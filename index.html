@@ -144,10 +144,10 @@
   <div class="card">
     <div class="card-title">📄 Upload your Resume (Optional — auto-fills your details)</div>
     <div class="upload-zone" id="uploadZone">
-      <input type="file" id="resumeFile" accept=".pdf" onchange="handleResumeUpload(this)"/>
+      <input type="file" id="resumeFile" accept=".pdf,.docx" onchange="handleResumeUpload(this)"/>
       <div class="upload-icon">📂</div>
       <div class="upload-text">Drop your resume PDF here or click to browse</div>
-      <div class="upload-sub">PDF only · Max 5MB · Your data stays private</div>
+      <div class="upload-sub">PDF or Word (.docx) · Max 10MB · Your data stays private</div>
     </div>
     <div class="parsing-msg" id="parsingMsg"><span class="spinner"></span> Reading your resume and auto-filling details...</div>
     <div class="upload-success" id="uploadSuccess">
@@ -277,7 +277,7 @@
     e.preventDefault();
     zone.classList.remove('drag');
     const file = e.dataTransfer.files[0];
-    if (file && file.type === 'application/pdf') {
+    if (file && file.name.match(/\.(pdf|docx)$/i)) {
       document.getElementById('resumeFile').files = e.dataTransfer.files;
       handleResumeUpload({ files: [file] });
     }
@@ -286,8 +286,8 @@
   async function handleResumeUpload(input) {
     const file = input.files[0];
     if (!file) return;
-    if (file.type !== 'application/pdf') {
-      alert('Please upload a PDF file only.');
+    if (!file.name.match(/\.(pdf|docx)$/i)) {
+      alert('Please upload a PDF or Word (.docx) file only.');
       return;
     }
 
