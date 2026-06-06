@@ -182,6 +182,7 @@
       <span class="output-title">Your cover letter</span>
       <div class="output-actions">
         <button class="action-btn primary" onclick="copyLetter()">Copy text</button>
+        <button class="action-btn" onclick="downloadPDF()">Download PDF</button>
         <button class="action-btn" onclick="regenerate()">Regenerate</button>
       </div>
     </div>
@@ -351,6 +352,18 @@
       setTimeout(() => { btn.textContent = 'Copy text'; }, 2000);
     });
   }
+
+  async function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const letter = document.getElementById('outputText').textContent;
+    const lines = doc.splitTextToSize(letter, 180);
+    doc.setFont("times", "normal");
+    doc.setFontSize(12);
+    doc.text(lines, 15, 20);
+    doc.save("cover-letter.pdf");
+  }
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </body>
 </html>
