@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>How It Works — CoverAI</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #1a1a1a; min-height: 100vh; }
+  nav { background: #fff; border-bottom: 1px solid #e8e8e8; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 56px; }
+  .logo { font-size: 18px; font-weight: 600; color: #5c4fc7; text-decoration: none; }
+  .logo span { color: #1a1a1a; }
+  .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+  .nav-links a { font-size: 14px; color: #555; text-decoration: none; }
+  .nav-links a:hover { color: #5c4fc7; }
+  .nav-btn { background: #5c4fc7; color: #fff; border: none; border-radius: 8px; padding: 7px 16px; font-size: 13px; font-weight: 500; cursor: pointer; }
+
+  .hero { text-align: center; padding: 3rem 1rem 2rem; }
+  .hero h1 { font-size: 36px; font-weight: 700; margin-bottom: 10px; }
+  .hero h1 span { color: #5c4fc7; }
+  .hero p { font-size: 16px; color: #666; max-width: 480px; margin: 0 auto; line-height: 1.6; }
+
+  /* STEPS */
+  .steps { max-width: 700px; margin: 2rem auto 4rem; padding: 0 1rem; }
+  .step { display: flex; gap: 1.5rem; margin-bottom: 2rem; align-items: flex-start; }
+  .step-num { width: 48px; height: 48px; border-radius: 50%; background: #5c4fc7; color: #fff; font-size: 20px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .step-body { background: #fff; border: 1px solid #e8e8e8; border-radius: 14px; padding: 1.2rem 1.4rem; flex: 1; }
+  .step-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .step-desc { font-size: 14px; color: #666; line-height: 1.6; }
+  .step-tag { display: inline-block; background: #eeedfe; color: #3c3489; font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 20px; margin-top: 8px; }
+
+  /* CONNECTOR LINE */
+  .connector { width: 2px; height: 24px; background: #e0e0e0; margin: 0 0 0 23px; }
+
+  /* FEATURES GRID */
+  .features-section { max-width: 700px; margin: 0 auto 4rem; padding: 0 1rem; }
+  .features-section h2 { font-size: 22px; font-weight: 700; text-align: center; margin-bottom: 1.5rem; }
+  .feat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  @media(max-width:520px){ .feat-grid { grid-template-columns: 1fr; } }
+  .feat { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1.2rem; }
+  .feat-icon { font-size: 24px; margin-bottom: 8px; }
+  .feat h3 { font-size: 14px; font-weight: 600; margin-bottom: 5px; }
+  .feat p { font-size: 13px; color: #666; line-height: 1.5; }
+
+  /* CTA */
+  .cta { text-align: center; padding: 3rem 1rem; background: #fff; border-top: 1px solid #e8e8e8; }
+  .cta h2 { font-size: 26px; font-weight: 700; margin-bottom: 10px; }
+  .cta p { font-size: 15px; color: #666; margin-bottom: 24px; }
+  .cta-btn { background: #5c4fc7; color: #fff; border: none; border-radius: 10px; padding: 14px 32px; font-size: 16px; font-weight: 700; cursor: pointer; }
+  .cta-btn:hover { background: #4a3db5; }
+
+  footer { text-align: center; padding: 1.5rem 1rem; font-size: 13px; color: #888; border-top: 1px solid #e8e8e8; }
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="logo">Cover<span>AI</span></a>
+  <div class="nav-links">
+    <a href="howitworks.html">How it works</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="index.html">Try Free</a>
+    <button class="nav-btn" onclick="window.location.href='pricing.html'">Get Pro</button>
+  </div>
+</nav>
+
+<div class="hero">
+  <h1>How <span>CoverAI</span> works</h1>
+  <p>From blank page to professional cover letter in under 15 seconds. Here's exactly how.</p>
+</div>
+
+<div class="steps">
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <div class="step-title">Enter your details</div>
+      <div class="step-desc">Fill in your name, profession, years of experience, and your top skills. You can also add a key achievement — like "Increased sales by 40%" — to make your letter stand out.</div>
+      <span class="step-tag">Takes 30 seconds</span>
+    </div>
+  </div>
+  <div class="connector"></div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <div class="step-title">Add the job details</div>
+      <div class="step-desc">Enter the company name and job title. Paste a few lines from the job description — our AI reads it and tailors your letter to match exactly what the employer is looking for.</div>
+      <span class="step-tag">The more detail, the better</span>
+    </div>
+  </div>
+  <div class="connector"></div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <div class="step-title">Pick your tone</div>
+      <div class="step-desc">Choose from 6 tones: Professional, Enthusiastic, Confident, Friendly, Formal, or Creative. Match the tone to the company culture — a startup needs a different voice than a bank.</div>
+      <span class="step-tag">6 tones available</span>
+    </div>
+  </div>
+  <div class="connector"></div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-body">
+      <div class="step-title">AI writes your letter</div>
+      <div class="step-desc">Click "Generate" and our AI writes a personalized, 3-paragraph cover letter in about 15 seconds. No placeholders, no generic templates — every letter is written fresh for your specific application.</div>
+      <span class="step-tag">~15 seconds</span>
+    </div>
+  </div>
+  <div class="connector"></div>
+
+  <div class="step">
+    <div class="step-num">5</div>
+    <div class="step-body">
+      <div class="step-title">Copy or download as PDF</div>
+      <div class="step-desc">Copy the text directly to paste into application forms, or download a clean PDF to attach to your email. Ready to send in seconds.</div>
+      <span class="step-tag">Free for everyone</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="features-section">
+  <h2>What makes CoverAI different</h2>
+  <div class="feat-grid">
+    <div class="feat"><div class="feat-icon">🎯</div><h3>Truly personalized</h3><p>Not a template with your name swapped in. The AI reads your skills, experience and the job description to write something unique every time.</p></div>
+    <div class="feat"><div class="feat-icon">⚡</div><h3>15 seconds, not 15 minutes</h3><p>Stop spending an hour on each application. Generate a professional letter in seconds and apply to more jobs faster.</p></div>
+    <div class="feat"><div class="feat-icon">🇮🇳</div><h3>Built for Indian job seekers</h3><p>Pricing in rupees, support for Indian companies and industries, and tones that work for both Indian and MNC applications.</p></div>
+    <div class="feat"><div class="feat-icon">🔒</div><h3>No sign-up needed</h3><p>Start generating immediately. No account, no email, no password. Just fill and generate.</p></div>
+  </div>
+</div>
+
+<div class="cta">
+  <h2>Ready to write your cover letter?</h2>
+  <p>Free to use. No sign-up. Your first letter in 15 seconds.</p>
+  <button class="cta-btn" onclick="window.location.href='index.html'">✦ Try CoverAI Free</button>
+</div>
+
+<footer>Built with ❤️ · <strong>CoverAI</strong> · <a href="pricing.html" style="color:#5c4fc7">View Pricing</a></footer>
+</body>
+</html>
