@@ -6,92 +6,104 @@
 <title>CoverAI — AI Cover Letter Generator</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #1a1a1a; min-height: 100vh; }
-  nav { background: #fff; border-bottom: 1px solid #e8e8e8; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 56px; }
-  .logo { font-size: 18px; font-weight: 600; color: #5c4fc7; text-decoration: none; }
-  .logo span { color: #1a1a1a; }
-  .nav-links { display: flex; gap: 1.5rem; align-items: center; }
-  .nav-links a { font-size: 14px; color: #555; text-decoration: none; }
-  .nav-links a:hover { color: #5c4fc7; }
-  .nav-btn { background: #5c4fc7; color: #fff; border: none; border-radius: 8px; padding: 7px 16px; font-size: 13px; font-weight: 500; cursor: pointer; }
-  .hero { text-align: center; padding: 3rem 1rem 2rem; }
-  .hero-badge { display: inline-block; background: #eeedfe; color: #3c3489; font-size: 12px; font-weight: 500; padding: 4px 14px; border-radius: 20px; margin-bottom: 14px; }
-  .hero h1 { font-size: 36px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
-  .hero h1 span { color: #5c4fc7; }
-  .hero p { font-size: 16px; color: #555; max-width: 480px; margin: 0 auto 24px; line-height: 1.6; }
-  .hero-stats { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; }
-  .hero-stat { text-align: center; }
-  .hero-stat strong { display: block; font-size: 22px; font-weight: 700; color: #5c4fc7; }
-  .hero-stat span { font-size: 12px; color: #888; }
-  .tool-wrap { max-width: 760px; margin: 0 auto; padding: 0 1rem 3rem; }
-  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 14px; padding: 1.5rem; margin-bottom: 1rem; }
-  .card-title { font-size: 12px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 14px; }
-  label { display: block; font-size: 13px; color: #444; margin-bottom: 5px; margin-top: 14px; font-weight: 500; }
-  label:first-of-type { margin-top: 0; }
-  input, select, textarea { width: 100%; font-size: 14px; color: #1a1a1a; background: #fafafa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 9px 13px; font-family: inherit; transition: border-color .2s; }
-  input:focus, select:focus, textarea:focus { outline: none; border-color: #7f77dd; background: #fff; }
-  textarea { resize: vertical; line-height: 1.6; }
-  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  @media(max-width:520px){ .row { grid-template-columns: 1fr; } }
-  .tone-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 6px; }
-  .tone-btn { padding: 9px 6px; font-size: 13px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fafafa; color: #555; cursor: pointer; text-align: center; transition: all .15s; }
-  .tone-btn:hover { border-color: #7f77dd; color: #3c3489; }
-  .tone-btn.active { background: #eeedfe; border-color: #7f77dd; color: #3c3489; font-weight: 600; }
-  .gen-btn { width: 100%; padding: 14px; font-size: 16px; font-weight: 600; border: none; border-radius: 10px; background: #5c4fc7; color: #fff; cursor: pointer; margin-top: 6px; transition: background .2s; }
-  .gen-btn:hover { background: #4a3db5; }
-  .gen-btn:disabled { background: #a8a2e0; cursor: not-allowed; }
-  .loading { text-align: center; padding: 2rem; color: #777; font-size: 14px; display: none; }
-  .spinner { display: inline-block; width: 20px; height: 20px; border: 2.5px solid #ddd; border-top-color: #5c4fc7; border-radius: 50%; animation: spin .7s linear infinite; vertical-align: -5px; margin-right: 8px; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .error { color: #c0392b; font-size: 13px; margin-top: 10px; display: none; background: #fdf0ef; border: 1px solid #f5c6c6; border-radius: 8px; padding: 10px 14px; }
-  .output-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 14px; padding: 1.5rem; margin-top: 1rem; display: none; }
-  .output-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
-  .output-title { font-size: 14px; font-weight: 600; color: #1a1a1a; }
-  .output-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-  .action-btn { font-size: 12px; font-weight: 500; padding: 6px 14px; border-radius: 7px; cursor: pointer; border: 1px solid #e0e0e0; background: #fff; color: #555; transition: all .15s; }
-  .action-btn:hover { background: #f0f0f0; }
-  .action-btn.primary { background: #eeedfe; border-color: #afa9ec; color: #3c3489; }
-  .action-btn.pdf { background: #e8f5e9; border-color: #a5d6a7; color: #2e7d32; }
-  .output-text { font-size: 15px; color: #2a2a2a; line-height: 1.9; white-space: pre-wrap; font-family: Georgia, serif; border-top: 1px solid #f0f0f0; padding-top: 16px; }
-  .pro-banner { margin-top: 16px; padding: 14px 18px; background: #eeedfe; border: 1px solid #afa9ec; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-  .pro-text { font-size: 13px; color: #3c3489; line-height: 1.5; }
-  .pro-upgrade-btn { background: #5c4fc7; color: #fff; border: none; border-radius: 8px; padding: 8px 18px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
-  .features { max-width: 760px; margin: 0 auto 3rem; padding: 0 1rem; }
-  .features h2 { font-size: 22px; font-weight: 700; text-align: center; margin-bottom: 1.5rem; }
-  .feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-  @media(max-width:520px){ .feat-grid { grid-template-columns: 1fr; } }
-  .feat { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1.2rem; }
-  .feat-icon { font-size: 22px; margin-bottom: 8px; }
-  .feat h3 { font-size: 14px; font-weight: 600; margin-bottom: 5px; }
-  .feat p { font-size: 13px; color: #666; line-height: 1.5; }
-  footer { text-align: center; padding: 2rem 1rem; font-size: 13px; color: #888; border-top: 1px solid #e8e8e8; background: #fff; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#1a1a1a;min-height:100vh}
+  nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+  .logo{font-size:18px;font-weight:600;color:#5c4fc7;text-decoration:none}
+  .logo span{color:#1a1a1a}
+  .nav-links{display:flex;gap:1.5rem;align-items:center}
+  .nav-links a{font-size:14px;color:#555;text-decoration:none}
+  .nav-links a:hover{color:#5c4fc7}
+  .nav-btn{background:#5c4fc7;color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:13px;font-weight:500;cursor:pointer}
+  .hero{text-align:center;padding:3rem 1rem 2rem}
+  .hero-badge{display:inline-block;background:#eeedfe;color:#3c3489;font-size:12px;font-weight:500;padding:4px 14px;border-radius:20px;margin-bottom:14px}
+  .hero h1{font-size:36px;font-weight:700;line-height:1.2;margin-bottom:12px}
+  .hero h1 span{color:#5c4fc7}
+  .hero p{font-size:16px;color:#555;max-width:480px;margin:0 auto 24px;line-height:1.6}
+  .hero-stats{display:flex;gap:2rem;justify-content:center;flex-wrap:wrap}
+  .hero-stat{text-align:center}
+  .hero-stat strong{display:block;font-size:22px;font-weight:700;color:#5c4fc7}
+  .hero-stat span{font-size:12px;color:#888}
+  .tool-wrap{max-width:760px;margin:0 auto;padding:0 1rem 3rem}
+  .card{background:#fff;border:1px solid #e8e8e8;border-radius:14px;padding:1.5rem;margin-bottom:1rem}
+  .card-title{font-size:12px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px}
+  label{display:block;font-size:13px;color:#444;margin-bottom:5px;margin-top:14px;font-weight:500}
+  label:first-of-type{margin-top:0}
+  input,select,textarea{width:100%;font-size:14px;color:#1a1a1a;background:#fafafa;border:1px solid #e0e0e0;border-radius:8px;padding:9px 13px;font-family:inherit;transition:border-color .2s}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:#7f77dd;background:#fff}
+  textarea{resize:vertical;line-height:1.6}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:520px){.row{grid-template-columns:1fr}}
+  .tone-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+  .tone-btn{padding:9px 6px;font-size:13px;border:1px solid #e0e0e0;border-radius:8px;background:#fafafa;color:#555;cursor:pointer;text-align:center;transition:all .15s}
+  .tone-btn:hover{border-color:#7f77dd;color:#3c3489}
+  .tone-btn.active{background:#eeedfe;border-color:#7f77dd;color:#3c3489;font-weight:600}
+  .gen-btn{width:100%;padding:14px;font-size:16px;font-weight:600;border:none;border-radius:10px;background:#5c4fc7;color:#fff;cursor:pointer;margin-top:6px;transition:background .2s}
+  .gen-btn:hover{background:#4a3db5}
+  .gen-btn:disabled{background:#a8a2e0;cursor:not-allowed}
+  .loading{text-align:center;padding:2rem;color:#777;font-size:14px;display:none}
+  .spinner{display:inline-block;width:20px;height:20px;border:2.5px solid #ddd;border-top-color:#5c4fc7;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-5px;margin-right:8px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .error{color:#c0392b;font-size:13px;margin-top:10px;display:none;background:#fdf0ef;border:1px solid #f5c6c6;border-radius:8px;padding:10px 14px}
+  .output-card{background:#fff;border:1px solid #e8e8e8;border-radius:14px;padding:1.5rem;margin-top:1rem;display:none}
+  .output-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+  .output-title{font-size:14px;font-weight:600;color:#1a1a1a}
+  .output-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .action-btn{font-size:12px;font-weight:500;padding:6px 14px;border-radius:7px;cursor:pointer;border:1px solid #e0e0e0;background:#fff;color:#555;transition:all .15s}
+  .action-btn:hover{background:#f0f0f0}
+  .action-btn.primary{background:#eeedfe;border-color:#afa9ec;color:#3c3489}
+  .action-btn.pdf{background:#e8f5e9;border-color:#a5d6a7;color:#2e7d32}
+  .output-text{font-size:15px;color:#2a2a2a;line-height:1.9;white-space:pre-wrap;font-family:Georgia,serif;border-top:1px solid #f0f0f0;padding-top:16px}
+  .pro-banner{margin-top:16px;padding:14px 18px;background:#eeedfe;border:1px solid #afa9ec;border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .pro-text{font-size:13px;color:#3c3489;line-height:1.5}
+  .pro-upgrade-btn{background:#5c4fc7;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+  .features{max-width:760px;margin:0 auto 3rem;padding:0 1rem}
+  .features h2{font-size:22px;font-weight:700;text-align:center;margin-bottom:1.5rem}
+  .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:520px){.feat-grid{grid-template-columns:1fr}}
+  .feat{background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:1.2rem}
+  .feat-icon{font-size:22px;margin-bottom:8px}
+  .feat h3{font-size:14px;font-weight:600;margin-bottom:5px}
+  .feat p{font-size:13px;color:#666;line-height:1.5}
+  footer{text-align:center;padding:2rem 1rem;font-size:13px;color:#888;border-top:1px solid #e8e8e8;background:#fff}
   /* USAGE BAR */
-  .usage-bar { max-width: 760px; margin: 0 auto 1rem; padding: 0 1rem; }
-  .usage-box { background: #fff; border: 1px solid #e8e8e8; border-radius: 10px; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-  .usage-left { font-size: 13px; color: #555; }
-  .usage-left strong { color: #5c4fc7; }
-  .usage-dots { display: flex; gap: 5px; }
-  .dot { width: 12px; height: 12px; border-radius: 50%; background: #5c4fc7; }
-  .dot.used { background: #e0e0e0; }
-  .usage-upgrade { font-size: 12px; color: #5c4fc7; font-weight: 600; cursor: pointer; text-decoration: underline; }
-  /* PAYWALL MODAL */
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 1000; align-items: center; justify-content: center; }
-  .modal-overlay.show { display: flex; }
-  .modal { background: #fff; border-radius: 20px; padding: 2rem; max-width: 420px; width: 90%; text-align: center; position: relative; }
-  .modal-icon { font-size: 40px; margin-bottom: 12px; }
-  .modal h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
-  .modal p { font-size: 14px; color: #666; line-height: 1.6; margin-bottom: 20px; }
-  .modal-price { background: #eeedfe; border-radius: 12px; padding: 14px; margin-bottom: 20px; }
-  .modal-price .price { font-size: 32px; font-weight: 700; color: #5c4fc7; }
-  .modal-price .per { font-size: 14px; color: #888; }
-  .modal-features { text-align: left; margin-bottom: 20px; }
-  .modal-features li { font-size: 13px; color: #444; padding: 5px 0; list-style: none; }
-  .modal-features li::before { content: "✅ "; }
-  .modal-cta { width: 100%; padding: 13px; font-size: 16px; font-weight: 700; background: #5c4fc7; color: #fff; border: none; border-radius: 10px; cursor: pointer; margin-bottom: 10px; }
-  .modal-cta:hover { background: #4a3db5; }
-  .modal-close { font-size: 13px; color: #aaa; cursor: pointer; text-decoration: underline; }
-  .modal-x { position: absolute; top: 14px; right: 18px; font-size: 20px; cursor: pointer; color: #aaa; background: none; border: none; }
+  .usage-bar{max-width:760px;margin:0 auto 1rem;padding:0 1rem}
+  .usage-box{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .usage-left{font-size:13px;color:#555}
+  .usage-left strong{color:#5c4fc7}
+  .usage-dots{display:flex;gap:5px}
+  .dot{width:12px;height:12px;border-radius:50%;background:#5c4fc7}
+  .dot.used{background:#e0e0e0}
+  .usage-upgrade{font-size:12px;color:#5c4fc7;font-weight:600;cursor:pointer;text-decoration:underline}
+  /* RESUME UPLOAD */
+  .upload-zone{border:2px dashed #c5c0f0;border-radius:12px;padding:1.5rem;text-align:center;cursor:pointer;transition:all .2s;background:#fafafa;position:relative}
+  .upload-zone:hover,.upload-zone.drag{border-color:#5c4fc7;background:#f0effe}
+  .upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+  .upload-icon{font-size:28px;margin-bottom:8px}
+  .upload-text{font-size:14px;font-weight:600;color:#5c4fc7;margin-bottom:4px}
+  .upload-sub{font-size:12px;color:#888}
+  .upload-success{display:none;background:#e8f5e9;border:1px solid #a5d6a7;border-radius:10px;padding:10px 14px;font-size:13px;color:#2e7d32;margin-top:10px;align-items:center;gap:8px}
+  .upload-success.show{display:flex}
+  .parsing-msg{display:none;font-size:13px;color:#5c4fc7;margin-top:8px;text-align:center}
+  .parsing-msg.show{display:block}
+  .autofill-badge{display:inline-block;background:#5c4fc7;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:6px;vertical-align:middle}
+  /* MODAL */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;align-items:center;justify-content:center}
+  .modal-overlay.show{display:flex}
+  .modal{background:#fff;border-radius:20px;padding:2rem;max-width:420px;width:90%;text-align:center;position:relative}
+  .modal-icon{font-size:40px;margin-bottom:12px}
+  .modal h2{font-size:22px;font-weight:700;margin-bottom:8px}
+  .modal p{font-size:14px;color:#666;line-height:1.6;margin-bottom:20px}
+  .modal-price{background:#eeedfe;border-radius:12px;padding:14px;margin-bottom:20px}
+  .modal-price .price{font-size:32px;font-weight:700;color:#5c4fc7}
+  .modal-price .per{font-size:14px;color:#888}
+  .modal-features{text-align:left;margin-bottom:20px}
+  .modal-features li{font-size:13px;color:#444;padding:5px 0;list-style:none}
+  .modal-features li::before{content:"✅ "}
+  .modal-cta{width:100%;padding:13px;font-size:16px;font-weight:700;background:#5c4fc7;color:#fff;border:none;border-radius:10px;cursor:pointer;margin-bottom:10px}
+  .modal-cta:hover{background:#4a3db5}
+  .modal-close{font-size:13px;color:#aaa;cursor:pointer;text-decoration:underline}
+  .modal-x{position:absolute;top:14px;right:18px;font-size:20px;cursor:pointer;color:#aaa;background:none;border:none}
 </style>
 </head>
 <body>
@@ -108,7 +120,7 @@
 <div class="hero">
   <div class="hero-badge">✦ Powered by AI</div>
   <h1>Write a <span>winning cover letter</span><br/>in 15 seconds</h1>
-  <p>Stop staring at a blank page. Fill in your details and let AI craft a personalized, professional cover letter instantly.</p>
+  <p>Upload your resume and let AI craft a perfectly tailored cover letter for any job instantly.</p>
   <div class="hero-stats">
     <div class="hero-stat"><strong>50,000+</strong><span>Letters generated</span></div>
     <div class="hero-stat"><strong>98%</strong><span>User satisfaction</span></div>
@@ -116,7 +128,6 @@
   </div>
 </div>
 
-<!-- USAGE COUNTER -->
 <div class="usage-bar">
   <div class="usage-box">
     <div class="usage-left">You have <strong id="remainCount">3</strong> free letters remaining today</div>
@@ -128,8 +139,26 @@
 </div>
 
 <div class="tool-wrap">
+
+  <!-- RESUME UPLOAD CARD -->
   <div class="card">
-    <div class="card-title">Your details</div>
+    <div class="card-title">📄 Upload your Resume (Optional — auto-fills your details)</div>
+    <div class="upload-zone" id="uploadZone">
+      <input type="file" id="resumeFile" accept=".pdf" onchange="handleResumeUpload(this)"/>
+      <div class="upload-icon">📂</div>
+      <div class="upload-text">Drop your resume PDF here or click to browse</div>
+      <div class="upload-sub">PDF only · Max 5MB · Your data stays private</div>
+    </div>
+    <div class="parsing-msg" id="parsingMsg"><span class="spinner"></span> Reading your resume and auto-filling details...</div>
+    <div class="upload-success" id="uploadSuccess">
+      <span>✅</span>
+      <span id="uploadSuccessText">Resume uploaded! Your details have been auto-filled below.</span>
+    </div>
+  </div>
+
+  <!-- YOUR DETAILS -->
+  <div class="card">
+    <div class="card-title">Your details <span id="autofilledBadge" style="display:none" class="autofill-badge">Auto-filled from resume</span></div>
     <div class="row">
       <div><label>Full name</label><input type="text" id="name" placeholder="e.g. Priya Sharma"/></div>
       <div><label>Your profession</label><input type="text" id="profession" placeholder="e.g. Software Engineer"/></div>
@@ -148,6 +177,7 @@
     <input type="text" id="achievement" placeholder="e.g. Increased sales by 40% at previous company"/>
   </div>
 
+  <!-- JOB DETAILS -->
   <div class="card">
     <div class="card-title">Job you're applying to</div>
     <div class="row">
@@ -158,6 +188,7 @@
     <textarea id="jobdesc" rows="4" placeholder="Paste a few lines from the job posting..."></textarea>
   </div>
 
+  <!-- TONE -->
   <div class="card">
     <div class="card-title">Tone & style</div>
     <div class="tone-grid">
@@ -194,13 +225,13 @@
 <div class="features">
   <h2>Why people love CoverAI</h2>
   <div class="feat-grid">
-    <div class="feat"><div class="feat-icon">⚡</div><h3>Instant generation</h3><p>Get a full, personalized cover letter in under 15 seconds — no templates, no blanks.</p></div>
+    <div class="feat"><div class="feat-icon">📄</div><h3>Resume-aware letters</h3><p>Upload your CV and AI reads your actual experience to write a perfectly tailored letter — no manual typing.</p></div>
     <div class="feat"><div class="feat-icon">🎯</div><h3>Job-specific content</h3><p>Paste the job description and your letter will match exactly what the employer is looking for.</p></div>
     <div class="feat"><div class="feat-icon">✍️</div><h3>6 tones to choose from</h3><p>From formal to creative — pick the tone that matches the company culture.</p></div>
   </div>
 </div>
 
-<footer>Built with ❤️ · <strong>CoverAI</strong> · <a href="pricing.html" style="color:#5c4fc7">View Pricing</a> · <a href="howitworks.html" style="color:#5c4fc7">How it works</a></footer>
+<footer>Built with ❤️ · <strong>CoverAI</strong> · <a href="pricing.html" style="color:#5c4fc7">Pricing</a> · <a href="howitworks.html" style="color:#5c4fc7">How it works</a></footer>
 
 <!-- PAYWALL MODAL -->
 <div class="modal-overlay" id="paywallModal">
@@ -208,17 +239,17 @@
     <button class="modal-x" onclick="closePaywall()">✕</button>
     <div class="modal-icon">🚀</div>
     <h2>Upgrade to Pro</h2>
-    <p>You've used your free letters for today. Upgrade to Pro and generate unlimited cover letters — anytime.</p>
+    <p>You've used your free letters for today. Upgrade to Pro and generate unlimited cover letters anytime.</p>
     <div class="modal-price">
       <div class="price">₹299<span class="per">/month</span></div>
       <div style="font-size:12px;color:#888;margin-top:4px">Cancel anytime · Instant access</div>
     </div>
     <ul class="modal-features">
       <li>Unlimited cover letters every day</li>
+      <li>Resume upload & auto-fill</li>
       <li>PDF download & export</li>
       <li>LinkedIn message generator</li>
       <li>Priority AI — faster generation</li>
-      <li>Email support</li>
     </ul>
     <button class="modal-cta" onclick="goToPro()">Get Pro Now — ₹299/month</button>
     <div class="modal-close" onclick="closePaywall()">No thanks, I'll wait until tomorrow</div>
@@ -227,7 +258,9 @@
 
 <script>
   let selectedTone = 'Professional';
+  let resumeText = '';
 
+  // Load remaining count
   window.addEventListener('DOMContentLoaded', async () => {
     try {
       const res = await fetch('/api/remaining');
@@ -236,10 +269,74 @@
     } catch(e) {}
   });
 
+  // Drag & drop styling
+  const zone = document.getElementById('uploadZone');
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('drag');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type === 'application/pdf') {
+      document.getElementById('resumeFile').files = e.dataTransfer.files;
+      handleResumeUpload({ files: [file] });
+    }
+  });
+
+  async function handleResumeUpload(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.type !== 'application/pdf') {
+      alert('Please upload a PDF file only.');
+      return;
+    }
+
+    document.getElementById('parsingMsg').classList.add('show');
+    document.getElementById('uploadSuccess').classList.remove('show');
+
+    const formData = new FormData();
+    formData.append('resume', file);
+
+    try {
+      const res = await fetch('/api/parse-resume', { method: 'POST', body: formData });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || 'Failed to parse resume');
+
+      const d = data.data;
+
+      // Auto-fill fields
+      if (d.name) document.getElementById('name').value = d.name;
+      if (d.profession) document.getElementById('profession').value = d.profession;
+      if (d.skills) document.getElementById('skills').value = d.skills;
+      if (d.achievement) document.getElementById('achievement').value = d.achievement;
+
+      // Match experience dropdown
+      if (d.exp) {
+        const expMap = { 'fresher': 'fresher', '1-2': '1-2 years', '3-5': '3-5 years', '5-10': '5-10 years', '10+': '10+ years' };
+        const expSel = document.getElementById('exp');
+        for (const [key, val] of Object.entries(expMap)) {
+          if (d.exp.includes(key)) { expSel.value = val; break; }
+        }
+      }
+
+      // Store raw resume text for richer generation
+      resumeText = d.rawText || '';
+
+      document.getElementById('autofilledBadge').style.display = 'inline-block';
+      document.getElementById('uploadSuccessText').textContent = `✅ Resume read! Auto-filled: name, profession, skills${d.achievement ? ', achievement' : ''}.`;
+      document.getElementById('uploadSuccess').classList.add('show');
+
+    } catch (err) {
+      alert('Could not read resume: ' + err.message);
+    } finally {
+      document.getElementById('parsingMsg').classList.remove('show');
+    }
+  }
+
   function updateUsageUI(remaining) {
     document.getElementById('remainCount').textContent = remaining;
-    const dots = document.querySelectorAll('.dot');
-    dots.forEach((dot, i) => { dot.classList.toggle('used', i >= remaining); });
+    document.querySelectorAll('.dot').forEach((dot, i) => dot.classList.toggle('used', i >= remaining));
     if (remaining === 0) {
       document.getElementById('genBtn').disabled = true;
       document.getElementById('genBtn').textContent = '⚡ Upgrade to Pro for more letters';
@@ -248,10 +345,7 @@
 
   function showPaywall() { document.getElementById('paywallModal').classList.add('show'); }
   function closePaywall() { document.getElementById('paywallModal').classList.remove('show'); }
-  function goToPro() {
-    // Replace with your Razorpay link when ready
-    window.location.href = 'pricing.html';
-  }
+  function goToPro() { window.location.href = 'pricing.html'; }
 
   document.querySelectorAll('.tone-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -280,7 +374,7 @@
       const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, profession, exp, skills, achievement, company, jobtitle, jobdesc, tone: selectedTone })
+        body: JSON.stringify({ name, profession, exp, skills, achievement, company, jobtitle, jobdesc, tone: selectedTone, resumeText })
       });
       const data = await res.json();
       if (res.status === 429 || data.error === 'LIMIT_REACHED') { showPaywall(); setLoading(false); return; }
@@ -297,78 +391,40 @@
     }
   }
 
-  // ── PDF DOWNLOAD ──────────────────────────────────────────────
   function downloadPDF() {
     const text = document.getElementById('outputText').textContent;
     if (!text) { alert('Generate a cover letter first!'); return; }
-
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-
-    const margin = 20;
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const maxWidth = pageWidth - margin * 2;
-    const lineHeight = 7;
+    const margin = 20, pageWidth = doc.internal.pageSize.getWidth(), maxWidth = pageWidth - margin * 2;
     let y = margin;
-
-    // Header
-    doc.setFontSize(18);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(92, 79, 199);
-    doc.text('CoverAI', margin, y);
-    y += 8;
-
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(150, 150, 150);
-    doc.text('Generated by coverai-nyid.onrender.com', margin, y);
-    y += 4;
-
-    // Divider line
-    doc.setDrawColor(220, 220, 220);
-    doc.line(margin, y, pageWidth - margin, y);
-    y += 10;
-
-    // Letter body
-    doc.setFontSize(12);
-    doc.setFont('times', 'normal');
-    doc.setTextColor(30, 30, 30);
-
-    const lines = doc.splitTextToSize(text, maxWidth);
-    lines.forEach(line => {
+    doc.setFontSize(18); doc.setFont('helvetica','bold'); doc.setTextColor(92,79,199);
+    doc.text('CoverAI', margin, y); y += 8;
+    doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(150,150,150);
+    doc.text('Generated by coverai-nyid.onrender.com', margin, y); y += 4;
+    doc.setDrawColor(220,220,220); doc.line(margin, y, pageWidth-margin, y); y += 10;
+    doc.setFontSize(12); doc.setFont('times','normal'); doc.setTextColor(30,30,30);
+    doc.splitTextToSize(text, maxWidth).forEach(line => {
       if (y > 270) { doc.addPage(); y = margin; }
-      doc.text(line, margin, y);
-      y += lineHeight;
+      doc.text(line, margin, y); y += 7;
     });
-
-    // Footer
-    y += 6;
-    doc.setFontSize(9);
-    doc.setTextColor(180, 180, 180);
+    y += 6; doc.setFontSize(9); doc.setTextColor(180,180,180);
     doc.text('Created with CoverAI — coverai-nyid.onrender.com', margin, y);
-
     const name = document.getElementById('name').value.trim() || 'cover-letter';
-    doc.save(`${name.replace(/\s+/g, '-')}-cover-letter.pdf`);
+    doc.save(`${name.replace(/\s+/g,'-')}-cover-letter.pdf`);
   }
-  // ─────────────────────────────────────────────────────────────
 
-  function regenerate() { document.getElementById('outputCard').style.display = 'none'; generate(); }
+  function regenerate() { document.getElementById('outputCard').style.display='none'; generate(); }
   function setLoading(on) {
     document.getElementById('genBtn').disabled = on;
     document.getElementById('loading').style.display = on ? 'block' : 'none';
     document.getElementById('error').style.display = 'none';
   }
-  function showError(msg) {
-    const el = document.getElementById('error');
-    el.textContent = msg;
-    el.style.display = 'block';
-  }
+  function showError(msg) { const el=document.getElementById('error'); el.textContent=msg; el.style.display='block'; }
   function copyLetter() {
-    const text = document.getElementById('outputText').textContent;
-    navigator.clipboard.writeText(text).then(() => {
+    navigator.clipboard.writeText(document.getElementById('outputText').textContent).then(() => {
       const btn = document.querySelector('.action-btn.primary');
-      btn.textContent = 'Copied!';
-      setTimeout(() => { btn.textContent = 'Copy text'; }, 2000);
+      btn.textContent='Copied!'; setTimeout(()=>{btn.textContent='Copy text';},2000);
     });
   }
 </script>
