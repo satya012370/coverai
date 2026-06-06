@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CoverAI — AI Cover Letter Generator</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #1a1a1a; min-height: 100vh; }
+  nav { background: #fff; border-bottom: 1px solid #e8e8e8; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 56px; }
+  .logo { font-size: 18px; font-weight: 600; color: #5c4fc7; }
+  .logo span { color: #1a1a1a; }
+  .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+  .nav-links a { font-size: 14px; color: #555; text-decoration: none; }
+  .nav-btn { background: #5c4fc7; color: #fff; border: none; border-radius: 8px; padding: 7px 16px; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .hero { text-align: center; padding: 3rem 1rem 2rem; }
+  .hero-badge { display: inline-block; background: #eeedfe; color: #3c3489; font-size: 12px; font-weight: 500; padding: 4px 14px; border-radius: 20px; margin-bottom: 14px; }
+  .hero h1 { font-size: 36px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+  .hero h1 span { color: #5c4fc7; }
+  .hero p { font-size: 16px; color: #555; max-width: 480px; margin: 0 auto 24px; line-height: 1.6; }
+  .hero-stats { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; }
+  .hero-stat { text-align: center; }
+  .hero-stat strong { display: block; font-size: 22px; font-weight: 700; color: #5c4fc7; }
+  .hero-stat span { font-size: 12px; color: #888; }
+  .tool-wrap { max-width: 760px; margin: 0 auto; padding: 0 1rem 3rem; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 14px; padding: 1.5rem; margin-bottom: 1rem; }
+  .card-title { font-size: 12px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 14px; }
+  label { display: block; font-size: 13px; color: #444; margin-bottom: 5px; margin-top: 14px; font-weight: 500; }
+  label:first-of-type { margin-top: 0; }
+  input, select, textarea { width: 100%; font-size: 14px; color: #1a1a1a; background: #fafafa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 9px 13px; font-family: inherit; transition: border-color .2s; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: #7f77dd; background: #fff; }
+  textarea { resize: vertical; line-height: 1.6; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media(max-width:520px){ .row { grid-template-columns: 1fr; } }
+  .tone-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 6px; }
+  .tone-btn { padding: 9px 6px; font-size: 13px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fafafa; color: #555; cursor: pointer; text-align: center; transition: all .15s; }
+  .tone-btn:hover { border-color: #7f77dd; color: #3c3489; }
+  .tone-btn.active { background: #eeedfe; border-color: #7f77dd; color: #3c3489; font-weight: 600; }
+  .gen-btn { width: 100%; padding: 14px; font-size: 16px; font-weight: 600; border: none; border-radius: 10px; background: #5c4fc7; color: #fff; cursor: pointer; margin-top: 6px; transition: background .2s; }
+  .gen-btn:hover { background: #4a3db5; }
+  .gen-btn:disabled { background: #a8a2e0; cursor: not-allowed; }
+  .loading { text-align: center; padding: 2rem; color: #777; font-size: 14px; display: none; }
+  .spinner { display: inline-block; width: 20px; height: 20px; border: 2.5px solid #ddd; border-top-color: #5c4fc7; border-radius: 50%; animation: spin .7s linear infinite; vertical-align: -5px; margin-right: 8px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error { color: #c0392b; font-size: 13px; margin-top: 10px; display: none; background: #fdf0ef; border: 1px solid #f5c6c6; border-radius: 8px; padding: 10px 14px; }
+  .output-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 14px; padding: 1.5rem; margin-top: 1rem; display: none; }
+  .output-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .output-title { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+  .output-actions { display: flex; gap: 8px; }
+  .action-btn { font-size: 12px; font-weight: 500; padding: 6px 14px; border-radius: 7px; cursor: pointer; border: 1px solid #e0e0e0; background: #fff; color: #555; transition: all .15s; }
+  .action-btn.primary { background: #eeedfe; border-color: #afa9ec; color: #3c3489; }
+  .output-text { font-size: 15px; color: #2a2a2a; line-height: 1.9; white-space: pre-wrap; font-family: Georgia, serif; border-top: 1px solid #f0f0f0; padding-top: 16px; }
+  .pro-banner { margin-top: 16px; padding: 14px 18px; background: #eeedfe; border: 1px solid #afa9ec; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .pro-text { font-size: 13px; color: #3c3489; line-height: 1.5; }
+  .pro-upgrade-btn { background: #5c4fc7; color: #fff; border: none; border-radius: 8px; padding: 8px 18px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .features { max-width: 760px; margin: 0 auto 3rem; padding: 0 1rem; }
+  .features h2 { font-size: 22px; font-weight: 700; text-align: center; margin-bottom: 1.5rem; }
+  .feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media(max-width:520px){ .feat-grid { grid-template-columns: 1fr; } }
+  .feat { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1.2rem; }
+  .feat-icon { font-size: 22px; margin-bottom: 8px; }
+  .feat h3 { font-size: 14px; font-weight: 600; margin-bottom: 5px; }
+  .feat p { font-size: 13px; color: #666; line-height: 1.5; }
+  footer { text-align: center; padding: 2rem 1rem; font-size: 13px; color: #888; border-top: 1px solid #e8e8e8; background: #fff; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Cover<span>AI</span></div>
+  <div class="nav-links">
+    <a href="#">How it works</a>
+    <a href="#">Pricing</a>
+    <a href="#">Blog</a>
+    <button class="nav-btn">Get Pro</button>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-badge">✦ Powered by AI</div>
+  <h1>Write a <span>winning cover letter</span><br/>in 15 seconds</h1>
+  <p>Stop staring at a blank page. Fill in your details and let AI craft a personalized, professional cover letter instantly.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><strong>50,000+</strong><span>Letters generated</span></div>
+    <div class="hero-stat"><strong>98%</strong><span>User satisfaction</span></div>
+    <div class="hero-stat"><strong>Free</strong><span>No sign-up needed</span></div>
+  </div>
+</div>
+
+<div class="tool-wrap">
+
+  <div class="card">
+    <div class="card-title">Your details</div>
+    <div class="row">
+      <div><label>Full name</label><input type="text" id="name" placeholder="e.g. Priya Sharma"/></div>
+      <div><label>Your profession</label><input type="text" id="profession" placeholder="e.g. Software Engineer"/></div>
+    </div>
+    <label>Years of experience</label>
+    <select id="exp">
+      <option value="fresher">Fresher / No experience</option>
+      <option value="1-2 years">1–2 years</option>
+      <option value="3-5 years" selected>3–5 years</option>
+      <option value="5-10 years">5–10 years</option>
+      <option value="10+ years">10+ years</option>
+    </select>
+    <label>Top skills (comma separated)</label>
+    <input type="text" id="skills" placeholder="e.g. React, Node.js, Team Leadership"/>
+    <label>Key achievement (optional)</label>
+    <input type="text" id="achievement" placeholder="e.g. Increased sales by 40% at previous company"/>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Job you're applying to</div>
+    <div class="row">
+      <div><label>Company name</label><input type="text" id="company" placeholder="e.g. Google"/></div>
+      <div><label>Job title</label><input type="text" id="jobtitle" placeholder="e.g. Senior Developer"/></div>
+    </div>
+    <label>Job description (paste key points)</label>
+    <textarea id="jobdesc" rows="4" placeholder="Paste a few lines from the job posting..."></textarea>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Tone & style</div>
+    <div class="tone-grid">
+      <div class="tone-btn active" data-tone="Professional">Professional</div>
+      <div class="tone-btn" data-tone="Enthusiastic">Enthusiastic</div>
+      <div class="tone-btn" data-tone="Confident">Confident</div>
+      <div class="tone-btn" data-tone="Friendly">Friendly</div>
+      <div class="tone-btn" data-tone="Formal">Formal</div>
+      <div class="tone-btn" data-tone="Creative">Creative</div>
+    </div>
+  </div>
+
+  <button class="gen-btn" id="genBtn" onclick="generate()">✦ Generate my cover letter</button>
+  <div class="loading" id="loading"><span class="spinner"></span> Writing your personalized cover letter...</div>
+  <div class="error" id="error"></div>
+
+  <div class="output-card" id="outputCard">
+    <div class="output-header">
+      <span class="output-title">Your cover letter</span>
+      <div class="output-actions">
+        <button class="action-btn primary" onclick="copyLetter()">Copy text</button>
+        <button class="action-btn" onclick="regenerate()">Regenerate</button>
+      </div>
+    </div>
+    <div class="output-text" id="outputText"></div>
+    <div class="pro-banner">
+      <div class="pro-text"><strong>Want PDF export, LinkedIn message & unlimited letters?</strong><br/>Upgrade to Pro for just $9/month.</div>
+      <button class="pro-upgrade-btn">Upgrade to Pro →</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="features">
+  <h2>Why people love CoverAI</h2>
+  <div class="feat-grid">
+    <div class="feat"><div class="feat-icon">⚡</div><h3>Instant generation</h3><p>Get a full, personalized cover letter in under 15 seconds — no templates, no blanks.</p></div>
+    <div class="feat"><div class="feat-icon">🎯</div><h3>Job-specific content</h3><p>Paste the job description and your letter will match exactly what the employer is looking for.</p></div>
+    <div class="feat"><div class="feat-icon">✍️</div><h3>6 tones to choose from</h3><p>From formal to creative — pick the tone that matches the company culture.</p></div>
+  </div>
+</div>
+
+<footer>Built with ❤️ · <strong>CoverAI</strong> · Free to use · Pro plan available</footer>
+
+<script>
+  let selectedTone = 'Professional';
+
+  document.querySelectorAll('.tone-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tone-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedTone = btn.dataset.tone;
+    });
+  });
+
+  async function generate() {
+    const name        = document.getElementById('name').value.trim();
+    const profession  = document.getElementById('profession').value.trim();
+    const exp         = document.getElementById('exp').value;
+    const skills      = document.getElementById('skills').value.trim();
+    const achievement = document.getElementById('achievement').value.trim();
+    const company     = document.getElementById('company').value.trim();
+    const jobtitle    = document.getElementById('jobtitle').value.trim();
+    const jobdesc     = document.getElementById('jobdesc').value.trim();
+
+    if (!name || !profession || !company || !jobtitle) {
+      showError('Please fill in your name, profession, company name, and job title.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, profession, exp, skills, achievement, company, jobtitle, jobdesc, tone: selectedTone })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || 'Something went wrong');
+      if (!data.letter) throw new Error('No letter returned. Please try again.');
+
+      document.getElementById('outputText').textContent = data.letter;
+      document.getElementById('outputCard').style.display = 'block';
+      document.getElementById('outputCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    } catch (err) {
+      showError('Error: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function regenerate() {
+    document.getElementById('outputCard').style.display = 'none';
+    generate();
+  }
+
+  function setLoading(on) {
+    document.getElementById('genBtn').disabled = on;
+    document.getElementById('loading').style.display = on ? 'block' : 'none';
+    document.getElementById('error').style.display = 'none';
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('error');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  function copyLetter() {
+    const text = document.getElementById('outputText').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector('.action-btn.primary');
+      btn.textContent = 'Copied!';
+      setTimeout(() => { btn.textContent = 'Copy text'; }, 2000);
+    });
+  }
+</script>
+</body>
+</html>
