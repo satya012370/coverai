@@ -10,27 +10,14 @@ app.use(express.json());
 app.use(express.static(__dirname));
 
 console.log("=================================");
-console.log(
-  "API Key Loaded:",
-  process.env.GEMINI_API_KEY ? "YES" : "NO"
-);
+console.log("API Key Loaded:", process.env.GEMINI_API_KEY ? "YES" : "NO");
 console.log("=================================");
 
 app.post("/api/generate", async (req, res) => {
   try {
     console.log("Received request...");
 
-    const {
-      name,
-      profession,
-      exp,
-      skills,
-      achievement,
-      company,
-      jobtitle,
-      jobdesc,
-      tone,
-    } = req.body;
+    const { name, profession, exp, skills, achievement, company, jobtitle, jobdesc, tone } = req.body;
 
     const prompt = `Write a cover letter using ONLY the details provided below. Do not invent or assume any information.
 
@@ -62,52 +49,30 @@ STRICT RULES — you must follow every rule exactly:
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: prompt,
-                },
-              ],
-            },
-          ],
+          contents: [{ parts: [{ text: prompt }] }],
         }),
       }
     );
 
     const data = await response.json();
 
-    console.log("Gemini Response:");
-    console.log(JSON.stringify(data, null, 2));
-
     if (!response.ok) {
-      throw new Error(
-        data.error?.message || "Failed to generate content"
-      );
+      throw new Error(data.error?.message || "Failed to generate content");
     }
 
-    const letter =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const letter = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (!letter) {
       throw new Error("No cover letter returned by Gemini");
     }
 
-    res.json({
-      letter,
-    });
+    res.json({ letter });
 
   } catch (error) {
-    console.error("FULL ERROR:");
-    console.error(error);
-
-    res.status(500).json({
-      error: error.message,
-    });
+    console.error("FULL ERROR:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -117,30 +82,14 @@ app.get("/test", async (req, res) => {
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: "Say hello in one sentence.",
-                },
-              ],
-            },
-          ],
+          contents: [{ parts: [{ text: "Say hello in one sentence." }] }],
         }),
       }
     );
-
     const data = await response.json();
-
-    res.send(
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-        JSON.stringify(data)
-    );
-
+    res.send(data?.candidates?.[0]?.content?.parts?.[0]?.text || JSON.stringify(data));
   } catch (error) {
     console.error(error);
     res.status(500).send(error.message);
