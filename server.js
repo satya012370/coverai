@@ -188,6 +188,62 @@ Rules: Strong action verbs, specific impact, under 2 sentences each. ONLY JSON, 
   }
 });
 
+// ─── ATS SCORE CHECKER ────────────────────────────────────────
+app.post("/api/ats-check", async (req, res) => {
+  try {
+    const { resumeText, jobDesc } = req.body;
+    if (!resumeText || !jobDesc) return res.status(400).json({ error: "Resume and job description are required." });
+
+    const prompt = `You are an ATS (Applicant Tracking System) expert. Analyse the resume against the job description and return ONLY a valid JSON object with no markdown or backticks.
+
+RESUME:
+${resumeText.slice(0, 4000)}
+
+JOB DESCRIPTION:
+${jobDesc.slice(0, 2000)}
+
+Return this exact JSON structure:
+{
+  "score": <overall match score 0-100>,
+  "breakdown": [
+    { "label": "Keyword Match", "score": <0-100> },
+    { "label": "Skills Alignment", "score": <0-100> },
+    { "label": "Experience Relevance", "score": <0-100> },
+    { "label": "Education & Qualifications", "score": <0-100> }
+  ],
+  "keywordsFound": ["keyword1", "keyword2"],
+  "keywordsMissing": ["keyword1", "keyword2"],
+  "suggestions": [
+    { "priority": "high", "title": "Short title", "detail": "Specific actionable suggestion" },
+    { "priority": "high", "title": "Short title", "detail": "Specific actionable suggestion" },
+    { "priority": "medium", "title": "Short title", "detail": "Specific actionable suggestion" },
+    { "priority": "medium", "title": "Short title", "detail": "Specific actionable suggestion" },
+    { "priority": "low", "title": "Short title", "detail": "Specific actionable suggestion" }
+  ]
+}
+
+Rules:
+- keywordsFound: important keywords/skills from JD that ARE in the resume (max 12)
+- keywordsMissing: important keywords/skills from JD that are NOT in the resume (max 10)
+- suggestions: 4-6 specific, actionable improvements (not generic advice)
+- Be strict and honest with scoring — a score of 80+ means genuinely strong match
+- Return ONLY the JSON object`;
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) }
+    );
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error?.message || "API error");
+    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+    const result = JSON.parse(raw.replace(/```json|```/g, "").trim());
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: "ATS check failed: " + err.message });
+  }
+});
+
 app.get("/api/remaining", (req, res) => {
   const ip = req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress;
   res.json({ remaining: getRemainingCount(ip) });
