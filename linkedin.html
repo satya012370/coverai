@@ -7,6 +7,7 @@
 <title>LinkedIn Message Generator — CoverAI</title>
 <link rel="stylesheet" href="mobile.css"/>
 <style>
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#1a1a1a;min-height:100vh}
 nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px}
@@ -164,21 +165,21 @@ footer{text-align:center;padding:2rem 1rem;font-size:13px;color:#888;border-top:
     <div class="card-title">Your details</div>
     <div class="row">
       <div><label>Your name</label><input type="text" id="name" placeholder="e.g. James Hopper"/></div>
-      <div><label>Your profession</label><input type="text" id="profession" placeholder="e.g. Embedded Systems Engineer"/></div>
+      <div><label>Your profession</label><input type="text" id="profession" placeholder="e.g. Software Engineer"/></div>
     </div>
     <label>Your top skills (comma separated)</label>
-    <input type="text" id="skills" placeholder="e.g. C++, FPGA, Hardware Design"/>
+    <input type="text" id="skills" placeholder="e.g. Python, Machine Learning, AWS"/>
   </div>
 
   <!-- JOB INFO -->
   <div class="card">
     <div class="card-title">Job & recruiter details</div>
     <div class="row">
-      <div><label>Recruiter / Manager name</label><input type="text" id="recruiterName" placeholder="e.g. Rahul Sharma (or leave blank)"/></div>
-      <div><label>Company name</label><input type="text" id="company" placeholder="e.g. Bosch"/></div>
+      <div><label>Recruiter / Manager name</label><input type="text" id="recruiterName" placeholder="e.g. Emily Davis (or leave blank)"/></div>
+      <div><label>Company name</label><input type="text" id="company" placeholder="e.g. Amazon"/></div>
     </div>
     <label>Job title you're applying for</label>
-    <input type="text" id="jobtitle" placeholder="e.g. Senior Embedded Engineer"/>
+    <input type="text" id="jobtitle" placeholder="e.g. Senior Software Engineer"/>
     <label>Why you're interested (optional)</label>
     <textarea id="reason" rows="2" placeholder="e.g. I've followed Bosch's work in automotive sensors for years and this role aligns perfectly with my experience..."></textarea>
   </div>
