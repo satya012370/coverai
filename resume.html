@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AI Resume Builder — CoverAI</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#1a1a1a;min-height:100vh}
+nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100}
+.logo{font-size:18px;font-weight:600;color:#5c4fc7;text-decoration:none}
+.logo span{color:#1a1a1a}
+.nav-links{display:flex;gap:1.5rem;align-items:center}
+.nav-links a{font-size:14px;color:#555;text-decoration:none}
+.nav-links a:hover{color:#5c4fc7}
+.nav-btn{background:#5c4fc7;color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:13px;font-weight:500;cursor:pointer}
+
+/* HERO */
+.hero{text-align:center;padding:2rem 1rem 1.5rem;background:linear-gradient(135deg,#f0effe 0%,#fff 100%);border-bottom:1px solid #e8e8e8}
+.free-badge{display:inline-block;background:#22c55e;color:#fff;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:10px}
+.hero h1{font-size:28px;font-weight:700;margin-bottom:6px}
+.hero h1 span{color:#5c4fc7}
+.hero p{font-size:14px;color:#666;max-width:520px;margin:0 auto}
+.hero-note{font-size:12px;color:#5c4fc7;margin-top:8px;font-weight:500}
+
+/* LAYOUT */
+.builder-layout{display:grid;grid-template-columns:420px 1fr;gap:0;max-width:1200px;margin:0 auto;min-height:calc(100vh - 120px)}
+@media(max-width:900px){.builder-layout{grid-template-columns:1fr}}
+
+/* LEFT PANEL */
+.form-panel{background:#fff;border-right:1px solid #e8e8e8;padding:1.5rem;overflow-y:auto;max-height:calc(100vh - 56px);position:sticky;top:56px}
+.section-title{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.06em;margin:18px 0 10px;padding-bottom:5px;border-bottom:1px solid #f0f0f0}
+.section-title:first-of-type{margin-top:0}
+label{display:block;font-size:12px;color:#555;margin-bottom:4px;margin-top:10px;font-weight:500}
+label:first-of-type{margin-top:0}
+input,select,textarea{width:100%;font-size:13px;color:#1a1a1a;background:#fafafa;border:1px solid #e0e0e0;border-radius:7px;padding:8px 11px;font-family:inherit;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#7f77dd;background:#fff}
+textarea{resize:vertical;line-height:1.5}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* TEMPLATE PICKER */
+.section-title.tpl-title{margin-bottom:6px}
+.template-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:4px}
+.tpl-btn{border:2px solid #e0e0e0;border-radius:8px;padding:6px 4px;text-align:center;font-size:10px;font-weight:600;background:#fff;transition:all .15s;position:relative}
+.tpl-btn.free-tpl{cursor:pointer}
+.tpl-btn.free-tpl:hover{border-color:#7f77dd}
+.tpl-btn.free-tpl.active{border-color:#5c4fc7;background:#eeedfe;color:#5c4fc7}
+.tpl-btn.pro-tpl{cursor:pointer;opacity:.7}
+.tpl-btn.pro-tpl:hover{border-color:#f59e0b}
+.tpl-dot{width:20px;height:20px;border-radius:50%;margin:0 auto 4px}
+.pro-lock{position:absolute;top:3px;right:4px;font-size:9px}
+.free-tag{position:absolute;top:2px;left:3px;font-size:8px;background:#22c55e;color:#fff;border-radius:3px;padding:1px 4px;font-weight:700}
+
+/* SKILLS */
+.skill-input-row{display:flex;gap:6px;margin-top:6px}
+.skill-input-row input{flex:1}
+.add-skill-btn{background:#eeedfe;color:#5c4fc7;border:1px solid #afa9ec;border-radius:7px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.skills-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.skill-tag{background:#eeedfe;color:#3c3489;font-size:12px;padding:3px 10px;border-radius:20px;display:flex;align-items:center;gap:4px}
+.skill-tag button{background:none;border:none;color:#aaa;cursor:pointer;font-size:14px;line-height:1;padding:0}
+
+/* ENTRIES */
+.entry{background:#fafafa;border:1px solid #e8e8e8;border-radius:8px;padding:10px;margin-bottom:8px;position:relative}
+.entry-del{position:absolute;top:8px;right:8px;background:none;border:none;color:#ccc;cursor:pointer;font-size:16px}
+.entry-del:hover{color:#e24b4a}
+.add-entry-btn{width:100%;padding:8px;font-size:12px;font-weight:600;border:1.5px dashed #c5c0f0;border-radius:7px;background:#fafafa;color:#5c4fc7;cursor:pointer;margin-top:6px}
+.add-entry-btn:hover{background:#eeedfe}
+
+/* BUTTONS */
+.ai-btn{width:100%;padding:11px;font-size:14px;font-weight:700;border:none;border-radius:9px;background:#5c4fc7;color:#fff;cursor:pointer;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px}
+.ai-btn:hover{background:#4a3db5}
+.ai-btn:disabled{background:#a8a2e0;cursor:not-allowed}
+.dl-btn{width:100%;padding:11px;font-size:14px;font-weight:700;border:1.5px solid #22c55e;border-radius:9px;background:#f0fdf4;color:#15803d;cursor:pointer;margin-top:8px}
+.dl-btn:hover{background:#dcfce7}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* USED BANNER */
+.used-banner{background:#fff8e1;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;margin-top:12px;font-size:13px;color:#92400e;display:none}
+.used-banner strong{display:block;font-size:14px;margin-bottom:4px}
+.upgrade-btn{width:100%;padding:10px;background:#f59e0b;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;margin-top:8px}
+.upgrade-btn:hover{background:#d97706}
+
+/* RIGHT PANEL */
+.preview-panel{background:#e8e8e8;padding:2rem;overflow-y:auto;display:flex;flex-direction:column;align-items:center}
+.preview-label{font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:1rem;text-align:center}
+.resume-page{width:210mm;min-height:297mm;background:#fff;box-shadow:0 4px 24px rgba(0,0,0,.12);border-radius:4px;overflow:hidden;font-size:10pt;line-height:1.4}
+@media(max-width:900px){.resume-page{width:100%;min-height:auto}}
+
+/* ── TEMPLATE: Modern Purple (FREE) ── */
+.tpl-modern .resume-header{background:#5c4fc7;color:#fff;padding:28px 32px}
+.tpl-modern .resume-header h1{font-size:22px;font-weight:700;margin-bottom:3px}
+.tpl-modern .resume-header .subtitle{font-size:12px;opacity:.85}
+.tpl-modern .resume-header .contact-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:10px;opacity:.9}
+.tpl-modern .resume-body{display:grid;grid-template-columns:1fr 2fr}
+.tpl-modern .resume-sidebar{background:#f0effe;padding:18px;border-right:1px solid #e0dbf7}
+.tpl-modern .resume-main{padding:18px 22px}
+.tpl-modern .sec-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#5c4fc7;margin:14px 0 7px;padding-bottom:3px;border-bottom:2px solid #5c4fc7}
+.tpl-modern .sec-title:first-child{margin-top:0}
+.tpl-modern .skill-pill{display:inline-block;background:#5c4fc7;color:#fff;font-size:9px;padding:2px 9px;border-radius:20px;margin:2px}
+.tpl-modern .exp-item{margin-bottom:12px}
+.tpl-modern .exp-title{font-weight:700;font-size:10px}
+.tpl-modern .exp-company{color:#5c4fc7;font-size:9px;font-weight:600}
+.tpl-modern .exp-date{font-size:9px;color:#888}
+.tpl-modern .exp-desc{font-size:9px;color:#444;margin-top:3px;line-height:1.5}
+
+/* ── TEMPLATE: Classic Navy (PRO) ── */
+.tpl-classic .resume-header{background:#1a3a5c;color:#fff;padding:22px 30px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.tpl-classic .resume-header h1{font-size:20px;font-weight:700}
+.tpl-classic .resume-header .subtitle{font-size:11px;opacity:.8;margin-top:3px}
+.tpl-classic .resume-header .contact-col{font-size:10px;opacity:.9;text-align:right;line-height:1.8}
+.tpl-classic .resume-body{padding:18px 30px}
+.tpl-classic .sec-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#1a3a5c;margin:16px 0 7px;padding-bottom:3px;border-bottom:2px solid #1a3a5c}
+.tpl-classic .sec-title:first-child{margin-top:0}
+.tpl-classic .skill-pill{display:inline-block;border:1px solid #1a3a5c;color:#1a3a5c;font-size:9px;padding:2px 9px;border-radius:4px;margin:2px}
+.tpl-classic .exp-item{margin-bottom:12px;padding-left:10px;border-left:3px solid #1a3a5c}
+.tpl-classic .exp-title{font-weight:700;font-size:10px}
+.tpl-classic .exp-company{color:#1a3a5c;font-size:9px;font-weight:600}
+.tpl-classic .exp-date{font-size:9px;color:#888}
+.tpl-classic .exp-desc{font-size:9px;color:#444;margin-top:3px;line-height:1.5}
+
+/* ── TEMPLATE: Minimal Black (PRO) ── */
+.tpl-minimal .resume-header{padding:28px 32px 16px;border-bottom:3px solid #1a1a1a}
+.tpl-minimal .resume-header h1{font-size:24px;font-weight:800;letter-spacing:-.5px}
+.tpl-minimal .resume-header .subtitle{font-size:12px;color:#555;margin-top:3px}
+.tpl-minimal .resume-header .contact-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:8px;font-size:9px;color:#555}
+.tpl-minimal .resume-body{padding:18px 32px}
+.tpl-minimal .sec-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#1a1a1a;margin:16px 0 7px}
+.tpl-minimal .sec-title:first-child{margin-top:0}
+.tpl-minimal .skill-pill{display:inline-block;background:#f0f0f0;color:#1a1a1a;font-size:9px;padding:2px 9px;border-radius:3px;margin:2px}
+.tpl-minimal .exp-item{margin-bottom:12px}
+.tpl-minimal .exp-title{font-weight:700;font-size:10px}
+.tpl-minimal .exp-company{color:#555;font-size:9px}
+.tpl-minimal .exp-date{font-size:9px;color:#888;float:right}
+.tpl-minimal .exp-desc{font-size:9px;color:#444;margin-top:3px;line-height:1.5;clear:both}
+
+/* ── TEMPLATE: Emerald (PRO) ── */
+.tpl-emerald .resume-header{background:#065f46;color:#fff;padding:26px 30px}
+.tpl-emerald .resume-header h1{font-size:22px;font-weight:700;margin-bottom:3px}
+.tpl-emerald .resume-header .subtitle{font-size:12px;opacity:.85}
+.tpl-emerald .resume-header .contact-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:10px;opacity:.9}
+.tpl-emerald .resume-body{display:grid;grid-template-columns:1fr 2fr}
+.tpl-emerald .resume-sidebar{background:#ecfdf5;padding:18px;border-right:1px solid #d1fae5}
+.tpl-emerald .resume-main{padding:18px 22px}
+.tpl-emerald .sec-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#065f46;margin:14px 0 7px;padding-bottom:3px;border-bottom:2px solid #065f46}
+.tpl-emerald .sec-title:first-child{margin-top:0}
+.tpl-emerald .skill-pill{display:inline-block;background:#065f46;color:#fff;font-size:9px;padding:2px 9px;border-radius:20px;margin:2px}
+.tpl-emerald .exp-item{margin-bottom:12px}
+.tpl-emerald .exp-title{font-weight:700;font-size:10px}
+.tpl-emerald .exp-company{color:#065f46;font-size:9px;font-weight:600}
+.tpl-emerald .exp-date{font-size:9px;color:#888}
+.tpl-emerald .exp-desc{font-size:9px;color:#444;margin-top:3px;line-height:1.5}
+
+/* ── TEMPLATE: Bold Red (PRO) ── */
+.tpl-bold .resume-header{padding:26px 30px;border-left:8px solid #dc2626}
+.tpl-bold .resume-header h1{font-size:24px;font-weight:800;color:#1a1a1a}
+.tpl-bold .resume-header .subtitle{font-size:12px;color:#dc2626;font-weight:600;margin-top:3px}
+.tpl-bold .resume-header .contact-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:8px;font-size:10px;color:#555}
+.tpl-bold .resume-body{padding:0 30px 22px}
+.tpl-bold .sec-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#fff;background:#dc2626;padding:4px 10px;margin:16px -30px 10px;display:block}
+.tpl-bold .sec-title:first-child{margin-top:0}
+.tpl-bold .skill-pill{display:inline-block;background:#fee2e2;color:#dc2626;font-size:9px;padding:2px 9px;border-radius:4px;margin:2px;font-weight:600}
+.tpl-bold .exp-item{margin-bottom:12px}
+.tpl-bold .exp-title{font-weight:700;font-size:10px}
+.tpl-bold .exp-company{color:#dc2626;font-size:9px;font-weight:600}
+.tpl-bold .exp-date{font-size:9px;color:#888}
+.tpl-bold .exp-desc{font-size:9px;color:#444;margin-top:3px;line-height:1.5}
+
+/* PRO OVERLAY on locked templates in preview */
+.pro-overlay{position:relative;display:inline-block;width:100%}
+.pro-blur{filter:blur(3px);pointer-events:none;user-select:none}
+.pro-overlay-badge{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.7);border-radius:4px;cursor:pointer}
+.pro-overlay-badge span{font-size:28px}
+.pro-overlay-badge p{font-size:13px;font-weight:700;color:#5c4fc7;margin-top:6px}
+.pro-overlay-badge small{font-size:11px;color:#888}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">Cover<span>AI</span></a>
+  <div class="nav-links">
+    <a href="index.html">Cover Letter</a>
+    <a href="howitworks.html">How it works</a>
+    <a href="pricing.html">Pricing</a>
+    <button class="nav-btn" onclick="showUpgradeModal()">Get Pro ⭐</button>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="free-badge">✅ 1 Free Resume Included</div>
+  <h1>AI <span>Resume Builder</span></h1>
+  <p>Fill in your details, let AI enhance your content, and download a professional resume PDF instantly.</p>
+  <div class="hero-note">Free: 1 resume download with Modern template · Pro: All 5 templates + unlimited downloads</div>
+</div>
+
+<div class="builder-layout">
+
+  <!-- LEFT: FORM -->
+  <div class="form-panel">
+
+    <!-- TEMPLATE PICKER -->
+    <div class="section-title tpl-title">Choose Template</div>
+    <div class="template-grid">
+      <div class="tpl-btn free-tpl active" data-tpl="modern" onclick="selectTemplate('modern',this)">
+        <div class="free-tag">FREE</div>
+        <div class="tpl-dot" style="background:#5c4fc7"></div>Modern
+      </div>
+      <div class="tpl-btn pro-tpl" data-tpl="classic" onclick="selectProTemplate(this,'Classic Navy')">
+        <div class="pro-lock">⭐</div>
+        <div class="tpl-dot" style="background:#1a3a5c"></div>Classic
+      </div>
+      <div class="tpl-btn pro-tpl" data-tpl="minimal" onclick="selectProTemplate(this,'Minimal Black')">
+        <div class="pro-lock">⭐</div>
+        <div class="tpl-dot" style="background:#1a1a1a"></div>Minimal
+      </div>
+      <div class="tpl-btn pro-tpl" data-tpl="emerald" onclick="selectProTemplate(this,'Emerald Green')">
+        <div class="pro-lock">⭐</div>
+        <div class="tpl-dot" style="background:#065f46"></div>Emerald
+      </div>
+      <div class="tpl-btn pro-tpl" data-tpl="bold" onclick="selectProTemplate(this,'Bold Red')">
+        <div class="pro-lock">⭐</div>
+        <div class="tpl-dot" style="background:#dc2626"></div>Bold
+      </div>
+    </div>
+
+    <!-- PERSONAL INFO -->
+    <div class="section-title">Personal Information</div>
+    <label>Full Name</label>
+    <input type="text" id="rName" placeholder="e.g. Satyendra Vishwakarma" oninput="updatePreview()"/>
+    <label>Job Title / Profession</label>
+    <input type="text" id="rTitle" placeholder="e.g. Embedded Systems Engineer" oninput="updatePreview()"/>
+    <div class="row2">
+      <div><label>Email</label><input type="email" id="rEmail" placeholder="you@email.com" oninput="updatePreview()"/></div>
+      <div><label>Phone</label><input type="tel" id="rPhone" placeholder="+91 98765 43210" oninput="updatePreview()"/></div>
+    </div>
+    <div class="row2">
+      <div><label>Location</label><input type="text" id="rLocation" placeholder="Mumbai, India" oninput="updatePreview()"/></div>
+      <div><label>LinkedIn (optional)</label><input type="text" id="rLinkedin" placeholder="linkedin.com/in/you" oninput="updatePreview()"/></div>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="section-title">Professional Summary</div>
+    <textarea id="rSummary" rows="3" placeholder="A brief 2-3 sentence summary about yourself..." oninput="updatePreview()"></textarea>
+    <button class="ai-btn" id="aiSummaryBtn" onclick="generateSummary()" style="font-size:13px;padding:9px;margin-top:8px">
+      ✦ Generate Summary with AI
+    </button>
+
+    <!-- SKILLS -->
+    <div class="section-title">Skills</div>
+    <div class="skill-input-row">
+      <input type="text" id="skillInput" placeholder="e.g. Python" onkeydown="if(event.key==='Enter'){addSkill()}"/>
+      <button class="add-skill-btn" onclick="addSkill()">+ Add</button>
+    </div>
+    <div class="skills-tags" id="skillsTags"></div>
+
+    <!-- EXPERIENCE -->
+    <div class="section-title">Work Experience</div>
+    <div id="expEntries"></div>
+    <button class="add-entry-btn" onclick="addExp()">+ Add Experience</button>
+
+    <!-- EDUCATION -->
+    <div class="section-title">Education</div>
+    <div id="eduEntries"></div>
+    <button class="add-entry-btn" onclick="addEdu()">+ Add Education</button>
+
+    <!-- ACTIONS -->
+    <button class="ai-btn" id="aiEnhanceBtn" onclick="enhanceWithAI()">✦ Enhance Resume with AI</button>
+
+    <!-- FREE DOWNLOAD + USED STATE -->
+    <button class="dl-btn" id="dlBtn" onclick="handleDownload()">⬇ Download PDF — Free</button>
+    <div class="used-banner" id="usedBanner">
+      <strong>🎉 You've used your 1 free resume!</strong>
+      Upgrade to Pro to download unlimited resumes with all 5 templates.
+      <button class="upgrade-btn" onclick="showUpgradeModal()">Upgrade to Pro — ₹299/month</button>
+    </div>
+  </div>
+
+  <!-- RIGHT: PREVIEW -->
+  <div class="preview-panel">
+    <div class="preview-label">Live Preview — updates as you type</div>
+    <div id="previewWrap">
+      <div class="resume-page" id="resumePreview"></div>
+    </div>
+  </div>
+</div>
+
+<!-- UPGRADE MODAL -->
+<div id="upgradeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:20px;padding:2rem;max-width:420px;width:90%;text-align:center;position:relative">
+    <button onclick="document.getElementById('upgradeModal').style.display='none'" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:#aaa">✕</button>
+    <div style="font-size:42px;margin-bottom:10px">⭐</div>
+    <h2 style="font-size:22px;font-weight:700;margin-bottom:8px">Upgrade to Pro</h2>
+    <p style="font-size:14px;color:#666;line-height:1.6;margin-bottom:16px">Unlock all 5 resume templates, unlimited downloads, unlimited cover letters and more.</p>
+    <div style="background:#eeedfe;border-radius:12px;padding:14px;margin-bottom:18px">
+      <div style="font-size:32px;font-weight:800;color:#5c4fc7">₹299<span style="font-size:15px;font-weight:400;color:#888">/month</span></div>
+      <div style="font-size:11px;color:#888;margin-top:4px">Cancel anytime · Instant access</div>
+    </div>
+    <ul style="text-align:left;margin-bottom:18px;list-style:none">
+      <li style="font-size:13px;padding:4px 0">✅ All 5 resume templates</li>
+      <li style="font-size:13px;padding:4px 0">✅ Unlimited resume downloads</li>
+      <li style="font-size:13px;padding:4px 0">✅ Unlimited cover letters daily</li>
+      <li style="font-size:13px;padding:4px 0">✅ Resume upload & auto-fill</li>
+      <li style="font-size:13px;padding:4px 0">✅ LinkedIn message generator</li>
+    </ul>
+    <button onclick="goToPro()" style="width:100%;padding:13px;font-size:15px;font-weight:700;background:#5c4fc7;color:#fff;border:none;border-radius:10px;cursor:pointer;margin-bottom:10px">Get Pro Now — ₹299/month</button>
+    <div onclick="document.getElementById('upgradeModal').style.display='none'" style="font-size:13px;color:#aaa;cursor:pointer;text-decoration:underline">Maybe later</div>
+  </div>
+</div>
+
+<script>
+let currentTemplate = 'modern';
+let skills = [];
+let expEntries = [];
+let eduEntries = [];
+const FREE_RESUME_KEY = 'coverai_resume_used';
+const isPro = sessionStorage.getItem('coverai_pro') === 'true';
+
+window.addEventListener('DOMContentLoaded', () => {
+  addExp(); addEdu(); updatePreview();
+  // Show used banner if already downloaded and not pro
+  if (localStorage.getItem(FREE_RESUME_KEY) === 'true' && !isPro) {
+    showUsedState();
+  }
+});
+
+function selectTemplate(tpl, el) {
+  document.querySelectorAll('.tpl-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  currentTemplate = tpl;
+  updatePreview();
+}
+
+function selectProTemplate(el, name) {
+  if (isPro) {
+    selectTemplate(el.dataset.tpl, el);
+  } else {
+    showUpgradeModal(`The ${name} template is a Pro feature.`);
+  }
+}
+
+function showUpgradeModal(msg) {
+  document.getElementById('upgradeModal').style.display = 'flex';
+}
+
+function goToPro() {
+  // Replace with Razorpay link
+  window.location.href = 'pricing.html';
+}
+
+function showUsedState() {
+  document.getElementById('dlBtn').style.display = 'none';
+  document.getElementById('usedBanner').style.display = 'block';
+}
+
+// ── SKILLS ────────────────────────────────────────────────────
+function addSkill() {
+  const inp = document.getElementById('skillInput');
+  const val = inp.value.trim();
+  if (!val) return;
+  skills.push(val); inp.value = '';
+  renderSkillTags(); updatePreview();
+}
+function removeSkill(i) { skills.splice(i,1); renderSkillTags(); updatePreview(); }
+function renderSkillTags() {
+  document.getElementById('skillsTags').innerHTML = skills.map((s,i) =>
+    `<div class="skill-tag">${s}<button onclick="removeSkill(${i})">×</button></div>`).join('');
+}
+
+// ── EXPERIENCE ────────────────────────────────────────────────
+function addExp() {
+  const id = Date.now(); expEntries.push(id);
+  const div = document.createElement('div');
+  div.className='entry'; div.id='exp_'+id;
+  div.innerHTML=`<button class="entry-del" onclick="removeEntry('exp',${id})">×</button>
+    <label>Job Title</label><input type="text" id="etitle_${id}" placeholder="e.g. Software Engineer" oninput="updatePreview()"/>
+    <label>Company</label><input type="text" id="ecomp_${id}" placeholder="e.g. Infosys" oninput="updatePreview()"/>
+    <div class="row2">
+      <div><label>Start</label><input type="text" id="estart_${id}" placeholder="Jan 2021" oninput="updatePreview()"/></div>
+      <div><label>End</label><input type="text" id="eend_${id}" placeholder="Present" oninput="updatePreview()"/></div>
+    </div>
+    <label>Description</label>
+    <textarea id="edesc_${id}" rows="2" placeholder="Key responsibilities and achievements..." oninput="updatePreview()"></textarea>`;
+  document.getElementById('expEntries').appendChild(div);
+}
+
+// ── EDUCATION ─────────────────────────────────────────────────
+function addEdu() {
+  const id = Date.now(); eduEntries.push(id);
+  const div = document.createElement('div');
+  div.className='entry'; div.id='edu_'+id;
+  div.innerHTML=`<button class="entry-del" onclick="removeEntry('edu',${id})">×</button>
+    <label>Degree</label><input type="text" id="udeg_${id}" placeholder="e.g. B.Tech Computer Science" oninput="updatePreview()"/>
+    <label>Institution</label><input type="text" id="uinst_${id}" placeholder="e.g. IIT Bombay" oninput="updatePreview()"/>
+    <div class="row2">
+      <div><label>Year</label><input type="text" id="uyear_${id}" placeholder="2018–2022" oninput="updatePreview()"/></div>
+      <div><label>Grade/CGPA</label><input type="text" id="ugrade_${id}" placeholder="8.5 CGPA" oninput="updatePreview()"/></div>
+    </div>`;
+  document.getElementById('eduEntries').appendChild(div);
+}
+
+function removeEntry(type, id) {
+  document.getElementById((type==='exp'?'exp_':'edu_')+id)?.remove();
+  if(type==='exp') expEntries=expEntries.filter(e=>e!==id);
+  else eduEntries=eduEntries.filter(e=>e!==id);
+  updatePreview();
+}
+
+// ── GET DATA ──────────────────────────────────────────────────
+function getFormData() {
+  return {
+    name: document.getElementById('rName').value||'Your Name',
+    title: document.getElementById('rTitle').value||'Your Title',
+    email: document.getElementById('rEmail').value,
+    phone: document.getElementById('rPhone').value,
+    location: document.getElementById('rLocation').value,
+    linkedin: document.getElementById('rLinkedin').value,
+    summary: document.getElementById('rSummary').value,
+    skills,
+    exps: expEntries.map(id=>({
+      title: document.getElementById('etitle_'+id)?.value||'',
+      company: document.getElementById('ecomp_'+id)?.value||'',
+      start: document.getElementById('estart_'+id)?.value||'',
+      end: document.getElementById('eend_'+id)?.value||'',
+      desc: document.getElementById('edesc_'+id)?.value||''
+    })).filter(e=>e.title||e.company),
+    edus: eduEntries.map(id=>({
+      degree: document.getElementById('udeg_'+id)?.value||'',
+      inst: document.getElementById('uinst_'+id)?.value||'',
+      year: document.getElementById('uyear_'+id)?.value||'',
+      grade: document.getElementById('ugrade_'+id)?.value||''
+    })).filter(e=>e.degree||e.inst)
+  };
+}
+
+// ── RENDER PREVIEW ────────────────────────────────────────────
+function updatePreview() {
+  const d = getFormData();
+  const tpl = currentTemplate;
+  const contact = [d.email,d.phone,d.location,d.linkedin].filter(Boolean);
+  let html = '';
+
+  if (tpl==='modern'||tpl==='emerald') {
+    const cls = tpl==='modern'?'tpl-modern':'tpl-emerald';
+    html=`<div class="${cls}">
+      <div class="resume-header"><h1>${d.name}</h1><div class="subtitle">${d.title}</div>
+      <div class="contact-row">${contact.map(c=>`<span>• ${c}</span>`).join('')}</div></div>
+      <div class="resume-body">
+        <div class="resume-sidebar">
+          ${d.skills.length?`<div class="sec-title">Skills</div>${d.skills.map(s=>`<span class="skill-pill">${s}</span>`).join('')}`:''}
+          ${d.edus.length?`<div class="sec-title">Education</div>${d.edus.map(e=>`<div class="exp-item"><div class="exp-title">${e.degree}</div><div class="exp-company">${e.inst}</div><div class="exp-date">${e.year}${e.grade?' · '+e.grade:''}</div></div>`).join('')}`:''}
+        </div>
+        <div class="resume-main">
+          ${d.summary?`<div class="sec-title">Summary</div><p style="font-size:9px;color:#444;line-height:1.6">${d.summary}</p>`:''}
+          ${d.exps.length?`<div class="sec-title">Experience</div>${d.exps.map(e=>`<div class="exp-item"><div class="exp-title">${e.title}</div><div class="exp-company">${e.company}</div><div class="exp-date">${e.start}${e.end?' – '+e.end:''}</div><div class="exp-desc">${e.desc}</div></div>`).join('')}`:''}
+        </div>
+      </div></div>`;
+  } else if (tpl==='classic') {
+    html=`<div class="tpl-classic">
+      <div class="resume-header"><div><h1>${d.name}</h1><div class="subtitle">${d.title}</div></div>
+      <div class="contact-col">${contact.map(c=>`<div>${c}</div>`).join('')}</div></div>
+      <div class="resume-body">
+        ${d.summary?`<div class="sec-title">Profile</div><p style="font-size:9px;color:#444;line-height:1.6">${d.summary}</p>`:''}
+        ${d.exps.length?`<div class="sec-title">Experience</div>${d.exps.map(e=>`<div class="exp-item"><div class="exp-title">${e.title} — <span class="exp-company">${e.company}</span> <span class="exp-date">(${e.start}${e.end?' – '+e.end:''})</span></div><div class="exp-desc">${e.desc}</div></div>`).join('')}`:''}
+        ${d.edus.length?`<div class="sec-title">Education</div>${d.edus.map(e=>`<div class="exp-item"><div class="exp-title">${e.degree} — <span class="exp-company">${e.inst}</span></div><div class="exp-desc">${e.year}${e.grade?' · '+e.grade:''}</div></div>`).join('')}`:''}
+        ${d.skills.length?`<div class="sec-title">Skills</div><div>${d.skills.map(s=>`<span class="skill-pill">${s}</span>`).join('')}</div>`:''}
+      </div></div>`;
+  } else if (tpl==='minimal') {
+    html=`<div class="tpl-minimal">
+      <div class="resume-header"><h1>${d.name}</h1><div class="subtitle">${d.title}</div>
+      <div class="contact-row">${contact.join(' · ')}</div></div>
+      <div class="resume-body">
+        ${d.summary?`<div class="sec-title">About</div><p style="font-size:9px;color:#444;line-height:1.6">${d.summary}</p>`:''}
+        ${d.exps.length?`<div class="sec-title">Experience</div>${d.exps.map(e=>`<div class="exp-item"><span class="exp-date">${e.start}${e.end?' – '+e.end:''}</span><div class="exp-title">${e.title}</div><div class="exp-company">${e.company}</div><div class="exp-desc">${e.desc}</div></div>`).join('')}`:''}
+        ${d.edus.length?`<div class="sec-title">Education</div>${d.edus.map(e=>`<div class="exp-item"><span class="exp-date">${e.year}</span><div class="exp-title">${e.degree}</div><div class="exp-company">${e.inst}${e.grade?' · '+e.grade:''}</div></div>`).join('')}`:''}
+        ${d.skills.length?`<div class="sec-title">Skills</div><div>${d.skills.map(s=>`<span class="skill-pill">${s}</span>`).join('')}</div>`:''}
+      </div></div>`;
+  } else if (tpl==='bold') {
+    html=`<div class="tpl-bold">
+      <div class="resume-header"><h1>${d.name}</h1><div class="subtitle">${d.title}</div>
+      <div class="contact-row">${contact.join(' | ')}</div></div>
+      <div class="resume-body">
+        ${d.summary?`<div class="sec-title">Profile</div><p style="font-size:9px;color:#444;line-height:1.6;margin-bottom:8px">${d.summary}</p>`:''}
+        ${d.exps.length?`<div class="sec-title">Experience</div>${d.exps.map(e=>`<div class="exp-item"><div class="exp-title">${e.title}</div><div class="exp-company">${e.company} · ${e.start}${e.end?' – '+e.end:''}</div><div class="exp-desc">${e.desc}</div></div>`).join('')}`:''}
+        ${d.edus.length?`<div class="sec-title">Education</div>${d.edus.map(e=>`<div class="exp-item"><div class="exp-title">${e.degree}</div><div class="exp-company">${e.inst} · ${e.year}${e.grade?' · '+e.grade:''}</div></div>`).join('')}`:''}
+        ${d.skills.length?`<div class="sec-title">Skills</div><div style="padding-bottom:8px">${d.skills.map(s=>`<span class="skill-pill">${s}</span>`).join('')}</div>`:''}
+      </div></div>`;
+  }
+
+  document.getElementById('resumePreview').innerHTML = html;
+}
+
+// ── AI SUMMARY ────────────────────────────────────────────────
+async function generateSummary() {
+  const d = getFormData();
+  const btn = document.getElementById('aiSummaryBtn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Generating...';
+  try {
+    const res = await fetch('/api/generate-summary',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({name:d.name,title:d.title,skills:d.skills.join(', '),exps:d.exps})
+    });
+    const data = await res.json();
+    if(data.summary){ document.getElementById('rSummary').value=data.summary; updatePreview(); }
+  } catch(e){ alert('Could not generate summary. Try again.'); }
+  finally{ btn.disabled=false; btn.innerHTML='✦ Generate Summary with AI'; }
+}
+
+// ── AI ENHANCE ────────────────────────────────────────────────
+async function enhanceWithAI() {
+  const btn = document.getElementById('aiEnhanceBtn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Enhancing...';
+  try {
+    const d = getFormData();
+    const res = await fetch('/api/enhance-resume',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(d)
+    });
+    const data = await res.json();
+    if(data.enhanced){
+      data.enhanced.forEach((e,i)=>{
+        const id=expEntries[i];
+        if(id&&document.getElementById('edesc_'+id)) document.getElementById('edesc_'+id).value=e;
+      });
+      if(data.summary){ document.getElementById('rSummary').value=data.summary; }
+      updatePreview();
+      alert('✅ Resume enhanced! Check descriptions and summary.');
+    }
+  } catch(e){ alert('Enhancement failed. Please try again.'); }
+  finally{ btn.disabled=false; btn.innerHTML='✦ Enhance Resume with AI'; }
+}
+
+// ── DOWNLOAD HANDLER ──────────────────────────────────────────
+function handleDownload() {
+  const alreadyUsed = localStorage.getItem(FREE_RESUME_KEY) === 'true';
+  if (alreadyUsed && !isPro) { showUpgradeModal(); return; }
+  downloadResumePDF();
+  if (!isPro) {
+    localStorage.setItem(FREE_RESUME_KEY,'true');
+    showUsedState();
+  }
+}
+
+// ── PDF DOWNLOAD ──────────────────────────────────────────────
+function downloadResumePDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'mm',format:'a4'});
+  const d = getFormData();
+  const margin=15, pw=210-margin*2, lh=6;
+  let y=15;
+  const colors={modern:[92,79,199],classic:[26,58,92],minimal:[26,26,26],emerald:[6,95,70],bold:[220,38,38]};
+  const [r,g,b]=colors[currentTemplate]||[92,79,199];
+
+  if(currentTemplate!=='minimal'&&currentTemplate!=='bold'){
+    doc.setFillColor(r,g,b); doc.rect(0,0,210,36,'F');
+    doc.setTextColor(255,255,255);
+  } else { doc.setTextColor(r,g,b); }
+
+  doc.setFontSize(18); doc.setFont('helvetica','bold');
+  doc.text(d.name,margin,y+6); y+=8;
+  doc.setFontSize(11); doc.setFont('helvetica','normal');
+  doc.text(d.title,margin,y+2); y+=6;
+  const contact=[d.email,d.phone,d.location].filter(Boolean).join(' | ');
+  doc.setFontSize(9); doc.text(contact,margin,y+2); y+=12;
+  doc.setTextColor(30,30,30);
+
+  const section=(title)=>{
+    doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(r,g,b);
+    doc.text(title.toUpperCase(),margin,y); y+=1;
+    doc.setDrawColor(r,g,b); doc.line(margin,y,210-margin,y); y+=5;
+    doc.setTextColor(30,30,30); doc.setFont('helvetica','normal');
+  };
+  const addText=(text,size=9,bold=false)=>{
+    doc.setFontSize(size); doc.setFont('helvetica',bold?'bold':'normal');
+    doc.splitTextToSize(text,pw).forEach(line=>{ if(y>280){doc.addPage();y=15;} doc.text(line,margin,y); y+=lh; });
+  };
+
+  if(d.summary){section('Summary');addText(d.summary);y+=2;}
+  if(d.exps.length){
+    section('Experience');
+    d.exps.forEach(e=>{
+      addText(`${e.title} — ${e.company}`,9,true);
+      addText(`${e.start}${e.end?' – '+e.end:''}`,8);
+      if(e.desc)addText(e.desc,9); y+=2;
+    });
+  }
+  if(d.edus.length){
+    section('Education');
+    d.edus.forEach(e=>{
+      addText(`${e.degree} — ${e.inst}`,9,true);
+      addText(`${e.year}${e.grade?' | '+e.grade:''}`,8); y+=2;
+    });
+  }
+  if(d.skills.length){section('Skills');addText(d.skills.join(' · '),9);}
+
+  const name=document.getElementById('rName').value||'resume';
+  doc.save(`${name.replace(/\s+/g,'-')}-resume.pdf`);
+}
+</script>
+</body>
+</html>

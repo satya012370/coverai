@@ -196,3 +196,69 @@ app.get("/test", async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => { console.log(`\n🚀 Server running on http://localhost:${PORT}\n`); });
+
+// ─── RESUME SUMMARY GENERATOR ─────────────────────────────────
+app.post("/api/generate-summary", async (req, res) => {
+  try {
+    const { name, title, skills, exps } = req.body;
+    const expText = exps?.map(e => `${e.title} at ${e.company}`).join(', ') || '';
+    const prompt = `Write a professional resume summary for:
+Name: ${name}
+Title: ${title}
+Skills: ${skills}
+Experience: ${expText}
+
+Rules:
+- 2-3 sentences only
+- First person, confident tone
+- Highlight value they bring
+- No clichés like "hardworking" or "team player"
+- Output the summary text ONLY`;
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      { method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ contents:[{ parts:[{ text: prompt }] }] }) }
+    );
+    const data = await response.json();
+    const summary = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    res.json({ summary: summary.trim() });
+  } catch(err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── RESUME ENHANCER ──────────────────────────────────────────
+app.post("/api/enhance-resume", async (req, res) => {
+  try {
+    const { name, title, skills, exps, summary } = req.body;
+    const prompt = `Improve this resume content and return ONLY valid JSON:
+{
+  "summary": "improved 2-3 sentence professional summary",
+  "enhanced": ["improved description for job 1", "improved description for job 2"]
+}
+
+Name: ${name}, Title: ${title}, Skills: ${skills?.join?.(', ')||skills}
+Experience: ${JSON.stringify(exps)}
+Current summary: ${summary || 'none'}
+
+Rules for descriptions:
+- Start each bullet with a strong action verb
+- Add specific impact where possible
+- Keep each under 2 sentences
+- Return ONLY the JSON, no markdown`;
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      { method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ contents:[{ parts:[{ text: prompt }] }] }) }
+    );
+    const data = await response.json();
+    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+    const clean = raw.replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(clean);
+    res.json(parsed);
+  } catch(err) {
+    res.status(500).json({ error: err.message });
+  }
+});
