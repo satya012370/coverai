@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='32' height='32' rx='8' fill='%235c4fc7'/%3E%3Cpath d='M18 9C13.582 9 10 12.582 10 17C10 21.418 13.582 25 18 25' stroke='white' stroke-width='2.8' stroke-linecap='round'/%3E%3Cpath d='M23 9.5L24.2 12.5L27 13.7L24.2 14.9L23 17.9L21.8 14.9L19 13.7L21.8 12.5Z' fill='%23F59E0B'/%3E%3C/svg%3E"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>CoverAI — AI Cover Letter Generator</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -59,23 +60,8 @@
   .pro-upgrade-btn{background:#5c4fc7;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
   .features{max-width:760px;margin:0 auto 3rem;padding:0 1rem}
   .features h2{font-size:22px;font-weight:700;text-align:center;margin-bottom:1.5rem}
-  .feat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
   @media(max-width:520px){.feat-grid{grid-template-columns:1fr}}
-  /* RESUME BUILDER HIGHLIGHT */
-  .rb-section{max-width:760px;margin:0 auto 2.5rem;padding:0 1rem}
-  .rb-card{background:linear-gradient(135deg,#5c4fc7 0%,#7c6fe0 50%,#9d8ff0 100%);border-radius:20px;padding:2rem;display:flex;align-items:center;gap:2rem;position:relative;overflow:hidden;color:#fff}
-  .rb-card::before{content:'';position:absolute;top:-30px;right:-30px;width:160px;height:160px;background:rgba(255,255,255,.08);border-radius:50%}
-  .rb-card::after{content:'';position:absolute;bottom:-40px;right:60px;width:100px;height:100px;background:rgba(255,255,255,.06);border-radius:50%}
-  .rb-left{flex:1;min-width:0;position:relative;z-index:1}
-  .rb-badge{display:inline-block;background:rgba(255,255,255,.2);color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;margin-bottom:10px;letter-spacing:.04em}
-  .rb-card h2{font-size:22px;font-weight:800;margin-bottom:8px;line-height:1.25}
-  .rb-card p{font-size:14px;opacity:.9;line-height:1.6;max-width:400px;margin-bottom:16px}
-  .rb-feats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
-  .rb-feat{background:rgba(255,255,255,.15);color:#fff;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px}
-  .rb-btn{display:inline-flex;align-items:center;gap:8px;background:#fff;color:#5c4fc7;border:none;border-radius:10px;padding:12px 22px;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;transition:all .2s;box-shadow:0 4px 14px rgba(0,0,0,.15)}
-  .rb-btn:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.2)}
-  .rb-right{font-size:80px;flex-shrink:0;position:relative;z-index:1;line-height:1}
-  @media(max-width:520px){.rb-card{flex-direction:column;gap:1rem;text-align:center}.rb-feats{justify-content:center}.rb-right{font-size:48px}.rb-btn{width:100%;justify-content:center}}
   .feat{background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:1.2rem}
   .feat-icon{font-size:22px;margin-bottom:8px}
   .feat h3{font-size:14px;font-weight:600;margin-bottom:5px}
@@ -124,14 +110,21 @@
 <body>
 
 <nav>
-  <a href="index.html" class="logo">Cover<span>AI</span></a>
+  <a href="index.html" class="logo" style="display:flex;align-items:center;gap:9px;text-decoration:none">
+  <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+    <rect width="32" height="32" rx="8" fill="#5c4fc7"/>
+    <path d="M18 9C13.582 9 10 12.582 10 17C10 21.418 13.582 25 18 25" stroke="white" stroke-width="2.8" stroke-linecap="round"/>
+    <path d="M23 9.5L24.2 12.5L27 13.7L24.2 14.9L23 17.9L21.8 14.9L19 13.7L21.8 12.5Z" fill="#F59E0B"/>
+  </svg>
+  <span style="font-size:18px;font-weight:700;color:#5c4fc7">Cover<span style="color:#1a1a1a">AI</span></span>
+</a>
   <div class="nav-links">
     <a href="index.html" style="color:#5c4fc7;font-weight:600">Cover Letter</a>
     <a href="resume.html">✦ Resume Builder <span style="background:#5c4fc7;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;margin-left:2px;vertical-align:middle">NEW</span></a>
     <a href="ats.html">🎯 ATS Checker</a>
     <a href="linkedin.html">LinkedIn</a>
     <a href="pricing.html">Pricing</a>
-    <button class="nav-btn" onclick="showPaywall()">Get Pro</button>
+    <button class="nav-btn" onclick="showPaywall()" style="background:#5c4fc7">Get Pro</button>
   </div>
 </nav>
 
@@ -240,35 +233,16 @@
   </div>
 </div>
 
-<div class="rb-section">
-  <div class="rb-card">
-    <div class="rb-left">
-      <div class="rb-badge">✦ FEATURED TOOL</div>
-      <h2>Build a Job-Winning Resume<br/>in Minutes</h2>
-      <p>Create a polished, ATS-friendly resume from scratch — or upload your existing one and let AI enhance every bullet point.</p>
-      <div class="rb-feats">
-        <span class="rb-feat">📝 AI bullet points</span>
-        <span class="rb-feat">5 templates</span>
-        <span class="rb-feat">🎯 ATS-friendly</span>
-        <span class="rb-feat">⚡ PDF export</span>
-      </div>
-      <a href="resume.html" class="rb-btn">Try Resume Builder Free →</a>
-    </div>
-    <div class="rb-right">📋</div>
-  </div>
-</div>
-
 <div class="features">
   <h2>Why people love CoverAI</h2>
   <div class="feat-grid">
     <div class="feat"><div class="feat-icon">📄</div><h3>Resume-aware letters</h3><p>Upload your CV and AI reads your actual experience to write a perfectly tailored letter — no manual typing.</p></div>
-    <div class="feat"><div class="feat-icon">🎯</div><h3>ATS Score Checker</h3><p>Paste your resume and job description — get a match score, missing keywords, and exactly what to fix. <a href="ats.html" style="color:#5c4fc7;font-weight:600">Try free →</a></p></div>
+    <div class="feat"><div class="feat-icon">🎯</div><h3>Job-specific content</h3><p>Paste the job description and your letter will match exactly what the employer is looking for.</p></div>
     <div class="feat"><div class="feat-icon">✍️</div><h3>6 tones to choose from</h3><p>From formal to creative — pick the tone that matches the company culture.</p></div>
-    <div class="feat" style="border-color:#afa9ec;background:#faf9ff;cursor:pointer" onclick="window.location.href='resume.html'"><div class="feat-icon">🏗️</div><h3 style="color:#5c4fc7">Resume Builder <span style="font-size:10px;background:#5c4fc7;color:#fff;padding:2px 6px;border-radius:10px;font-weight:700;margin-left:4px">NEW</span></h3><p>Build a complete, ATS-ready resume from scratch. AI writes bullet points that get past filters. <span style="color:#5c4fc7;font-weight:600">Try it free →</span></p></div>
   </div>
 </div>
 
-<footer>Built with ❤️ · <strong>CoverAI</strong> · <a href="resume.html" style="color:#5c4fc7">Resume Builder</a> · <a href="ats.html" style="color:#5c4fc7">ATS Checker</a> · <a href="linkedin.html" style="color:#5c4fc7">LinkedIn</a> · <a href="pricing.html" style="color:#5c4fc7">Pricing</a></footer>
+<footer>Built with ❤️ · <strong>CoverAI</strong> · <a href="pricing.html" style="color:#5c4fc7">Pricing</a> · <a href="howitworks.html" style="color:#5c4fc7">How it works</a></footer>
 
 <!-- PAYWALL MODAL -->
 <div class="modal-overlay" id="paywallModal">
