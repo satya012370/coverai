@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LinkedIn Message Generator — CoverAI</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#1a1a1a;min-height:100vh}
+nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+.logo{font-size:18px;font-weight:600;color:#5c4fc7;text-decoration:none}
+.logo span{color:#1a1a1a}
+.nav-links{display:flex;gap:1.5rem;align-items:center}
+.nav-links a{font-size:14px;color:#555;text-decoration:none}
+.nav-links a:hover{color:#5c4fc7}
+.nav-btn{background:#0077b5;color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:13px;font-weight:500;cursor:pointer}
+
+/* HERO */
+.hero{text-align:center;padding:2.5rem 1rem 2rem;background:linear-gradient(135deg,#e8f4fd 0%,#fff 100%);border-bottom:1px solid #e8e8e8}
+.hero-badge{display:inline-block;background:#0077b5;color:#fff;font-size:11px;font-weight:700;padding:4px 14px;border-radius:20px;margin-bottom:12px}
+.hero h1{font-size:30px;font-weight:700;margin-bottom:8px}
+.hero h1 span{color:#0077b5}
+.hero p{font-size:15px;color:#555;max-width:500px;margin:0 auto 16px;line-height:1.6}
+.hero-stats{display:flex;gap:2rem;justify-content:center;flex-wrap:wrap}
+.hero-stat{text-align:center}
+.hero-stat strong{display:block;font-size:20px;font-weight:700;color:#0077b5}
+.hero-stat span{font-size:12px;color:#888}
+
+/* USAGE BAR */
+.usage-bar{max-width:760px;margin:1rem auto 0;padding:0 1rem}
+.usage-box{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.usage-left{font-size:13px;color:#555}
+.usage-left strong{color:#0077b5}
+.usage-dots{display:flex;gap:5px}
+.dot{width:11px;height:11px;border-radius:50%;background:#0077b5}
+.dot.used{background:#e0e0e0}
+
+/* TOOL */
+.tool-wrap{max-width:760px;margin:0 auto;padding:1.5rem 1rem 3rem}
+.card{background:#fff;border:1px solid #e8e8e8;border-radius:14px;padding:1.5rem;margin-bottom:1rem}
+.card-title{font-size:12px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px}
+label{display:block;font-size:13px;color:#444;margin-bottom:5px;margin-top:14px;font-weight:500}
+label:first-of-type{margin-top:0}
+input,select,textarea{width:100%;font-size:14px;color:#1a1a1a;background:#fafafa;border:1px solid #e0e0e0;border-radius:8px;padding:9px 13px;font-family:inherit;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#0077b5;background:#fff}
+textarea{resize:vertical;line-height:1.6}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:520px){.row{grid-template-columns:1fr}}
+
+/* MESSAGE TYPE GRID */
+.type-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:6px}
+@media(max-width:520px){.type-grid{grid-template-columns:1fr}}
+.type-btn{padding:10px 12px;font-size:13px;border:1px solid #e0e0e0;border-radius:8px;background:#fafafa;color:#555;cursor:pointer;text-align:left;transition:all .15s;line-height:1.4}
+.type-btn:hover{border-color:#0077b5;color:#0077b5}
+.type-btn.active{background:#e8f4fd;border-color:#0077b5;color:#0077b5;font-weight:600}
+.type-btn .type-icon{font-size:16px;margin-bottom:3px;display:block}
+.type-btn .type-name{font-size:12px;font-weight:600;display:block}
+.type-btn .type-desc{font-size:11px;color:#888;margin-top:2px;display:block}
+
+/* GENERATE BUTTON */
+.gen-btn{width:100%;padding:14px;font-size:16px;font-weight:600;border:none;border-radius:10px;background:#0077b5;color:#fff;cursor:pointer;margin-top:6px;transition:background .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.gen-btn:hover{background:#005f8e}
+.gen-btn:disabled{background:#7ab8d4;cursor:not-allowed}
+.loading{text-align:center;padding:2rem;color:#777;font-size:14px;display:none}
+.spinner{display:inline-block;width:20px;height:20px;border:2.5px solid #ddd;border-top-color:#0077b5;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-5px;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error{color:#c0392b;font-size:13px;margin-top:10px;display:none;background:#fdf0ef;border:1px solid #f5c6c6;border-radius:8px;padding:10px 14px}
+
+/* OUTPUT */
+.output-card{background:#fff;border:1px solid #e8e8e8;border-radius:14px;padding:1.5rem;margin-top:1rem;display:none}
+.output-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.output-title{font-size:14px;font-weight:600;color:#1a1a1a}
+.output-actions{display:flex;gap:8px;flex-wrap:wrap}
+.action-btn{font-size:12px;font-weight:500;padding:6px 14px;border-radius:7px;cursor:pointer;border:1px solid #e0e0e0;background:#fff;color:#555;transition:all .15s}
+.action-btn:hover{background:#f0f0f0}
+.action-btn.primary{background:#e8f4fd;border-color:#90cae8;color:#0077b5}
+.action-btn.linkedin{background:#0077b5;border-color:#0077b5;color:#fff}
+.action-btn.linkedin:hover{background:#005f8e}
+.output-messages{display:grid;grid-template-columns:1fr;gap:12px}
+.message-box{border:1px solid #e0e0e0;border-radius:10px;padding:14px;background:#fafafa;position:relative}
+.message-label{font-size:11px;font-weight:700;color:#0077b5;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.message-char{font-size:10px;color:#aaa;margin-left:auto}
+.message-text{font-size:14px;color:#2a2a2a;line-height:1.7;white-space:pre-wrap}
+.copy-msg-btn{position:absolute;top:10px;right:10px;font-size:11px;background:#e8f4fd;color:#0077b5;border:1px solid #90cae8;border-radius:6px;padding:3px 10px;cursor:pointer}
+
+/* TIPS BOX */
+.tips-box{background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:14px 18px;margin-top:1rem}
+.tips-title{font-size:13px;font-weight:600;color:#0369a1;margin-bottom:8px}
+.tips-list{list-style:none}
+.tips-list li{font-size:12px;color:#0369a1;padding:3px 0}
+.tips-list li::before{content:"💡 "}
+
+/* FEATURES */
+.features{max-width:760px;margin:0 auto 3rem;padding:0 1rem}
+.features h2{font-size:20px;font-weight:700;text-align:center;margin-bottom:1.2rem}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:520px){.feat-grid{grid-template-columns:1fr}}
+.feat{background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:1.1rem}
+.feat-icon{font-size:20px;margin-bottom:6px}
+.feat h3{font-size:13px;font-weight:600;margin-bottom:4px}
+.feat p{font-size:12px;color:#666;line-height:1.5}
+footer{text-align:center;padding:2rem 1rem;font-size:13px;color:#888;border-top:1px solid #e8e8e8;background:#fff}
+
+/* LIMIT MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:20px;padding:2rem;max-width:400px;width:90%;text-align:center;position:relative}
+.modal-x{position:absolute;top:12px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:#aaa}
+.modal h2{font-size:20px;font-weight:700;margin-bottom:8px}
+.modal p{font-size:14px;color:#666;line-height:1.6;margin-bottom:16px}
+.modal-cta{width:100%;padding:12px;font-size:15px;font-weight:700;background:#0077b5;color:#fff;border:none;border-radius:10px;cursor:pointer;margin-bottom:8px}
+.modal-close{font-size:13px;color:#aaa;cursor:pointer;text-decoration:underline}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">Cover<span>AI</span></a>
+  <div class="nav-links">
+    <a href="index.html">Cover Letter</a>
+    <a href="resume.html">Resume Builder</a>
+    <a href="pricing.html">Pricing</a>
+    <button class="nav-btn">LinkedIn ✦</button>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-badge">✦ LinkedIn Message Generator</div>
+  <h1>Message the <span>hiring manager</span><br/>and get noticed</h1>
+  <p>Most applicants just submit a form. Stand out by sending a personalized LinkedIn message — generated in seconds.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><strong>3x</strong><span>Higher response rate</span></div>
+    <div class="hero-stat"><strong>~150</strong><span>Characters — perfect length</span></div>
+    <div class="hero-stat"><strong>Free</strong><span>5 messages/day</span></div>
+  </div>
+</div>
+
+<!-- USAGE BAR -->
+<div class="usage-bar">
+  <div class="usage-box">
+    <div class="usage-left">You have <strong id="remainCount">5</strong> free messages remaining today</div>
+    <div class="usage-dots" id="usageDots">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+  </div>
+</div>
+
+<div class="tool-wrap">
+
+  <!-- YOUR INFO -->
+  <div class="card">
+    <div class="card-title">Your details</div>
+    <div class="row">
+      <div><label>Your name</label><input type="text" id="name" placeholder="e.g. Satyendra Vishwakarma"/></div>
+      <div><label>Your profession</label><input type="text" id="profession" placeholder="e.g. Embedded Systems Engineer"/></div>
+    </div>
+    <label>Your top skills (comma separated)</label>
+    <input type="text" id="skills" placeholder="e.g. C++, FPGA, Hardware Design"/>
+  </div>
+
+  <!-- JOB INFO -->
+  <div class="card">
+    <div class="card-title">Job & recruiter details</div>
+    <div class="row">
+      <div><label>Recruiter / Manager name</label><input type="text" id="recruiterName" placeholder="e.g. Rahul Sharma (or leave blank)"/></div>
+      <div><label>Company name</label><input type="text" id="company" placeholder="e.g. Bosch"/></div>
+    </div>
+    <label>Job title you're applying for</label>
+    <input type="text" id="jobtitle" placeholder="e.g. Senior Embedded Engineer"/>
+    <label>Why you're interested (optional)</label>
+    <textarea id="reason" rows="2" placeholder="e.g. I've followed Bosch's work in automotive sensors for years and this role aligns perfectly with my experience..."></textarea>
+  </div>
+
+  <!-- MESSAGE TYPE -->
+  <div class="card">
+    <div class="card-title">Message type</div>
+    <div class="type-grid">
+      <div class="type-btn active" data-type="connection">
+        <span class="type-icon">🤝</span>
+        <span class="type-name">Connection Request</span>
+        <span class="type-desc">Short note when sending a connection request (300 chars max)</span>
+      </div>
+      <div class="type-btn" data-type="followup">
+        <span class="type-icon">📩</span>
+        <span class="type-name">Follow-up Message</span>
+        <span class="type-desc">After connecting — express interest in the role</span>
+      </div>
+      <div class="type-btn" data-type="referral">
+        <span class="type-icon">🙏</span>
+        <span class="type-name">Ask for Referral</span>
+        <span class="type-desc">Politely ask an employee for an internal referral</span>
+      </div>
+      <div class="type-btn" data-type="informational">
+        <span class="type-icon">💬</span>
+        <span class="type-name">Informational Chat</span>
+        <span class="type-desc">Request a quick call to learn about the team or role</span>
+      </div>
+    </div>
+  </div>
+
+  <button class="gen-btn" id="genBtn" onclick="generate()">✦ Generate LinkedIn Message</button>
+  <div class="loading" id="loading"><span class="spinner"></span> Writing your personalized message...</div>
+  <div class="error" id="error"></div>
+
+  <!-- OUTPUT -->
+  <div class="output-card" id="outputCard">
+    <div class="output-header">
+      <span class="output-title">Your LinkedIn messages</span>
+      <div class="output-actions">
+        <button class="action-btn" onclick="regenerate()">Regenerate</button>
+        <button class="action-btn primary" onclick="copyAll()">Copy all</button>
+      </div>
+    </div>
+    <div class="output-messages" id="outputMessages"></div>
+
+    <div class="tips-box">
+      <div class="tips-title">📌 Tips for higher response rates</div>
+      <ul class="tips-list">
+        <li>Send the connection request in the morning (9–11am) for best visibility</li>
+        <li>Personalize the message with the recruiter's first name if you have it</li>
+        <li>Don't attach your resume in the first message — wait until they respond</li>
+        <li>Follow up once after 5–7 days if no response</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<div class="features">
+  <h2>Why LinkedIn messages work</h2>
+  <div class="feat-grid">
+    <div class="feat"><div class="feat-icon">👁️</div><h3>Get seen directly</h3><p>Your application goes through HR filters. A LinkedIn message goes straight to the hiring manager's inbox.</p></div>
+    <div class="feat"><div class="feat-icon">✍️</div><h3>4 message types</h3><p>Connection request, follow-up, referral ask, or informational chat — the right message for every situation.</p></div>
+    <div class="feat"><div class="feat-icon">⚡</div><h3>Ready in 5 seconds</h3><p>Fill in your details and get a personalized, professional message instantly — no awkward drafting.</p></div>
+  </div>
+</div>
+
+<footer>Built with ❤️ · <strong>CoverAI</strong> · <a href="index.html" style="color:#0077b5">Cover Letter</a> · <a href="resume.html" style="color:#0077b5">Resume Builder</a> · <a href="pricing.html" style="color:#0077b5">Pricing</a></footer>
+
+<!-- LIMIT MODAL -->
+<div class="modal-overlay" id="limitModal">
+  <div class="modal">
+    <button class="modal-x" onclick="closeModal()">✕</button>
+    <div style="font-size:40px;margin-bottom:10px">⚡</div>
+    <h2>Daily limit reached</h2>
+    <p>You've used your 5 free LinkedIn messages for today. Come back tomorrow for 5 more — or upgrade to Pro for unlimited.</p>
+    <button class="modal-cta" onclick="window.location.href='pricing.html'">View Pro Plan →</button>
+    <div class="modal-close" onclick="closeModal()">Come back tomorrow</div>
+  </div>
+</div>
+
+<script>
+  const FREE_LIMIT = 5;
+  const STORAGE_KEY = 'coverai_linkedin_usage';
+  let selectedType = 'connection';
+
+  // ── USAGE TRACKING (localStorage per day) ────────────────────
+  function getToday() { return new Date().toISOString().split('T')[0]; }
+  function getUsage() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { date: getToday(), count: 0 };
+    const parsed = JSON.parse(raw);
+    if (parsed.date !== getToday()) return { date: getToday(), count: 0 };
+    return parsed;
+  }
+  function incrementUsage() {
+    const u = getUsage(); u.count++;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
+  }
+  function getRemaining() { return Math.max(0, FREE_LIMIT - getUsage().count); }
+
+  function updateUsageUI() {
+    const remaining = getRemaining();
+    document.getElementById('remainCount').textContent = remaining;
+    document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('used', i >= remaining));
+    if (remaining === 0) {
+      document.getElementById('genBtn').disabled = true;
+      document.getElementById('genBtn').textContent = '⚡ Daily limit reached — come back tomorrow';
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', updateUsageUI);
+
+  // ── TYPE SELECTOR ─────────────────────────────────────────────
+  document.querySelectorAll('.type-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedType = btn.dataset.type;
+    });
+  });
+
+  // ── GENERATE ─────────────────────────────────────────────────
+  async function generate() {
+    if (getRemaining() <= 0) {
+      document.getElementById('limitModal').classList.add('show');
+      return;
+    }
+
+    const name         = document.getElementById('name').value.trim();
+    const profession   = document.getElementById('profession').value.trim();
+    const skills       = document.getElementById('skills').value.trim();
+    const recruiterName= document.getElementById('recruiterName').value.trim();
+    const company      = document.getElementById('company').value.trim();
+    const jobtitle     = document.getElementById('jobtitle').value.trim();
+    const reason       = document.getElementById('reason').value.trim();
+
+    if (!name || !profession || !company || !jobtitle) {
+      showError('Please fill in your name, profession, company, and job title.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const res = await fetch('/api/linkedin-message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, profession, skills, recruiterName, company, jobtitle, reason, messageType: selectedType })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Something went wrong');
+      if (!data.messages) throw new Error('No messages returned');
+
+      renderMessages(data.messages);
+      document.getElementById('outputCard').style.display = 'block';
+      document.getElementById('outputCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      incrementUsage();
+      updateUsageUI();
+
+    } catch(err) {
+      showError('Error: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function renderMessages(messages) {
+    const container = document.getElementById('outputMessages');
+    container.innerHTML = messages.map((msg, i) => `
+      <div class="message-box">
+        <div class="message-label">
+          ${msg.label}
+          <span class="message-char">${msg.text.length} chars</span>
+        </div>
+        <div class="message-text" id="msg_${i}">${msg.text}</div>
+        <button class="copy-msg-btn" onclick="copyMsg(${i})">Copy</button>
+      </div>
+    `).join('');
+  }
+
+  function copyMsg(i) {
+    const text = document.getElementById('msg_'+i).textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelectorAll('.copy-msg-btn')[i];
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 2000);
+    });
+  }
+
+  function copyAll() {
+    const texts = Array.from(document.querySelectorAll('.message-text')).map(el => el.textContent).join('\n\n---\n\n');
+    navigator.clipboard.writeText(texts).then(() => {
+      const btn = document.querySelector('.action-btn.primary');
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy all', 2000);
+    });
+  }
+
+  function regenerate() {
+    document.getElementById('outputCard').style.display = 'none';
+    generate();
+  }
+
+  function setLoading(on) {
+    document.getElementById('genBtn').disabled = on;
+    document.getElementById('loading').style.display = on ? 'block' : 'none';
+    document.getElementById('error').style.display = 'none';
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('error');
+    el.textContent = msg; el.style.display = 'block';
+  }
+
+  function closeModal() {
+    document.getElementById('limitModal').classList.remove('show');
+  }
+</script>
+</body>
+</html>

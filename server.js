@@ -207,3 +207,63 @@ app.get("/test", async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => { console.log(`\n🚀 Server running on http://localhost:${PORT}\n`); });
+
+// ─── LINKEDIN MESSAGE GENERATOR ───────────────────────────────
+app.post("/api/linkedin-message", async (req, res) => {
+  try {
+    const { name, profession, skills, recruiterName, company, jobtitle, reason, messageType } = req.body;
+
+    const greeting = recruiterName ? `Hi ${recruiterName.split(' ')[0]}` : 'Hi there';
+
+    const typeInstructions = {
+      connection: `Write a LinkedIn CONNECTION REQUEST NOTE (strictly under 300 characters). It should be warm, specific, and mention the job role. Do NOT make it generic.`,
+      followup: `Write a LinkedIn FOLLOW-UP MESSAGE (after connecting). 3-4 sentences. Express genuine interest in the ${jobtitle} role, mention one relevant skill, and ask if they'd be open to a quick chat.`,
+      referral: `Write a LinkedIn REFERRAL REQUEST message. 3-4 sentences. Be polite and respectful. Ask if they'd be willing to refer the candidate for the ${jobtitle} position. Make it easy to say yes.`,
+      informational: `Write a LinkedIn INFORMATIONAL INTERVIEW REQUEST. 3-4 sentences. Ask for a 15-minute call to learn about the team or role. Be specific about why you're interested in ${company}.`
+    };
+
+    const prompt = `Generate 2 versions of a LinkedIn message for this person.
+
+Sender: ${name}
+Profession: ${profession}
+Skills: ${skills || 'not specified'}
+Target Company: ${company}
+Target Role: ${jobtitle}
+Reason for interest: ${reason || 'not specified'}
+Greeting to use: ${greeting}
+
+Message type: ${typeInstructions[messageType] || typeInstructions.connection}
+
+Return ONLY a valid JSON array with exactly 2 objects:
+[
+  { "label": "Version 1 — Confident", "text": "the message text" },
+  { "label": "Version 2 — Friendly", "text": "the message text" }
+]
+
+Rules:
+- Use the sender's REAL name "${name}" — never use placeholders
+- Make each version feel genuinely human and personal
+- No buzzwords like "leverage", "synergy", "passionate about"
+- Version 1 = more confident and direct
+- Version 2 = warmer and conversational
+- Return ONLY the JSON array, no markdown, no explanation`;
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) }
+    );
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error?.message || "API error");
+
+    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
+    const messages = JSON.parse(raw.replace(/```json|```/g, "").trim());
+
+    res.json({ messages });
+
+  } catch (err) {
+    console.error("LinkedIn message error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
