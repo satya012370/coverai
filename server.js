@@ -261,6 +261,47 @@ app.get("/test", async (req, res) => {
   } catch(error) { res.status(500).send(error.message); }
 });
 
+
+// ─── PAYMENT REQUEST ──────────────────────────────────────────
+// Stores payment requests — you verify manually and email the user
+const paymentRequests = []; // In production use a database
+
+app.post("/api/payment-request", async (req, res) => {
+  try {
+    const { email, txnId, name, amount, plan } = req.body;
+    if (!email || !txnId) return res.status(400).json({ error: "Email and transaction ID required" });
+
+    const request = {
+      id: Date.now(),
+      email, txnId, name: name || 'Not provided',
+      amount: amount || 49, plan: plan || 'pro-monthly',
+      submittedAt: new Date().toISOString(),
+      status: 'pending'
+    };
+
+    paymentRequests.push(request);
+    console.log("\n💰 NEW PAYMENT REQUEST:");
+    console.log("   Email:", email);
+    console.log("   TXN ID:", txnId);
+    console.log("   Name:", name);
+    console.log("   Amount: ₹", amount);
+    console.log("   Time:", request.submittedAt);
+    console.log("   → Verify on UPI app and send Pro access to this email\n");
+
+    res.json({ success: true, message: "Payment request received" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// View all pending payments (admin only — add a secret key in production)
+app.get("/api/admin/payments", (req, res) => {
+  const key = req.query.key;
+  // CHANGE THIS SECRET KEY to something only you know
+  if (key !== "coverai_admin_2024") return res.status(401).json({ error: "Unauthorized" });
+  res.json({ total: paymentRequests.length, requests: paymentRequests });
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => { console.log(`\n🚀 Server running on http://localhost:${PORT}\n`); });
 

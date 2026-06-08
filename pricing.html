@@ -79,11 +79,11 @@
   <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
   <div class="nav-links">
     <a href="index.html">Cover Letter</a>
-    <a href="resume.html" style="font-weight:700;color:#5c4fc7">📄 Resume Builder <span style="background:linear-gradient(135deg,#5c4fc7,#7c3aed);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:3px;vertical-align:middle;animation:pulse 2s infinite">NEW</span></a>
+    <a href="resume.html">✦ Resume Builder <span style="background:#5c4fc7;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;margin-left:2px;vertical-align:middle">NEW</span></a>
     <a href="ats.html">🎯 ATS Checker</a>
     <a href="linkedin.html">LinkedIn</a>
     <a href="pricing.html" style="color:#5c4fc7;font-weight:600">Pricing</a>
-    <button class="nav-btn" onclick="document.getElementById('proModal').classList.add('show')" style="background:#5c4fc7">Get Pro</button>
+    <button class="nav-btn" onclick="window.location.href='payment.html'" style="background:#5c4fc7">Get Pro</button>
   </div>
 </nav>
 
@@ -99,10 +99,11 @@
     <div class="plan-price">₹0 <span>/ month</span></div>
     <div class="plan-desc">Perfect for occasional job applications. No sign-up needed.</div>
     <ul class="plan-features">
-      <li><span class="check">✓</span> 3 cover letters per day</li>
+      <li><span class="check">✓</span> 5 cover letters per day</li>
       <li><span class="check">✓</span> All 6 tones</li>
       <li><span class="check">✓</span> PDF download</li>
       <li><span class="check">✓</span> Copy to clipboard</li>
+      <li><span class="check">✓</span> Resume builder (3 downloads)</li>
       <li><span class="cross">✗</span> Unlimited letters</li>
       <li><span class="cross">✗</span> LinkedIn message generator</li>
       <li><span class="cross">✗</span> Priority AI (faster)</li>
@@ -115,19 +116,20 @@
   <div class="plan popular">
     <div class="popular-badge">⭐ Most Popular</div>
     <div class="plan-name">Pro</div>
-    <div class="plan-price">₹299 <span>/ month</span></div>
+    <div class="plan-price">₹49 <span>/ month</span></div>
     <div class="plan-desc">For active job seekers who apply to multiple roles every week.</div>
     <ul class="plan-features">
-      <li><span class="check">✓</span> Unlimited cover letters</li>
+      <li><span class="check">✓</span> Unlimited cover letters daily</li>
       <li><span class="check">✓</span> All 6 tones</li>
       <li><span class="check">✓</span> PDF download</li>
       <li><span class="check">✓</span> Copy to clipboard</li>
       <li><span class="check">✓</span> LinkedIn message generator</li>
+      <li><span class="check">✓</span> Interview Q&A Generator</li>
       <li><span class="check">✓</span> Priority AI (faster)</li>
       <li><span class="check">✓</span> Email support</li>
       <li><span class="check">✓</span> Cancel anytime</li>
     </ul>
-    <button class="plan-btn pro" onclick="document.getElementById('proModal').classList.add('show')">Get Pro — ₹299/month</button>
+    <button class="plan-btn pro" onclick="window.location.href='payment.html'">Get Pro — ₹49/month</button>
   </div>
 </div>
 
@@ -143,7 +145,7 @@
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="toggleFaq(this)">Is the free plan really free? <span class="faq-arrow">▾</span></div>
-    <div class="faq-a">Yes! Free plan gives you 3 cover letters every day, forever. No credit card required.</div>
+    <div class="faq-a">Yes! Free plan gives you 5 cover letters every day plus 3 resume downloads, forever. No credit card required.</div>
   </div>
   <div class="faq-item">
     <div class="faq-q" onclick="toggleFaq(this)">How is CoverAI different from ChatGPT? <span class="faq-arrow">▾</span></div>
@@ -160,7 +162,7 @@
 <!-- PRO MODAL -->
 <div class="modal-overlay" id="proModal">
   <div class="modal">
-    <h2>🚀 Get Pro — ₹299/month</h2>
+    <h2>🚀 Get Pro — ₹49/month</h2>
     <p>Unlimited cover letters, PDF export, LinkedIn messages and priority AI. Cancel anytime.</p>
     <button class="modal-btn" onclick="goToPro()">Pay Now with Razorpay →</button>
     <div class="modal-close" onclick="document.getElementById('proModal').classList.remove('show')">Maybe later</div>
@@ -173,7 +175,7 @@
   }
   function goToPro() {
     // Replace with your Razorpay link
-    alert('Razorpay payment link coming soon!');
+    window.location.href='payment.html';
   }
 </script>
 <script src="mobile.js"></script>
