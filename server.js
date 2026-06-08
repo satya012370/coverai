@@ -298,7 +298,7 @@ app.post("/api/payment-request", async (req, res) => {
 app.get("/api/admin/payments", (req, res) => {
   const key = req.query.key;
   // CHANGE THIS SECRET KEY to something only you know
-  if (key !== "coverai_admin_2024") return res.status(401).json({ error: "Unauthorized" });
+  if (key !== "coverai012370") return res.status(401).json({ error: "Unauthorized" });
   res.json({ total: paymentRequests.length, requests: paymentRequests });
 });
 
