@@ -3,7 +3,7 @@ import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signO
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBfR2_eSuJoDuQtTNGV1ZQdtP5AQCwpnWk",
+  apiKey: "AIzaSyBfR2_eSuJoDuQtTNGV1ZQdtP5AQCWpnWk",
   authDomain: "coverai-a26bf.firebaseapp.com",
   projectId: "coverai-a26bf",
   storageBucket: "coverai-a26bf.firebasestorage.app",
