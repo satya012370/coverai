@@ -3,11 +3,25 @@
 <head>
 <meta charset="UTF-8"/>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='32' height='32' rx='8' fill='%235c4fc7'/%3E%3Cpath d='M18 9C13.582 9 10 12.582 10 17C10 21.418 13.582 25 18 25' stroke='white' stroke-width='2.8' stroke-linecap='round'/%3E%3Cpath d='M23 9.5L24.2 12.5L27 13.7L24.2 14.9L23 17.9L21.8 14.9L19 13.7L21.8 12.5Z' fill='%23F59E0B'/%3E%3C/svg%3E"/>
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg width='180' height='180' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='32' height='32' rx='8' fill='%235c4fc7'/%3E%3Cpath d='M18 9C13.582 9 10 12.582 10 17C10 21.418 13.582 25 18 25' stroke='white' stroke-width='2.8' stroke-linecap='round'/%3E%3Cpath d='M23 9.5L24.2 12.5L27 13.7L24.2 14.9L23 17.9L21.8 14.9L19 13.7L21.8 12.5Z' fill='%23F59E0B'/%3E%3C/svg%3E"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>CoverAI — AI Cover Letter Generator</title>
+<meta name="description" content="Generate a professional, perfectly tailored cover letter in 15 seconds using AI. Upload your resume, paste the job description, and get a personalized letter instantly. Free, no sign-up needed."/>
+<!-- Open Graph / Social Sharing -->
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://www.coveraii.com/"/>
+<meta property="og:title" content="CoverAI — AI Cover Letter Generator"/>
+<meta property="og:description" content="Write a winning cover letter in 15 seconds with AI. Upload your resume, paste the job description — done."/>
+<meta property="og:image" content="https://www.coveraii.com/og-image.png"/>
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="CoverAI — AI Cover Letter Generator"/>
+<meta name="twitter:description" content="Write a winning cover letter in 15 seconds with AI. Free, no sign-up needed."/>
+<meta name="twitter:image" content="https://www.coveraii.com/og-image.png"/>
 <link rel="stylesheet" href="mobile.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#1a1a1a;min-height:100vh}
   nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px}
@@ -46,6 +60,7 @@
   .spinner{display:inline-block;width:20px;height:20px;border:2.5px solid #ddd;border-top-color:#5c4fc7;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-5px;margin-right:8px}
   @keyframes spin{to{transform:rotate(360deg)}}
   .error{color:#c0392b;font-size:13px;margin-top:10px;display:none;background:#fdf0ef;border:1px solid #f5c6c6;border-radius:8px;padding:10px 14px}
+  .upload-error{color:#c0392b;font-size:13px;margin-top:8px;display:none;background:#fdf0ef;border:1px solid #f5c6c6;border-radius:8px;padding:9px 12px;text-align:center}
   .output-card{background:#fff;border:1px solid #e8e8e8;border-radius:14px;padding:1.5rem;margin-top:1rem;display:none}
   .output-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
   .output-title{font-size:14px;font-weight:600;color:#1a1a1a}
@@ -199,6 +214,7 @@
       <span>✅</span>
       <span id="uploadSuccessText">Resume uploaded! Your details have been auto-filled below.</span>
     </div>
+    <div class="upload-error" id="uploadError"></div>
   </div>
 
   <!-- YOUR DETAILS -->
@@ -276,7 +292,7 @@
   </div>
 </div>
 
-<footer>Built with ❤️ · <strong>CoverAI</strong> · <a href="pricing.html" style="color:#5c4fc7">Pricing</a> · <a href="howitworks.html" style="color:#5c4fc7">How it works</a></footer>
+<footer>Built with ❤️ · <strong>CoverAI</strong> · <a href="pricing.html" style="color:#5c4fc7">Pricing</a> · <a href="howitworks.html" style="color:#5c4fc7">How it works</a> · <a href="privacy.html" style="color:#5c4fc7">Privacy Policy</a> · <a href="terms.html" style="color:#5c4fc7">Terms</a></footer>
 
 <!-- PAYWALL MODAL -->
 <div class="modal-overlay" id="paywallModal">
@@ -296,7 +312,7 @@
       <li>LinkedIn message generator</li>
       <li>Priority AI — faster generation</li>
     </ul>
-    <button class="modal-cta" onclick="goToPro()">Get Pro Now — ₹49/month (coming soon)</button>
+    <button class="modal-cta" onclick="goToPro()">Get Pro Now — ₹49/month →</button>
     <div class="modal-close" onclick="closePaywall()">No thanks, I'll wait until tomorrow</div>
   </div>
 </div>
@@ -332,7 +348,7 @@
     const file = input.files[0];
     if (!file) return;
     if (!file.name.match(/\.(pdf|docx)$/i)) {
-      alert('Please upload a PDF or Word (.docx) file only.');
+      showUploadError('Please upload a PDF or Word (.docx) file only.');
       return;
     }
 
@@ -373,7 +389,7 @@
       document.getElementById('uploadSuccess').classList.add('show');
 
     } catch (err) {
-      alert('Could not read resume: ' + err.message);
+      showUploadError('Could not read resume: ' + err.message);
     } finally {
       document.getElementById('parsingMsg').classList.remove('show');
     }
@@ -438,7 +454,7 @@
 
   function downloadPDF() {
     const text = document.getElementById('outputText').textContent;
-    if (!text) { alert('Generate a cover letter first!'); return; }
+    if (!text) { showError('Please generate a cover letter first!'); return; }
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
     const margin = 20, pageWidth = doc.internal.pageSize.getWidth(), maxWidth = pageWidth - margin * 2;
@@ -466,6 +482,7 @@
     document.getElementById('error').style.display = 'none';
   }
   function showError(msg) { const el=document.getElementById('error'); el.textContent=msg; el.style.display='block'; }
+  function showUploadError(msg) { const el=document.getElementById('uploadError'); el.textContent=msg; el.style.display='block'; setTimeout(()=>{el.style.display='none';}, 5000); }
   function copyLetter() {
     navigator.clipboard.writeText(document.getElementById('outputText').textContent).then(() => {
       const btn = document.querySelector('.action-btn.primary');

@@ -3,8 +3,18 @@
 <head>
 <meta charset="UTF-8"/>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='32' height='32' rx='8' fill='%235c4fc7'/%3E%3Cpath d='M18 9C13.582 9 10 12.582 10 17C10 21.418 13.582 25 18 25' stroke='white' stroke-width='2.8' stroke-linecap='round'/%3E%3Cpath d='M23 9.5L24.2 12.5L27 13.7L24.2 14.9L23 17.9L21.8 14.9L19 13.7L21.8 12.5Z' fill='%23F59E0B'/%3E%3C/svg%3E"/>
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg width='180' height='180' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='32' height='32' rx='8' fill='%235c4fc7'/%3E%3C/svg%3E"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>ATS Score Checker — CoverAI</title>
+<meta name="description" content="Check if your resume will pass ATS filters. Paste your resume and job description — our AI scores your match, finds missing keywords, and tells you exactly what to fix."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://www.coveraii.com/ats.html"/>
+<meta property="og:title" content="Free ATS Resume Checker — CoverAI"/>
+<meta property="og:description" content="Will your resume pass ATS filters? Check your score, find missing keywords, and get improvement tips instantly."/>
+<meta property="og:image" content="https://www.coveraii.com/og-image.png"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Free ATS Resume Checker — CoverAI"/>
+<meta name="twitter:description" content="Score your resume against any job description in seconds."/>
 <link rel="stylesheet" href="mobile.css"/>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -57,6 +67,7 @@
   .loading { text-align: center; padding: 1.5rem; color: #777; font-size: 14px; display: none; }
   .loading .spinner { border-top-color: #5c4fc7; border-color: #ddd; border-top-color: #5c4fc7; }
   .error { color: #c0392b; font-size: 13px; margin-top: 10px; display: none; background: #fdf0ef; border: 1px solid #f5c6c6; border-radius: 8px; padding: 10px 14px; }
+  .upload-error { color: #c0392b; font-size: 13px; margin-top: 8px; display: none; background: #fdf0ef; border: 1px solid #f5c6c6; border-radius: 8px; padding: 9px 12px; text-align: center; }
 
   /* RESULTS */
   .result-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 14px; padding: 1.5rem; margin-top: 1rem; display: none; }
@@ -164,6 +175,7 @@
       Reading your resume...
     </div>
     <div class="upload-success" id="uploadSuccess"><span>✅</span><span id="uploadSuccessText">Resume loaded!</span></div>
+    <div class="upload-error" id="uploadError"></div>
     <div class="or-divider">— or paste below —</div>
     <label>Paste your resume text</label>
     <textarea id="resumeText" rows="6" placeholder="Paste your full resume text here..."></textarea>
@@ -225,7 +237,7 @@
   </div>
 </div>
 
-<footer>Built with ❤️ · <strong>CoverAI</strong> · <a href="index.html" style="color:#5c4fc7">Cover Letter</a> · <a href="resume.html" style="color:#5c4fc7">Resume Builder</a> · <a href="pricing.html" style="color:#5c4fc7">Pricing</a></footer>
+<footer>Built with ❤️ · <strong>CoverAI</strong> · <a href="index.html" style="color:#5c4fc7">Cover Letter</a> · <a href="resume.html" style="color:#5c4fc7">Resume Builder</a> · <a href="pricing.html" style="color:#5c4fc7">Pricing</a> · <a href="privacy.html" style="color:#5c4fc7">Privacy Policy</a> · <a href="terms.html" style="color:#5c4fc7">Terms</a></footer>
 
 <script>
   let uploadedResumeText = '';
@@ -243,7 +255,7 @@
   async function handleResumeUpload(input) {
     const file = input.files[0];
     if (!file) return;
-    if (!file.name.match(/\.(pdf|docx)$/i)) { alert('Please upload PDF or .docx only.'); return; }
+    if (!file.name.match(/\.(pdf|docx)$/i)) { showUploadError('Please upload PDF or .docx only.'); return; }
     document.getElementById('parsingMsg').classList.add('show');
     document.getElementById('uploadSuccess').classList.remove('show');
     const formData = new FormData();
@@ -257,7 +269,7 @@
       document.getElementById('uploadSuccessText').textContent = '✅ Resume loaded and ready to check!';
       document.getElementById('uploadSuccess').classList.add('show');
     } catch (err) {
-      alert('Could not read resume: ' + err.message);
+      showUploadError('Could not read resume: ' + err.message);
     } finally {
       document.getElementById('parsingMsg').classList.remove('show');
     }
@@ -392,6 +404,12 @@
     const el = document.getElementById('error');
     el.textContent = msg;
     el.style.display = 'block';
+  }
+  function showUploadError(msg) {
+    const el = document.getElementById('uploadError');
+    el.textContent = msg;
+    el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 5000);
   }
 </script>
 <script src="mobile.js"></script>
