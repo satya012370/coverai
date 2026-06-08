@@ -3,275 +3,471 @@
 <head>
 <meta charset="UTF-8"/>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='32' height='32' rx='8' fill='%235c4fc7'/%3E%3Cpath d='M18 9C13.582 9 10 12.582 10 17C10 21.418 13.582 25 18 25' stroke='white' stroke-width='2.8' stroke-linecap='round'/%3E%3Cpath d='M23 9.5L24.2 12.5L27 13.7L24.2 14.9L23 17.9L21.8 14.9L19 13.7L21.8 12.5Z' fill='%23F59E0B'/%3E%3C/svg%3E"/>
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg width='180' height='180' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='32' height='32' rx='8' fill='%235c4fc7'/%3E%3C/svg%3E"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>AI Resume Builder — CoverAI</title>
+<meta name="description" content="Build a stunning, ATS-friendly resume in minutes with AI. Choose from 5 beautiful templates, let AI enhance your content, and download your professional PDF for free."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://www.coveraii.com/resume.html"/>
+<meta property="og:title" content="AI Resume Builder — CoverAI"/>
+<meta property="og:description" content="Build a professional resume in minutes. 5 templates, AI-enhanced content, free PDF download."/>
+<meta property="og:image" content="https://www.coveraii.com/og-image.png"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="AI Resume Builder — CoverAI"/>
+<meta name="twitter:description" content="Build a stunning resume with AI in minutes. Free PDF download, no sign-up needed."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="mobile.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#1a1a1a;min-height:100vh}
-nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100}
-.logo{font-size:18px;font-weight:600;color:#5c4fc7;text-decoration:none}
-.logo span{color:#1a1a1a}
-.nav-links{display:flex;gap:1.5rem;align-items:center}
-.nav-links a{font-size:14px;color:#555;text-decoration:none}
-.nav-links a:hover{color:#5c4fc7}
-.nav-btn{background:#5c4fc7;color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:13px;font-weight:500;cursor:pointer}
-.hero{text-align:center;padding:2rem 1rem 1.5rem;background:linear-gradient(135deg,#f0effe 0%,#fff 100%);border-bottom:1px solid #e8e8e8}
-.free-badge{display:inline-block;background:#22c55e;color:#fff;font-size:11px;font-weight:700;padding:4px 14px;border-radius:20px;margin-bottom:10px}
-.hero h1{font-size:28px;font-weight:700;margin-bottom:6px}
-.hero h1 span{color:#5c4fc7}
-.hero p{font-size:14px;color:#666;max-width:520px;margin:0 auto}
-.hero-note{font-size:12px;color:#5c4fc7;margin-top:8px;font-weight:500}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+@keyframes toastIn{from{opacity:0;transform:translateX(120px)}to{opacity:1;transform:translateX(0)}}
+@keyframes toastOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(120px)}}
 
-/* LAYOUT */
-.builder-layout{display:grid;grid-template-columns:420px 1fr;gap:0;max-width:1200px;margin:0 auto;min-height:calc(100vh - 110px)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#f4f4f8;color:#1a1a1a;min-height:100vh}
+
+/* ── NAV ── */
+nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:200;box-shadow:0 1px 8px rgba(0,0,0,.06)}
+.nav-links{display:flex;gap:1.5rem;align-items:center}
+.nav-links a{font-size:14px;color:#555;text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:#5c4fc7}
+.nav-btn{background:#5c4fc7;color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s}
+.nav-btn:hover{background:#4a3db5}
+
+/* ── HERO ── */
+.hero{background:linear-gradient(135deg,#5c4fc7 0%,#7c3aed 50%,#4338ca 100%);color:#fff;text-align:center;padding:3rem 1rem 2.5rem;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25);color:#fff;font-size:12px;font-weight:600;padding:5px 16px;border-radius:30px;margin-bottom:16px;animation:fadeInUp .5s ease}
+.hero h1{font-size:36px;font-weight:800;line-height:1.2;margin-bottom:12px;animation:fadeInUp .5s .1s ease both}
+.hero h1 span{background:linear-gradient(90deg,#fde68a,#fb923c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{font-size:15px;opacity:.9;max-width:520px;margin:0 auto 20px;line-height:1.7;animation:fadeInUp .5s .2s ease both}
+.hero-pills{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;animation:fadeInUp .5s .3s ease both}
+.hero-pill{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:12px;font-weight:500;padding:4px 14px;border-radius:20px}
+
+/* ── PROGRESS BAR ── */
+.progress-wrap{background:#fff;border-bottom:1px solid #e8e8e8;padding:12px 2rem}
+.progress-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.progress-label{font-size:12px;font-weight:600;color:#555;white-space:nowrap}
+.progress-bar-bg{flex:1;height:6px;background:#f0f0f0;border-radius:10px;overflow:hidden}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,#5c4fc7,#7c3aed);border-radius:10px;transition:width .5s ease;width:0%}
+.progress-pct{font-size:12px;font-weight:700;color:#5c4fc7;min-width:32px;text-align:right}
+
+/* ── MAIN LAYOUT ── */
+.builder-layout{display:grid;grid-template-columns:400px 1fr;gap:0;max-width:1200px;margin:0 auto;min-height:calc(100vh - 170px)}
 @media(max-width:900px){.builder-layout{grid-template-columns:1fr}}
-.form-panel{background:#fff;border-right:1px solid #e8e8e8;padding:1.5rem;overflow-y:auto;max-height:calc(100vh - 56px);position:sticky;top:56px}
-.section-title{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.06em;margin:18px 0 10px;padding-bottom:5px;border-bottom:1px solid #f0f0f0}
-.section-title:first-of-type{margin-top:0}
-label{display:block;font-size:12px;color:#555;margin-bottom:4px;margin-top:10px;font-weight:500}
+
+/* ── FORM PANEL ── */
+.form-panel{background:#fff;border-right:1px solid #e8e8e8;overflow-y:auto;max-height:calc(100vh - 113px);position:sticky;top:113px;scrollbar-width:thin;scrollbar-color:#e0e0e0 transparent}
+.form-panel::-webkit-scrollbar{width:4px}
+.form-panel::-webkit-scrollbar-track{background:transparent}
+.form-panel::-webkit-scrollbar-thumb{background:#e0e0e0;border-radius:4px}
+
+/* ── SECTION ACCORDION ── */
+.acc-section{border-bottom:1px solid #f0f0f0}
+.acc-header{display:flex;align-items:center;gap:10px;padding:14px 20px;cursor:pointer;transition:background .15s;user-select:none}
+.acc-header:hover{background:#fafafa}
+.acc-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.acc-title{font-size:13px;font-weight:700;color:#1a1a1a;flex:1}
+.acc-status{font-size:11px;color:#22c55e;font-weight:600;margin-right:4px}
+.acc-arrow{font-size:12px;color:#aaa;transition:transform .25s}
+.acc-section.open .acc-arrow{transform:rotate(180deg)}
+.acc-body{display:none;padding:0 20px 16px;animation:fadeInUp .2s ease}
+.acc-section.open .acc-body{display:block}
+
+/* ── TEMPLATE GRID ── */
+.template-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:4px}
+@media(max-width:480px){.template-grid{grid-template-columns:repeat(3,1fr)}}
+.tpl-card{border:2px solid #e8e8e8;border-radius:10px;padding:8px 4px 6px;cursor:pointer;text-align:center;font-size:10px;font-weight:700;color:#555;background:#fff;transition:all .2s;position:relative}
+.tpl-card:hover{border-color:#a8a2e0;transform:translateY(-2px);box-shadow:0 4px 12px rgba(92,79,199,.15)}
+.tpl-card.active{border-color:#5c4fc7;background:#eeedfe;color:#3c3489;box-shadow:0 4px 14px rgba(92,79,199,.25)}
+.tpl-preview{width:100%;height:48px;border-radius:5px;margin-bottom:5px;overflow:hidden;position:relative}
+.tpl-preview-header{height:40%;width:100%}
+.tpl-preview-lines{padding:3px 4px}
+.tpl-preview-line{height:3px;border-radius:2px;margin-bottom:2px;background:rgba(0,0,0,.12)}
+.tpl-preview-line.short{width:60%}
+.active-check{position:absolute;top:4px;right:4px;width:16px;height:16px;border-radius:50%;background:#5c4fc7;color:#fff;font-size:9px;display:none;align-items:center;justify-content:center;font-weight:700}
+.tpl-card.active .active-check{display:flex}
+
+/* ── FORM FIELDS ── */
+label{display:block;font-size:12px;color:#555;margin-bottom:4px;margin-top:12px;font-weight:600}
 label:first-of-type{margin-top:0}
-input,select,textarea{width:100%;font-size:13px;color:#1a1a1a;background:#fafafa;border:1px solid #e0e0e0;border-radius:7px;padding:8px 11px;font-family:inherit;transition:border-color .2s}
-input:focus,select:focus,textarea:focus{outline:none;border-color:#7f77dd;background:#fff}
-textarea{resize:vertical;line-height:1.5}
+input,select,textarea{width:100%;font-size:13px;color:#1a1a1a;background:#fafafa;border:1.5px solid #e8e8e8;border-radius:8px;padding:9px 12px;font-family:'Inter',sans-serif;transition:all .2s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#7f77dd;background:#fff;box-shadow:0 0 0 3px rgba(92,79,199,.1)}
+textarea{resize:vertical;line-height:1.6}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
-/* TEMPLATE PICKER */
-.template-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:4px}
-.tpl-btn{border:2px solid #e0e0e0;border-radius:8px;padding:6px 4px;cursor:pointer;text-align:center;font-size:10px;font-weight:600;background:#fff;transition:all .15s}
-.tpl-btn:hover{border-color:#7f77dd}
-.tpl-btn.active{border-color:#5c4fc7;background:#eeedfe;color:#5c4fc7}
-.tpl-dot{width:20px;height:20px;border-radius:50%;margin:0 auto 4px}
-
-/* SKILLS */
-.skill-input-row{display:flex;gap:6px;margin-top:6px}
+/* ── SKILLS ── */
+.skill-input-row{display:flex;gap:6px;margin-top:8px}
 .skill-input-row input{flex:1}
-.add-skill-btn{background:#eeedfe;color:#5c4fc7;border:1px solid #afa9ec;border-radius:7px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
-.skills-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-.skill-tag{background:#eeedfe;color:#3c3489;font-size:12px;padding:3px 10px;border-radius:20px;display:flex;align-items:center;gap:4px}
-.skill-tag button{background:none;border:none;color:#aaa;cursor:pointer;font-size:14px;line-height:1;padding:0}
+.add-skill-btn{background:#5c4fc7;color:#fff;border:none;border-radius:8px;padding:9px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .2s}
+.add-skill-btn:hover{background:#4a3db5}
+.skills-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;min-height:24px}
+.skill-tag{background:linear-gradient(135deg,#eeedfe,#f0effe);color:#3c3489;font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;display:flex;align-items:center;gap:5px;border:1px solid #c5c0f0;animation:fadeInUp .15s ease}
+.skill-tag button{background:none;border:none;color:#9e9aca;cursor:pointer;font-size:14px;line-height:1;padding:0;transition:color .15s}
+.skill-tag button:hover{color:#c0392b}
 
-/* ENTRIES */
-.entry{background:#fafafa;border:1px solid #e8e8e8;border-radius:8px;padding:10px;margin-bottom:8px;position:relative}
-.entry-del{position:absolute;top:8px;right:8px;background:none;border:none;color:#ccc;cursor:pointer;font-size:16px}
+/* ── ENTRIES ── */
+.entry{background:linear-gradient(135deg,#fafafa,#f5f5ff);border:1.5px solid #e8e8e8;border-radius:10px;padding:14px;margin-bottom:10px;position:relative;animation:fadeInUp .2s ease;transition:border-color .2s}
+.entry:hover{border-color:#c5c0f0}
+.entry-del{position:absolute;top:10px;right:10px;background:none;border:none;color:#ddd;cursor:pointer;font-size:18px;transition:color .15s;line-height:1}
 .entry-del:hover{color:#e24b4a}
-.add-entry-btn{width:100%;padding:8px;font-size:12px;font-weight:600;border:1.5px dashed #c5c0f0;border-radius:7px;background:#fafafa;color:#5c4fc7;cursor:pointer;margin-top:6px}
-.add-entry-btn:hover{background:#eeedfe}
+.add-entry-btn{width:100%;padding:10px;font-size:12px;font-weight:700;border:2px dashed #c5c0f0;border-radius:8px;background:transparent;color:#7f77dd;cursor:pointer;margin-top:4px;transition:all .2s}
+.add-entry-btn:hover{background:#eeedfe;border-color:#7f77dd;color:#5c4fc7}
 
-/* BUTTONS */
-.ai-btn{width:100%;padding:11px;font-size:14px;font-weight:700;border:none;border-radius:9px;background:#5c4fc7;color:#fff;cursor:pointer;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px}
-.ai-btn:hover{background:#4a3db5}
-.ai-btn:disabled{background:#a8a2e0;cursor:not-allowed}
-.dl-btn{width:100%;padding:12px;font-size:14px;font-weight:700;border:1.5px solid #22c55e;border-radius:9px;background:#f0fdf4;color:#15803d;cursor:pointer;margin-top:8px;transition:all .2s}
-.dl-btn:hover{background:#dcfce7}
-.dl-btn:disabled{opacity:.5;cursor:not-allowed}
+/* ── BUTTONS ── */
+.ai-btn{width:100%;padding:12px;font-size:13px;font-weight:700;border:none;border-radius:10px;background:linear-gradient(135deg,#5c4fc7,#7c3aed);color:#fff;cursor:pointer;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;box-shadow:0 4px 14px rgba(92,79,199,.3)}
+.ai-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(92,79,199,.4)}
+.ai-btn:disabled{background:#a8a2e0;cursor:not-allowed;transform:none;box-shadow:none}
+.ai-btn.secondary{background:linear-gradient(135deg,#f59e0b,#d97706);box-shadow:0 4px 14px rgba(245,158,11,.3)}
+.ai-btn.secondary:hover{box-shadow:0 6px 20px rgba(245,158,11,.4)}
+
+.dl-btn{width:100%;padding:13px;font-size:14px;font-weight:700;border:none;border-radius:10px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;cursor:pointer;margin-top:10px;transition:all .2s;box-shadow:0 4px 14px rgba(34,197,94,.3);display:flex;align-items:center;justify-content:center;gap:8px}
+.dl-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(34,197,94,.4)}
+.dl-btn:disabled{background:#86efac;cursor:not-allowed;transform:none;box-shadow:none}
+
 .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
 
-/* DOWNLOAD COUNTER */
-.dl-counter{background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 14px;margin-top:10px;display:flex;align-items:center;justify-content:space-between;font-size:13px}
-.dl-counter strong{color:#15803d}
+/* ── DOWNLOAD COUNTER ── */
+.dl-counter{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:10px;padding:12px 16px;margin-top:12px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.dl-counter-left{font-size:12px;color:#15803d;font-weight:600}
 .dl-dots{display:flex;gap:5px}
-.dl-dot{width:10px;height:10px;border-radius:50%;background:#22c55e}
+.dl-dot{width:11px;height:11px;border-radius:50%;background:#22c55e;transition:background .3s}
 .dl-dot.used{background:#e0e0e0}
+.limit-banner{background:linear-gradient(135deg,#fff8e1,#fef3c7);border:1.5px solid #fde68a;border-radius:12px;padding:16px;margin-top:12px;font-size:13px;color:#92400e;display:none;text-align:center;line-height:1.6}
+.limit-banner strong{display:block;font-size:14px;margin-bottom:6px;color:#78350f}
 
-/* LIMIT BANNER */
-.limit-banner{background:#fff8e1;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;margin-top:10px;font-size:13px;color:#92400e;display:none;text-align:center}
-.limit-banner strong{display:block;font-size:14px;margin-bottom:6px}
+/* ── BOTTOM CTA ── */
+.form-bottom{padding:16px 20px 24px;background:#fafafa;border-top:1px solid #f0f0f0}
 
-/* RIGHT PANEL */
-.preview-panel{background:#e8e8e8;padding:2rem;overflow-y:auto;display:flex;flex-direction:column;align-items:center}
-.preview-label{font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:1rem;text-align:center}
-.resume-page{width:210mm;min-height:297mm;background:#fff;box-shadow:0 4px 24px rgba(0,0,0,.12);border-radius:4px;overflow:hidden;font-size:10pt;line-height:1.4}
+/* ── PREVIEW PANEL ── */
+.preview-panel{background:#e2e2e8;padding:2rem;overflow-y:auto;display:flex;flex-direction:column;align-items:center;gap:0}
+.preview-top{width:100%;max-width:210mm;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.preview-label{font-size:11px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:6px}
+.preview-label span{width:8px;height:8px;border-radius:50%;background:#22c55e;animation:pulse 2s infinite}
+.preview-zoom{display:flex;gap:6px}
+.zoom-btn{background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;color:#555;transition:all .15s}
+.zoom-btn:hover{background:#eeedfe;border-color:#afa9ec;color:#5c4fc7}
+.resume-page{width:210mm;min-height:297mm;background:#fff;box-shadow:0 8px 32px rgba(0,0,0,.18);border-radius:4px;overflow:hidden;font-size:10pt;line-height:1.4;transition:transform .3s ease;transform-origin:top center}
 @media(max-width:900px){.resume-page{width:100%;min-height:auto}}
 
-/* TEMPLATES */
-.tpl-modern .resume-header{background:#5c4fc7;color:#fff;padding:26px 30px}
-.tpl-modern .resume-header h1{font-size:22px;font-weight:700;margin-bottom:3px}
-.tpl-modern .resume-header .subtitle{font-size:12px;opacity:.85}
-.tpl-modern .resume-header .contact-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;font-size:10px;opacity:.9}
-.tpl-modern .resume-body{display:grid;grid-template-columns:1fr 2fr}
-.tpl-modern .resume-sidebar{background:#f0effe;padding:18px;border-right:1px solid #e0dbf7}
-.tpl-modern .resume-main{padding:18px 22px}
-.tpl-modern .sec-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#5c4fc7;margin:14px 0 7px;padding-bottom:3px;border-bottom:2px solid #5c4fc7}
+/* ── TEMPLATES ── */
+.tpl-modern .resume-header{background:linear-gradient(135deg,#5c4fc7,#7c3aed);color:#fff;padding:28px 32px}
+.tpl-modern .resume-header h1{font-size:22px;font-weight:800;margin-bottom:3px;letter-spacing:-.3px}
+.tpl-modern .resume-header .subtitle{font-size:12px;opacity:.9;font-weight:500}
+.tpl-modern .resume-header .contact-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:9px;opacity:.85}
+.tpl-modern .resume-body{display:grid;grid-template-columns:1fr 2.2fr}
+.tpl-modern .resume-sidebar{background:#f0effe;padding:20px;border-right:1px solid #e0dbf7}
+.tpl-modern .resume-main{padding:20px 24px}
+.tpl-modern .sec-title{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#5c4fc7;margin:16px 0 8px;padding-bottom:3px;border-bottom:2px solid #5c4fc7}
 .tpl-modern .sec-title:first-child{margin-top:0}
-.tpl-modern .skill-pill{display:inline-block;background:#5c4fc7;color:#fff;font-size:9px;padding:2px 9px;border-radius:20px;margin:2px}
-.tpl-modern .exp-item{margin-bottom:12px}
+.tpl-modern .skill-pill{display:inline-block;background:#5c4fc7;color:#fff;font-size:8px;padding:3px 10px;border-radius:20px;margin:2px 2px 2px 0;font-weight:600}
+.tpl-modern .exp-item{margin-bottom:13px}
 .tpl-modern .exp-title{font-weight:700;font-size:10px}
-.tpl-modern .exp-company{color:#5c4fc7;font-size:9px;font-weight:600}
-.tpl-modern .exp-date{font-size:9px;color:#888}
-.tpl-modern .exp-desc{font-size:9px;color:#444;margin-top:3px;line-height:1.5}
+.tpl-modern .exp-company{color:#7c3aed;font-size:9px;font-weight:600}
+.tpl-modern .exp-date{font-size:8px;color:#888;margin-top:1px}
+.tpl-modern .exp-desc{font-size:8.5px;color:#444;margin-top:4px;line-height:1.6}
 
-.tpl-classic .resume-header{background:#1a3a5c;color:#fff;padding:22px 30px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
-.tpl-classic .resume-header h1{font-size:20px;font-weight:700}
-.tpl-classic .resume-header .subtitle{font-size:11px;opacity:.8;margin-top:3px}
-.tpl-classic .resume-header .contact-col{font-size:10px;opacity:.9;text-align:right;line-height:1.8}
-.tpl-classic .resume-body{padding:18px 30px}
-.tpl-classic .sec-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#1a3a5c;margin:16px 0 7px;padding-bottom:3px;border-bottom:2px solid #1a3a5c}
+.tpl-classic .resume-header{background:#1a3a5c;color:#fff;padding:24px 32px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
+.tpl-classic .resume-header h1{font-size:21px;font-weight:800;letter-spacing:-.3px}
+.tpl-classic .resume-header .subtitle{font-size:11px;opacity:.8;margin-top:3px;font-weight:500}
+.tpl-classic .resume-header .contact-col{font-size:9px;opacity:.85;text-align:right;line-height:2}
+.tpl-classic .resume-body{padding:20px 32px}
+.tpl-classic .sec-title{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#1a3a5c;margin:18px 0 8px;padding-bottom:4px;border-bottom:2.5px solid #1a3a5c}
 .tpl-classic .sec-title:first-child{margin-top:0}
-.tpl-classic .skill-pill{display:inline-block;border:1px solid #1a3a5c;color:#1a3a5c;font-size:9px;padding:2px 9px;border-radius:4px;margin:2px}
-.tpl-classic .exp-item{margin-bottom:12px;padding-left:10px;border-left:3px solid #1a3a5c}
+.tpl-classic .skill-pill{display:inline-block;border:1.5px solid #1a3a5c;color:#1a3a5c;font-size:8px;padding:2px 10px;border-radius:4px;margin:2px;font-weight:600}
+.tpl-classic .exp-item{margin-bottom:13px;padding-left:12px;border-left:3px solid #1a3a5c}
 .tpl-classic .exp-title{font-weight:700;font-size:10px}
 .tpl-classic .exp-company{color:#1a3a5c;font-size:9px;font-weight:600}
-.tpl-classic .exp-date{font-size:9px;color:#888}
-.tpl-classic .exp-desc{font-size:9px;color:#444;margin-top:3px;line-height:1.5}
+.tpl-classic .exp-date{font-size:8px;color:#888}
+.tpl-classic .exp-desc{font-size:8.5px;color:#444;margin-top:4px;line-height:1.6}
 
-.tpl-minimal .resume-header{padding:28px 32px 16px;border-bottom:3px solid #1a1a1a}
-.tpl-minimal .resume-header h1{font-size:24px;font-weight:800;letter-spacing:-.5px}
-.tpl-minimal .resume-header .subtitle{font-size:12px;color:#555;margin-top:3px}
-.tpl-minimal .resume-header .contact-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:8px;font-size:9px;color:#555}
-.tpl-minimal .resume-body{padding:18px 32px}
-.tpl-minimal .sec-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#1a1a1a;margin:16px 0 7px}
+.tpl-minimal .resume-header{padding:30px 34px 18px;border-bottom:3px solid #1a1a1a}
+.tpl-minimal .resume-header h1{font-size:26px;font-weight:900;letter-spacing:-1px}
+.tpl-minimal .resume-header .subtitle{font-size:12px;color:#555;margin-top:4px;font-weight:500}
+.tpl-minimal .resume-header .contact-row{display:flex;flex-wrap:wrap;gap:16px;margin-top:10px;font-size:9px;color:#666}
+.tpl-minimal .resume-body{padding:20px 34px}
+.tpl-minimal .sec-title{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.14em;color:#1a1a1a;margin:18px 0 8px;display:flex;align-items:center;gap:8px}
+.tpl-minimal .sec-title::after{content:'';flex:1;height:1px;background:#e0e0e0}
 .tpl-minimal .sec-title:first-child{margin-top:0}
-.tpl-minimal .skill-pill{display:inline-block;background:#f0f0f0;color:#1a1a1a;font-size:9px;padding:2px 9px;border-radius:3px;margin:2px}
-.tpl-minimal .exp-item{margin-bottom:12px}
-.tpl-minimal .exp-title{font-weight:700;font-size:10px}
-.tpl-minimal .exp-company{color:#555;font-size:9px}
-.tpl-minimal .exp-date{font-size:9px;color:#888;float:right}
-.tpl-minimal .exp-desc{font-size:9px;color:#444;margin-top:3px;line-height:1.5;clear:both}
+.tpl-minimal .skill-pill{display:inline-block;background:#f0f0f0;color:#1a1a1a;font-size:8px;padding:3px 10px;border-radius:3px;margin:2px;font-weight:600}
+.tpl-minimal .exp-item{margin-bottom:13px;display:grid;grid-template-columns:1fr auto}
+.tpl-minimal .exp-title{font-weight:700;font-size:10px;grid-column:1}
+.tpl-minimal .exp-company{color:#555;font-size:9px;grid-column:1}
+.tpl-minimal .exp-date{font-size:8px;color:#888;text-align:right;grid-column:2;grid-row:1/3}
+.tpl-minimal .exp-desc{font-size:8.5px;color:#444;margin-top:4px;line-height:1.6;grid-column:1/-1}
 
-.tpl-emerald .resume-header{background:#065f46;color:#fff;padding:26px 30px}
-.tpl-emerald .resume-header h1{font-size:22px;font-weight:700;margin-bottom:3px}
-.tpl-emerald .resume-header .subtitle{font-size:12px;opacity:.85}
-.tpl-emerald .resume-header .contact-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;font-size:10px;opacity:.9}
-.tpl-emerald .resume-body{display:grid;grid-template-columns:1fr 2fr}
-.tpl-emerald .resume-sidebar{background:#ecfdf5;padding:18px;border-right:1px solid #d1fae5}
-.tpl-emerald .resume-main{padding:18px 22px}
-.tpl-emerald .sec-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#065f46;margin:14px 0 7px;padding-bottom:3px;border-bottom:2px solid #065f46}
+.tpl-emerald .resume-header{background:linear-gradient(135deg,#065f46,#047857);color:#fff;padding:28px 32px}
+.tpl-emerald .resume-header h1{font-size:22px;font-weight:800;margin-bottom:3px;letter-spacing:-.3px}
+.tpl-emerald .resume-header .subtitle{font-size:12px;opacity:.9;font-weight:500}
+.tpl-emerald .resume-header .contact-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:9px;opacity:.85}
+.tpl-emerald .resume-body{display:grid;grid-template-columns:1fr 2.2fr}
+.tpl-emerald .resume-sidebar{background:#ecfdf5;padding:20px;border-right:1px solid #d1fae5}
+.tpl-emerald .resume-main{padding:20px 24px}
+.tpl-emerald .sec-title{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#065f46;margin:16px 0 8px;padding-bottom:3px;border-bottom:2px solid #065f46}
 .tpl-emerald .sec-title:first-child{margin-top:0}
-.tpl-emerald .skill-pill{display:inline-block;background:#065f46;color:#fff;font-size:9px;padding:2px 9px;border-radius:20px;margin:2px}
-.tpl-emerald .exp-item{margin-bottom:12px}
+.tpl-emerald .skill-pill{display:inline-block;background:#065f46;color:#fff;font-size:8px;padding:3px 10px;border-radius:20px;margin:2px;font-weight:600}
+.tpl-emerald .exp-item{margin-bottom:13px}
 .tpl-emerald .exp-title{font-weight:700;font-size:10px}
-.tpl-emerald .exp-company{color:#065f46;font-size:9px;font-weight:600}
-.tpl-emerald .exp-date{font-size:9px;color:#888}
-.tpl-emerald .exp-desc{font-size:9px;color:#444;margin-top:3px;line-height:1.5}
+.tpl-emerald .exp-company{color:#047857;font-size:9px;font-weight:600}
+.tpl-emerald .exp-date{font-size:8px;color:#888;margin-top:1px}
+.tpl-emerald .exp-desc{font-size:8.5px;color:#444;margin-top:4px;line-height:1.6}
 
-.tpl-bold .resume-header{padding:26px 30px;border-left:8px solid #dc2626}
-.tpl-bold .resume-header h1{font-size:24px;font-weight:800;color:#1a1a1a}
-.tpl-bold .resume-header .subtitle{font-size:12px;color:#dc2626;font-weight:600;margin-top:3px}
-.tpl-bold .resume-header .contact-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:8px;font-size:10px;color:#555}
-.tpl-bold .resume-body{padding:0 30px 22px}
-.tpl-bold .sec-title{font-size:11px;font-weight:800;text-transform:uppercase;color:#fff;background:#dc2626;padding:4px 10px;margin:16px -30px 10px;display:block}
+.tpl-bold .resume-header{padding:28px 32px;border-left:8px solid #dc2626;background:#fff}
+.tpl-bold .resume-header h1{font-size:26px;font-weight:900;color:#1a1a1a;letter-spacing:-.5px}
+.tpl-bold .resume-header .subtitle{font-size:12px;color:#dc2626;font-weight:700;margin-top:4px;text-transform:uppercase;letter-spacing:.05em}
+.tpl-bold .resume-header .contact-row{display:flex;flex-wrap:wrap;gap:16px;margin-top:10px;font-size:9px;color:#555}
+.tpl-bold .resume-body{padding:0 32px 24px}
+.tpl-bold .sec-title{font-size:10px;font-weight:900;text-transform:uppercase;color:#fff;background:#dc2626;padding:5px 12px;margin:16px -32px 12px;display:block;letter-spacing:.06em}
 .tpl-bold .sec-title:first-child{margin-top:0}
-.tpl-bold .skill-pill{display:inline-block;background:#fee2e2;color:#dc2626;font-size:9px;padding:2px 9px;border-radius:4px;margin:2px;font-weight:600}
-.tpl-bold .exp-item{margin-bottom:12px}
-.tpl-bold .exp-title{font-weight:700;font-size:10px}
-.tpl-bold .exp-company{color:#dc2626;font-size:9px;font-weight:600}
-.tpl-bold .exp-date{font-size:9px;color:#888}
-.tpl-bold .exp-desc{font-size:9px;color:#444;margin-top:3px;line-height:1.5}
+.tpl-bold .skill-pill{display:inline-block;background:#fee2e2;color:#dc2626;font-size:8px;padding:3px 10px;border-radius:4px;margin:2px;font-weight:700}
+.tpl-bold .exp-item{margin-bottom:13px}
+.tpl-bold .exp-title{font-weight:800;font-size:10px}
+.tpl-bold .exp-company{color:#dc2626;font-size:9px;font-weight:700}
+.tpl-bold .exp-date{font-size:8px;color:#888;margin-top:1px}
+.tpl-bold .exp-desc{font-size:8.5px;color:#444;margin-top:4px;line-height:1.6}
+
+/* ── TOAST ── */
+.toast-container{position:fixed;top:80px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast{background:#1a1a1a;color:#fff;font-size:13px;font-weight:500;padding:12px 18px;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.25);display:flex;align-items:center;gap:10px;animation:toastIn .3s ease;min-width:220px}
+.toast.success{background:#16a34a}
+.toast.error{background:#dc2626}
+.toast.info{background:#5c4fc7}
+
+/* ── FOOTER ── */
+footer{text-align:center;padding:2rem 1rem;font-size:13px;color:#888;border-top:1px solid #e8e8e8;background:#fff}
+footer a{color:#5c4fc7}
 </style>
 </head>
 <body>
 
 <nav>
-  <a href="index.html" class="logo" style="display:flex;align-items:center;gap:9px;text-decoration:none">
+  <a href="index.html" style="display:flex;align-items:center;gap:9px;text-decoration:none">
   <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
     <rect width="32" height="32" rx="8" fill="#5c4fc7"/>
     <path d="M18 9C13.582 9 10 12.582 10 17C10 21.418 13.582 25 18 25" stroke="white" stroke-width="2.8" stroke-linecap="round"/>
     <path d="M23 9.5L24.2 12.5L27 13.7L24.2 14.9L23 17.9L21.8 14.9L19 13.7L21.8 12.5Z" fill="#F59E0B"/>
   </svg>
   <span style="font-size:18px;font-weight:700;color:#5c4fc7">Cover<span style="color:#1a1a1a">AI</span></span>
-</a>
+  </a>
   <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
   <div class="nav-links">
     <a href="index.html">Cover Letter</a>
-    <a href="resume.html" style="color:#5c4fc7;font-weight:600">✦ Resume Builder <span style="background:#5c4fc7;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;margin-left:2px;vertical-align:middle">NEW</span></a>
+    <a href="resume.html" style="color:#5c4fc7;font-weight:700">✦ Resume Builder <span style="background:#5c4fc7;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:3px;vertical-align:middle;animation:pulse 2s infinite">NEW</span></a>
     <a href="ats.html">🎯 ATS Checker</a>
     <a href="linkedin.html">LinkedIn</a>
     <a href="pricing.html">Pricing</a>
-    <button class="nav-btn" onclick="window.location.href='pricing.html'" style="background:#5c4fc7">Get Pro</button>
+    <button class="nav-btn" onclick="window.location.href='pricing.html'">Get Pro</button>
   </div>
 </nav>
 
+<!-- HERO -->
 <div class="hero">
-  <div class="free-badge">✅ Free — 3 Resume Downloads</div>
-  <h1>AI <span>Resume Builder</span></h1>
-  <p>Fill in your details, pick from 5 templates, let AI enhance your content, and download your resume PDF free.</p>
-  <div class="hero-note">All 5 templates free · 3 downloads included · No sign-up needed</div>
+  <div class="hero-badge">✦ AI-Powered Resume Builder</div>
+  <h1>Build a <span>stunning resume</span><br/>that gets you hired</h1>
+  <p>Choose a template, fill in your details, let AI polish your content — download a professional PDF in minutes. No sign-up required.</p>
+  <div class="hero-pills">
+    <div class="hero-pill">✅ 5 beautiful templates</div>
+    <div class="hero-pill">✨ AI content enhancement</div>
+    <div class="hero-pill">⚡ 3 free PDF downloads</div>
+    <div class="hero-pill">🔒 Data stays private</div>
+  </div>
 </div>
 
+<!-- PROGRESS BAR -->
+<div class="progress-wrap">
+  <div class="progress-inner">
+    <span class="progress-label">Profile completeness</span>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
+    <span class="progress-pct" id="progressPct">0%</span>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
 <div class="builder-layout">
+  <!-- FORM PANEL -->
   <div class="form-panel">
 
-    <div class="section-title">Choose Template — All 10 Free</div>
-    <div class="template-grid">
-      <div class="tpl-btn active" data-tpl="modern" onclick="selectTemplate('modern',this)">
-        <div class="tpl-dot" style="background:#5c4fc7"></div>Modern
+    <!-- 1. TEMPLATE -->
+    <div class="acc-section open" id="sec-template">
+      <div class="acc-header" onclick="toggleSection('template')">
+        <div class="acc-icon" style="background:#eeedfe">🎨</div>
+        <span class="acc-title">Choose Template</span>
+        <span class="acc-status" id="tpl-status">Modern</span>
+        <span class="acc-arrow">▾</span>
       </div>
-      <div class="tpl-btn" data-tpl="classic" onclick="selectTemplate('classic',this)">
-        <div class="tpl-dot" style="background:#1a3a5c"></div>Classic
-      </div>
-      <div class="tpl-btn" data-tpl="minimal" onclick="selectTemplate('minimal',this)">
-        <div class="tpl-dot" style="background:#1a1a1a"></div>Minimal
-      </div>
-      <div class="tpl-btn" data-tpl="emerald" onclick="selectTemplate('emerald',this)">
-        <div class="tpl-dot" style="background:#065f46"></div>Emerald
-      </div>
-      <div class="tpl-btn" data-tpl="bold" onclick="selectTemplate('bold',this)">
-        <div class="tpl-dot" style="background:#dc2626"></div>Bold
-      </div>
-    </div>
-
-    <div class="section-title">Personal Information</div>
-    <label>Full Name</label>
-    <input type="text" id="rName" placeholder="e.g. Stev Jobs" oninput="updatePreview()"/>
-    <label>Job Title / Profession</label>
-    <input type="text" id="rTitle" placeholder="e.g. Embedded Systems Engineer" oninput="updatePreview()"/>
-    <div class="row2">
-      <div><label>Email</label><input type="email" id="rEmail" placeholder="you@email.com" oninput="updatePreview()"/></div>
-      <div><label>Phone</label><input type="tel" id="rPhone" placeholder="+91 98765 43210" oninput="updatePreview()"/></div>
-    </div>
-    <div class="row2">
-      <div><label>Location</label><input type="text" id="rLocation" placeholder="Mumbai, India" oninput="updatePreview()"/></div>
-      <div><label>LinkedIn (optional)</label><input type="text" id="rLinkedin" placeholder="linkedin.com/in/you" oninput="updatePreview()"/></div>
-    </div>
-
-    <div class="section-title">Professional Summary</div>
-    <textarea id="rSummary" rows="3" placeholder="A brief 2-3 sentence summary..." oninput="updatePreview()"></textarea>
-    <button class="ai-btn" id="aiSummaryBtn" onclick="generateSummary()" style="font-size:13px;padding:9px;margin-top:8px">✦ Generate Summary with AI</button>
-
-    <div class="section-title">Skills</div>
-    <div class="skill-input-row">
-      <input type="text" id="skillInput" placeholder="e.g. Python" onkeydown="if(event.key==='Enter'){addSkill()}"/>
-      <button class="add-skill-btn" onclick="addSkill()">+ Add</button>
-    </div>
-    <div class="skills-tags" id="skillsTags"></div>
-
-    <div class="section-title">Work Experience</div>
-    <div id="expEntries"></div>
-    <button class="add-entry-btn" onclick="addExp()">+ Add Experience</button>
-
-    <div class="section-title">Education</div>
-    <div id="eduEntries"></div>
-    <button class="add-entry-btn" onclick="addEdu()">+ Add Education</button>
-
-    <button class="ai-btn" id="aiEnhanceBtn" onclick="enhanceWithAI()">✦ Enhance Resume with AI</button>
-
-    <!-- DOWNLOAD COUNTER -->
-    <div class="dl-counter" id="dlCounter">
-      <span>Downloads remaining: <strong id="dlRemain">3</strong> of 3 free</span>
-      <div class="dl-dots" id="dlDots">
-        <div class="dl-dot"></div><div class="dl-dot"></div><div class="dl-dot"></div>
+      <div class="acc-body">
+        <div class="template-grid">
+          <div class="tpl-card active" data-tpl="modern" onclick="selectTemplate('modern',this)" title="Modern — Purple sidebar">
+            <div class="tpl-preview">
+              <div class="tpl-preview-header" style="background:linear-gradient(135deg,#5c4fc7,#7c3aed)"></div>
+              <div class="tpl-preview-lines"><div class="tpl-preview-line"></div><div class="tpl-preview-line short"></div></div>
+            </div>
+            <div class="active-check">✓</div>Modern
+          </div>
+          <div class="tpl-card" data-tpl="classic" onclick="selectTemplate('classic',this)" title="Classic — Navy executive">
+            <div class="tpl-preview">
+              <div class="tpl-preview-header" style="background:#1a3a5c"></div>
+              <div class="tpl-preview-lines"><div class="tpl-preview-line"></div><div class="tpl-preview-line short"></div></div>
+            </div>
+            <div class="active-check">✓</div>Classic
+          </div>
+          <div class="tpl-card" data-tpl="minimal" onclick="selectTemplate('minimal',this)" title="Minimal — Clean & crisp">
+            <div class="tpl-preview" style="border:1px solid #e0e0e0">
+              <div class="tpl-preview-header" style="background:#fff;border-bottom:3px solid #1a1a1a;height:35%"></div>
+              <div class="tpl-preview-lines"><div class="tpl-preview-line"></div><div class="tpl-preview-line short"></div></div>
+            </div>
+            <div class="active-check">✓</div>Minimal
+          </div>
+          <div class="tpl-card" data-tpl="emerald" onclick="selectTemplate('emerald',this)" title="Emerald — Green sidebar">
+            <div class="tpl-preview">
+              <div class="tpl-preview-header" style="background:linear-gradient(135deg,#065f46,#047857)"></div>
+              <div class="tpl-preview-lines"><div class="tpl-preview-line"></div><div class="tpl-preview-line short"></div></div>
+            </div>
+            <div class="active-check">✓</div>Emerald
+          </div>
+          <div class="tpl-card" data-tpl="bold" onclick="selectTemplate('bold',this)" title="Bold — Red accent">
+            <div class="tpl-preview" style="border:1px solid #e0e0e0">
+              <div class="tpl-preview-header" style="background:#fff;border-left:5px solid #dc2626;height:100%;display:flex;align-items:center;padding-left:4px"><div style="background:#1a1a1a;height:4px;width:50%;border-radius:2px"></div></div>
+            </div>
+            <div class="active-check">✓</div>Bold
+          </div>
+        </div>
       </div>
     </div>
 
-    <button class="dl-btn" id="dlBtn" onclick="handleDownload()">⬇ Download PDF — Free</button>
+    <!-- 2. PERSONAL INFO -->
+    <div class="acc-section open" id="sec-personal">
+      <div class="acc-header" onclick="toggleSection('personal')">
+        <div class="acc-icon" style="background:#fef3c7">👤</div>
+        <span class="acc-title">Personal Information</span>
+        <span class="acc-status" id="personal-status"></span>
+        <span class="acc-arrow">▾</span>
+      </div>
+      <div class="acc-body">
+        <label>Full Name *</label>
+        <input type="text" id="rName" placeholder="e.g. Priya Sharma" oninput="updatePreview();updateProgress()"/>
+        <label>Job Title / Profession *</label>
+        <input type="text" id="rTitle" placeholder="e.g. Senior Software Engineer" oninput="updatePreview();updateProgress()"/>
+        <div class="row2">
+          <div><label>Email *</label><input type="email" id="rEmail" placeholder="you@email.com" oninput="updatePreview();updateProgress()"/></div>
+          <div><label>Phone</label><input type="tel" id="rPhone" placeholder="+91 98765 43210" oninput="updatePreview()"/></div>
+        </div>
+        <div class="row2">
+          <div><label>City / Location</label><input type="text" id="rLocation" placeholder="Mumbai, India" oninput="updatePreview()"/></div>
+          <div><label>LinkedIn URL</label><input type="text" id="rLinkedin" placeholder="linkedin.com/in/you" oninput="updatePreview()"/></div>
+        </div>
+        <label>Portfolio / Website (optional)</label>
+        <input type="text" id="rWebsite" placeholder="github.com/username or yoursite.com" oninput="updatePreview()"/>
+      </div>
+    </div>
 
-    <div class="limit-banner" id="limitBanner">
-      <strong>🎉 You've used your 3 free resume downloads!</strong>
-      You can still edit and preview your resume. Upgrade to Pro for unlimited downloads and more features.
-      <br/><br/>
-      <a href="pricing.html" style="color:#5c4fc7;font-weight:700;text-decoration:none">View Pro Plan →</a>
+    <!-- 3. SUMMARY -->
+    <div class="acc-section" id="sec-summary">
+      <div class="acc-header" onclick="toggleSection('summary')">
+        <div class="acc-icon" style="background:#ede9fe">📝</div>
+        <span class="acc-title">Professional Summary</span>
+        <span class="acc-status" id="summary-status"></span>
+        <span class="acc-arrow">▾</span>
+      </div>
+      <div class="acc-body">
+        <textarea id="rSummary" rows="4" placeholder="A results-driven professional with X years of experience in..." oninput="updatePreview();updateProgress()"></textarea>
+        <button class="ai-btn" id="aiSummaryBtn" onclick="generateSummary()">
+          ✦ Generate Summary with AI
+        </button>
+      </div>
+    </div>
+
+    <!-- 4. SKILLS -->
+    <div class="acc-section" id="sec-skills">
+      <div class="acc-header" onclick="toggleSection('skills')">
+        <div class="acc-icon" style="background:#fce7f3">⚡</div>
+        <span class="acc-title">Skills</span>
+        <span class="acc-status" id="skills-status"></span>
+        <span class="acc-arrow">▾</span>
+      </div>
+      <div class="acc-body">
+        <div class="skill-input-row">
+          <input type="text" id="skillInput" placeholder="e.g. Python, React, Leadership..." onkeydown="if(event.key==='Enter'){addSkill()}"/>
+          <button class="add-skill-btn" onclick="addSkill()">+ Add</button>
+        </div>
+        <div class="skills-tags" id="skillsTags"><span style="font-size:12px;color:#bbb;margin-top:4px">Type a skill and press Enter or click Add</span></div>
+      </div>
+    </div>
+
+    <!-- 5. EXPERIENCE -->
+    <div class="acc-section" id="sec-exp">
+      <div class="acc-header" onclick="toggleSection('exp')">
+        <div class="acc-icon" style="background:#dcfce7">💼</div>
+        <span class="acc-title">Work Experience</span>
+        <span class="acc-status" id="exp-status"></span>
+        <span class="acc-arrow">▾</span>
+      </div>
+      <div class="acc-body">
+        <div id="expEntries"></div>
+        <button class="add-entry-btn" onclick="addExp()">+ Add Work Experience</button>
+        <button class="ai-btn secondary" id="aiEnhanceBtn" onclick="enhanceWithAI()" style="margin-top:12px">
+          ✨ AI Enhance All Descriptions
+        </button>
+      </div>
+    </div>
+
+    <!-- 6. EDUCATION -->
+    <div class="acc-section" id="sec-edu">
+      <div class="acc-header" onclick="toggleSection('edu')">
+        <div class="acc-icon" style="background:#e0f2fe">🎓</div>
+        <span class="acc-title">Education</span>
+        <span class="acc-status" id="edu-status"></span>
+        <span class="acc-arrow">▾</span>
+      </div>
+      <div class="acc-body">
+        <div id="eduEntries"></div>
+        <button class="add-entry-btn" onclick="addEdu()">+ Add Education</button>
+      </div>
+    </div>
+
+    <!-- BOTTOM ACTIONS -->
+    <div class="form-bottom">
+      <div class="dl-counter" id="dlCounter">
+        <div class="dl-counter-left">⬇ Downloads remaining: <strong id="dlRemain">3</strong> / 3 free</div>
+        <div class="dl-dots" id="dlDots">
+          <div class="dl-dot"></div><div class="dl-dot"></div><div class="dl-dot"></div>
+        </div>
+      </div>
+      <button class="dl-btn" id="dlBtn" onclick="handleDownload()">
+        ⬇ Download PDF — Free
+      </button>
+      <div class="limit-banner" id="limitBanner">
+        <strong>🎉 You've used all 3 free downloads!</strong>
+        Upgrade to Pro for unlimited downloads, all templates, and priority AI.
+        <br/><br/>
+        <a href="pricing.html" style="display:inline-block;background:#5c4fc7;color:#fff;font-size:13px;font-weight:700;padding:9px 20px;border-radius:8px;text-decoration:none">View Pro Plan →</a>
+      </div>
     </div>
 
   </div>
 
+  <!-- PREVIEW PANEL -->
   <div class="preview-panel">
-    <div class="preview-label">Live Preview — updates as you type</div>
+    <div class="preview-top">
+      <div class="preview-label"><span></span>Live Preview — updates as you type</div>
+      <div class="preview-zoom">
+        <button class="zoom-btn" onclick="zoomPreview(0.7)">75%</button>
+        <button class="zoom-btn" onclick="zoomPreview(0.85)">85%</button>
+        <button class="zoom-btn" onclick="zoomPreview(1)">100%</button>
+      </div>
+    </div>
     <div class="resume-page" id="resumePreview"></div>
   </div>
 </div>
+
+<footer>Built with ❤️ · <strong>CoverAI</strong> · <a href="index.html">Cover Letter</a> · <a href="pricing.html">Pricing</a> · <a href="privacy.html">Privacy Policy</a> · <a href="terms.html">Terms</a></footer>
 
 <script>
 const FREE_DOWNLOADS = 3;
@@ -282,232 +478,382 @@ let expEntries = [];
 let eduEntries = [];
 
 window.addEventListener('DOMContentLoaded', () => {
-  addExp(); addEdu(); updatePreview(); updateDlUI();
+  addExp(); addEdu();
+  updatePreview(); updateDlUI(); updateProgress();
 });
 
+/* ── TOAST ── */
+function showToast(msg, type='info', duration=3000) {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  const icons = {success:'✅', error:'❌', info:'✦'};
+  t.innerHTML = `<span>${icons[type]||'✦'}</span><span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(() => { t.style.animation='toastOut .3s ease forwards'; setTimeout(()=>t.remove(), 300); }, duration);
+}
+
+/* ── ACCORDION ── */
+function toggleSection(name) {
+  const sec = document.getElementById('sec-' + name);
+  sec.classList.toggle('open');
+}
+
+/* ── ZOOM ── */
+function zoomPreview(scale) {
+  document.getElementById('resumePreview').style.transform = `scale(${scale})`;
+}
+
+/* ── PROGRESS ── */
+function updateProgress() {
+  const fields = [
+    document.getElementById('rName').value,
+    document.getElementById('rTitle').value,
+    document.getElementById('rEmail').value,
+    document.getElementById('rSummary').value,
+  ];
+  const filled = fields.filter(f => f.trim()).length;
+  const skillBonus = skills.length > 0 ? 1 : 0;
+  const expBonus = expEntries.length > 0 ? 1 : 0;
+  const total = filled + skillBonus + expBonus;
+  const max = 6;
+  const pct = Math.round((total / max) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+
+  // Update section statuses
+  const name = document.getElementById('rName').value;
+  const title = document.getElementById('rTitle').value;
+  document.getElementById('personal-status').textContent = (name && title) ? '✓' : '';
+  document.getElementById('summary-status').textContent = document.getElementById('rSummary').value ? '✓' : '';
+  document.getElementById('skills-status').textContent = skills.length > 0 ? `${skills.length} added` : '';
+  document.getElementById('exp-status').textContent = expEntries.length > 0 ? `${expEntries.length} added` : '';
+  document.getElementById('edu-status').textContent = eduEntries.length > 0 ? `${eduEntries.length} added` : '';
+}
+
+/* ── DOWNLOADS ── */
 function getDownloadsUsed() { return parseInt(localStorage.getItem(DL_KEY) || '0'); }
 function incrementDownloads() { localStorage.setItem(DL_KEY, getDownloadsUsed() + 1); }
 function getDownloadsLeft() { return Math.max(0, FREE_DOWNLOADS - getDownloadsUsed()); }
-
 function updateDlUI() {
   const left = getDownloadsLeft();
   document.getElementById('dlRemain').textContent = left;
-  const dots = document.querySelectorAll('.dl-dot');
-  dots.forEach((d, i) => d.classList.toggle('used', i >= left));
+  document.querySelectorAll('.dl-dot').forEach((d, i) => d.classList.toggle('used', i >= left));
   if (left === 0) {
     document.getElementById('dlBtn').style.display = 'none';
     document.getElementById('limitBanner').style.display = 'block';
+    document.getElementById('dlCounter').style.display = 'none';
   }
 }
 
+/* ── TEMPLATE ── */
 function selectTemplate(tpl, el) {
-  document.querySelectorAll('.tpl-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tpl-card').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
   currentTemplate = tpl;
+  const names = {modern:'Modern',classic:'Classic',minimal:'Minimal',emerald:'Emerald',bold:'Bold'};
+  document.getElementById('tpl-status').textContent = names[tpl] || tpl;
   updatePreview();
+  showToast(`Template switched to ${names[tpl]}`, 'info', 1500);
 }
 
+/* ── SKILLS ── */
 function addSkill() {
   const inp = document.getElementById('skillInput');
   const val = inp.value.trim();
   if (!val) return;
+  if (skills.includes(val)) { showToast('Skill already added', 'error', 2000); return; }
   skills.push(val); inp.value = '';
-  renderSkillTags(); updatePreview();
+  renderSkillTags(); updatePreview(); updateProgress();
 }
-function removeSkill(i) { skills.splice(i,1); renderSkillTags(); updatePreview(); }
+function removeSkill(i) { skills.splice(i, 1); renderSkillTags(); updatePreview(); updateProgress(); }
 function renderSkillTags() {
-  document.getElementById('skillsTags').innerHTML = skills.map((s,i) =>
-    `<div class="skill-tag">${s}<button onclick="removeSkill(${i})">×</button></div>`).join('');
+  const c = document.getElementById('skillsTags');
+  if (skills.length === 0) {
+    c.innerHTML = '<span style="font-size:12px;color:#bbb;margin-top:4px">Type a skill and press Enter or click Add</span>';
+    return;
+  }
+  c.innerHTML = skills.map((s, i) =>
+    `<div class="skill-tag">${s}<button onclick="removeSkill(${i})" title="Remove">×</button></div>`).join('');
 }
 
+/* ── EXPERIENCE ── */
 function addExp() {
   const id = Date.now(); expEntries.push(id);
   const div = document.createElement('div');
-  div.className='entry'; div.id='exp_'+id;
-  div.innerHTML=`<button class="entry-del" onclick="removeEntry('exp',${id})">×</button>
-    <label>Job Title</label><input type="text" id="etitle_${id}" placeholder="e.g. Software Engineer" oninput="updatePreview()"/>
-    <label>Company</label><input type="text" id="ecomp_${id}" placeholder="e.g. Infosys" oninput="updatePreview()"/>
+  div.className = 'entry'; div.id = 'exp_' + id;
+  div.innerHTML = `<button class="entry-del" onclick="removeEntry('exp',${id})" title="Remove">×</button>
+    <label>Job Title *</label><input type="text" id="etitle_${id}" placeholder="e.g. Software Engineer" oninput="updatePreview();updateProgress()"/>
+    <label>Company *</label><input type="text" id="ecomp_${id}" placeholder="e.g. Google" oninput="updatePreview()"/>
     <div class="row2">
-      <div><label>Start</label><input type="text" id="estart_${id}" placeholder="Jan 2021" oninput="updatePreview()"/></div>
-      <div><label>End</label><input type="text" id="eend_${id}" placeholder="Present" oninput="updatePreview()"/></div>
+      <div><label>Start Date</label><input type="text" id="estart_${id}" placeholder="Jan 2022" oninput="updatePreview()"/></div>
+      <div><label>End Date</label><input type="text" id="eend_${id}" placeholder="Present" oninput="updatePreview()"/></div>
     </div>
-    <label>Description</label>
-    <textarea id="edesc_${id}" rows="2" placeholder="Key responsibilities..." oninput="updatePreview()"></textarea>`;
+    <label>Key Responsibilities &amp; Achievements</label>
+    <textarea id="edesc_${id}" rows="3" placeholder="• Led a team of 5 engineers to deliver...&#10;• Improved performance by 40%..." oninput="updatePreview()"></textarea>`;
   document.getElementById('expEntries').appendChild(div);
+  updateProgress();
 }
 
+/* ── EDUCATION ── */
 function addEdu() {
   const id = Date.now(); eduEntries.push(id);
   const div = document.createElement('div');
-  div.className='entry'; div.id='edu_'+id;
-  div.innerHTML=`<button class="entry-del" onclick="removeEntry('edu',${id})">×</button>
-    <label>Degree</label><input type="text" id="udeg_${id}" placeholder="e.g. B.Tech Computer Science" oninput="updatePreview()"/>
-    <label>Institution</label><input type="text" id="uinst_${id}" placeholder="e.g. IIT Bombay" oninput="updatePreview()"/>
+  div.className = 'entry'; div.id = 'edu_' + id;
+  div.innerHTML = `<button class="entry-del" onclick="removeEntry('edu',${id})" title="Remove">×</button>
+    <label>Degree / Qualification *</label><input type="text" id="udeg_${id}" placeholder="e.g. B.Tech Computer Science" oninput="updatePreview()"/>
+    <label>Institution *</label><input type="text" id="uinst_${id}" placeholder="e.g. IIT Bombay" oninput="updatePreview()"/>
     <div class="row2">
-      <div><label>Year</label><input type="text" id="uyear_${id}" placeholder="2018–2022" oninput="updatePreview()"/></div>
-      <div><label>Grade</label><input type="text" id="ugrade_${id}" placeholder="8.5 CGPA" oninput="updatePreview()"/></div>
+      <div><label>Year</label><input type="text" id="uyear_${id}" placeholder="2019 – 2023" oninput="updatePreview()"/></div>
+      <div><label>Grade / CGPA</label><input type="text" id="ugrade_${id}" placeholder="8.5 CGPA / 92%" oninput="updatePreview()"/></div>
     </div>`;
   document.getElementById('eduEntries').appendChild(div);
+  updateProgress();
 }
 
 function removeEntry(type, id) {
-  document.getElementById((type==='exp'?'exp_':'edu_')+id)?.remove();
-  if(type==='exp') expEntries=expEntries.filter(e=>e!==id);
-  else eduEntries=eduEntries.filter(e=>e!==id);
-  updatePreview();
+  document.getElementById((type==='exp'?'exp_':'edu_') + id)?.remove();
+  if (type==='exp') expEntries = expEntries.filter(e => e !== id);
+  else eduEntries = eduEntries.filter(e => e !== id);
+  updatePreview(); updateProgress();
 }
 
+/* ── FORM DATA ── */
 function getFormData() {
   return {
-    name: document.getElementById('rName').value||'Your Name',
-    title: document.getElementById('rTitle').value||'Your Title',
+    name: document.getElementById('rName').value || 'Your Name',
+    title: document.getElementById('rTitle').value || 'Your Title',
     email: document.getElementById('rEmail').value,
     phone: document.getElementById('rPhone').value,
     location: document.getElementById('rLocation').value,
     linkedin: document.getElementById('rLinkedin').value,
+    website: document.getElementById('rWebsite').value,
     summary: document.getElementById('rSummary').value,
     skills,
-    exps: expEntries.map(id=>({
+    exps: expEntries.map(id => ({
       title: document.getElementById('etitle_'+id)?.value||'',
       company: document.getElementById('ecomp_'+id)?.value||'',
       start: document.getElementById('estart_'+id)?.value||'',
       end: document.getElementById('eend_'+id)?.value||'',
       desc: document.getElementById('edesc_'+id)?.value||''
-    })).filter(e=>e.title||e.company),
-    edus: eduEntries.map(id=>({
+    })).filter(e => e.title || e.company),
+    edus: eduEntries.map(id => ({
       degree: document.getElementById('udeg_'+id)?.value||'',
       inst: document.getElementById('uinst_'+id)?.value||'',
       year: document.getElementById('uyear_'+id)?.value||'',
       grade: document.getElementById('ugrade_'+id)?.value||''
-    })).filter(e=>e.degree||e.inst)
+    })).filter(e => e.degree || e.inst)
   };
 }
 
+/* ── PREVIEW ── */
+function esc(s){ return s ? s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : ''; }
 function updatePreview() {
   const d = getFormData();
   const tpl = currentTemplate;
-  const contact = [d.email,d.phone,d.location,d.linkedin].filter(Boolean);
+  const contact = [d.email, d.phone, d.location, d.linkedin, d.website].filter(Boolean);
   let html = '';
 
-  if(tpl==='modern'||tpl==='emerald'){
-    const cls=tpl==='modern'?'tpl-modern':'tpl-emerald';
-    html=`<div class="${cls}">
-      <div class="resume-header"><h1>${d.name}</h1><div class="subtitle">${d.title}</div>
-      <div class="contact-row">${contact.map(c=>`<span>• ${c}</span>`).join('')}</div></div>
+  const expHtml = d.exps.map(e => `<div class="exp-item">
+    <div class="exp-title">${esc(e.title)}</div>
+    <div class="exp-company">${esc(e.company)}</div>
+    <div class="exp-date">${esc(e.start)}${e.end?' – '+esc(e.end):''}</div>
+    <div class="exp-desc">${esc(e.desc).replace(/\n/g,'<br/>')}</div>
+  </div>`).join('');
+
+  const eduHtml = d.edus.map(e => `<div class="exp-item">
+    <div class="exp-title">${esc(e.degree)}</div>
+    <div class="exp-company">${esc(e.inst)}</div>
+    <div class="exp-date">${esc(e.year)}${e.grade?' · '+esc(e.grade):''}</div>
+  </div>`).join('');
+
+  const skillsHtml = d.skills.map(s => `<span class="skill-pill">${esc(s)}</span>`).join('');
+  const summaryHtml = d.summary ? `<div class="sec-title">Summary</div><p style="font-size:8.5px;color:#444;line-height:1.7">${esc(d.summary)}</p>` : '';
+
+  if (tpl === 'modern' || tpl === 'emerald') {
+    const cls = tpl === 'modern' ? 'tpl-modern' : 'tpl-emerald';
+    html = `<div class="${cls}">
+      <div class="resume-header">
+        <h1>${esc(d.name)}</h1><div class="subtitle">${esc(d.title)}</div>
+        <div class="contact-row">${contact.map(c=>`<span>• ${esc(c)}</span>`).join('')}</div>
+      </div>
       <div class="resume-body">
         <div class="resume-sidebar">
-          ${d.skills.length?`<div class="sec-title">Skills</div>${d.skills.map(s=>`<span class="skill-pill">${s}</span>`).join('')}`:''}
-          ${d.edus.length?`<div class="sec-title">Education</div>${d.edus.map(e=>`<div class="exp-item"><div class="exp-title">${e.degree}</div><div class="exp-company">${e.inst}</div><div class="exp-date">${e.year}${e.grade?' · '+e.grade:''}</div></div>`).join('')}`:''}
+          ${d.skills.length?`<div class="sec-title">Skills</div><div>${skillsHtml}</div>`:''}
+          ${d.edus.length?`<div class="sec-title">Education</div>${eduHtml}`:''}
         </div>
         <div class="resume-main">
-          ${d.summary?`<div class="sec-title">Summary</div><p style="font-size:9px;color:#444;line-height:1.6">${d.summary}</p>`:''}
-          ${d.exps.length?`<div class="sec-title">Experience</div>${d.exps.map(e=>`<div class="exp-item"><div class="exp-title">${e.title}</div><div class="exp-company">${e.company}</div><div class="exp-date">${e.start}${e.end?' – '+e.end:''}</div><div class="exp-desc">${e.desc}</div></div>`).join('')}`:''}
+          ${summaryHtml}
+          ${d.exps.length?`<div class="sec-title">Experience</div>${expHtml}`:''}
         </div>
       </div></div>`;
-  } else if(tpl==='classic'){
-    html=`<div class="tpl-classic">
-      <div class="resume-header"><div><h1>${d.name}</h1><div class="subtitle">${d.title}</div></div>
-      <div class="contact-col">${contact.map(c=>`<div>${c}</div>`).join('')}</div></div>
+  } else if (tpl === 'classic') {
+    html = `<div class="tpl-classic">
+      <div class="resume-header">
+        <div><h1>${esc(d.name)}</h1><div class="subtitle">${esc(d.title)}</div></div>
+        <div class="contact-col">${contact.map(c=>`<div>${esc(c)}</div>`).join('')}</div>
+      </div>
       <div class="resume-body">
-        ${d.summary?`<div class="sec-title">Profile</div><p style="font-size:9px;color:#444;line-height:1.6">${d.summary}</p>`:''}
-        ${d.exps.length?`<div class="sec-title">Experience</div>${d.exps.map(e=>`<div class="exp-item"><div class="exp-title">${e.title} — <span class="exp-company">${e.company}</span> <span class="exp-date">(${e.start}${e.end?' – '+e.end:''})</span></div><div class="exp-desc">${e.desc}</div></div>`).join('')}`:''}
-        ${d.edus.length?`<div class="sec-title">Education</div>${d.edus.map(e=>`<div class="exp-item"><div class="exp-title">${e.degree} — <span class="exp-company">${e.inst}</span></div><div class="exp-desc">${e.year}${e.grade?' · '+e.grade:''}</div></div>`).join('')}`:''}
-        ${d.skills.length?`<div class="sec-title">Skills</div><div>${d.skills.map(s=>`<span class="skill-pill">${s}</span>`).join('')}</div>`:''}
+        ${summaryHtml}
+        ${d.exps.length?`<div class="sec-title">Experience</div>${d.exps.map(e=>`<div class="exp-item"><div class="exp-title">${esc(e.title)} — <span class="exp-company">${esc(e.company)}</span> <span class="exp-date">(${esc(e.start)}${e.end?' – '+esc(e.end):''})</span></div><div class="exp-desc">${esc(e.desc).replace(/\n/g,'<br/>')}</div></div>`).join('')}`:''}
+        ${d.edus.length?`<div class="sec-title">Education</div>${d.edus.map(e=>`<div class="exp-item"><div class="exp-title">${esc(e.degree)} — <span class="exp-company">${esc(e.inst)}</span></div><div class="exp-desc">${esc(e.year)}${e.grade?' · '+esc(e.grade):''}</div></div>`).join('')}`:''}
+        ${d.skills.length?`<div class="sec-title">Skills</div><div>${skillsHtml}</div>`:''}
       </div></div>`;
-  } else if(tpl==='minimal'){
-    html=`<div class="tpl-minimal">
-      <div class="resume-header"><h1>${d.name}</h1><div class="subtitle">${d.title}</div>
-      <div class="contact-row">${contact.join(' · ')}</div></div>
+  } else if (tpl === 'minimal') {
+    html = `<div class="tpl-minimal">
+      <div class="resume-header">
+        <h1>${esc(d.name)}</h1><div class="subtitle">${esc(d.title)}</div>
+        <div class="contact-row">${contact.join(' · ')}</div>
+      </div>
       <div class="resume-body">
-        ${d.summary?`<div class="sec-title">About</div><p style="font-size:9px;color:#444;line-height:1.6">${d.summary}</p>`:''}
-        ${d.exps.length?`<div class="sec-title">Experience</div>${d.exps.map(e=>`<div class="exp-item"><span class="exp-date">${e.start}${e.end?' – '+e.end:''}</span><div class="exp-title">${e.title}</div><div class="exp-company">${e.company}</div><div class="exp-desc">${e.desc}</div></div>`).join('')}`:''}
-        ${d.edus.length?`<div class="sec-title">Education</div>${d.edus.map(e=>`<div class="exp-item"><span class="exp-date">${e.year}</span><div class="exp-title">${e.degree}</div><div class="exp-company">${e.inst}${e.grade?' · '+e.grade:''}</div></div>`).join('')}`:''}
-        ${d.skills.length?`<div class="sec-title">Skills</div><div>${d.skills.map(s=>`<span class="skill-pill">${s}</span>`).join('')}</div>`:''}
+        ${summaryHtml}
+        ${d.exps.length?`<div class="sec-title">Experience</div>${d.exps.map(e=>`<div class="exp-item"><div class="exp-title">${esc(e.title)}</div><div class="exp-company">${esc(e.company)}</div><div class="exp-date">${esc(e.start)}${e.end?' – '+esc(e.end):''}</div><div class="exp-desc">${esc(e.desc).replace(/\n/g,'<br/>')}</div></div>`).join('')}`:''}
+        ${d.edus.length?`<div class="sec-title">Education</div>${d.edus.map(e=>`<div class="exp-item"><div class="exp-title">${esc(e.degree)}</div><div class="exp-company">${esc(e.inst)}</div><div class="exp-date">${esc(e.year)}${e.grade?' · '+esc(e.grade):''}</div></div>`).join('')}`:''}
+        ${d.skills.length?`<div class="sec-title">Skills</div><div>${skillsHtml}</div>`:''}
       </div></div>`;
-  } else if(tpl==='bold'){
-    html=`<div class="tpl-bold">
-      <div class="resume-header"><h1>${d.name}</h1><div class="subtitle">${d.title}</div>
-      <div class="contact-row">${contact.join(' | ')}</div></div>
+  } else if (tpl === 'bold') {
+    html = `<div class="tpl-bold">
+      <div class="resume-header">
+        <h1>${esc(d.name)}</h1><div class="subtitle">${esc(d.title)}</div>
+        <div class="contact-row">${contact.join(' | ')}</div>
+      </div>
       <div class="resume-body">
-        ${d.summary?`<div class="sec-title">Profile</div><p style="font-size:9px;color:#444;line-height:1.6;margin-bottom:8px">${d.summary}</p>`:''}
-        ${d.exps.length?`<div class="sec-title">Experience</div>${d.exps.map(e=>`<div class="exp-item"><div class="exp-title">${e.title}</div><div class="exp-company">${e.company} · ${e.start}${e.end?' – '+e.end:''}</div><div class="exp-desc">${e.desc}</div></div>`).join('')}`:''}
-        ${d.edus.length?`<div class="sec-title">Education</div>${d.edus.map(e=>`<div class="exp-item"><div class="exp-title">${e.degree}</div><div class="exp-company">${e.inst} · ${e.year}${e.grade?' · '+e.grade:''}</div></div>`).join('')}`:''}
-        ${d.skills.length?`<div class="sec-title">Skills</div><div style="padding-bottom:8px">${d.skills.map(s=>`<span class="skill-pill">${s}</span>`).join('')}</div>`:''}
+        ${d.summary?`<div class="sec-title">Profile</div><p style="font-size:8.5px;color:#444;line-height:1.7;margin-bottom:8px">${esc(d.summary)}</p>`:''}
+        ${d.exps.length?`<div class="sec-title">Experience</div>${expHtml}`:''}
+        ${d.edus.length?`<div class="sec-title">Education</div>${eduHtml}`:''}
+        ${d.skills.length?`<div class="sec-title">Skills</div><div style="padding-bottom:8px">${skillsHtml}</div>`:''}
       </div></div>`;
   }
   document.getElementById('resumePreview').innerHTML = html;
 }
 
+/* ── AI SUMMARY ── */
 async function generateSummary() {
   const d = getFormData();
   const btn = document.getElementById('aiSummaryBtn');
-  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Generating...';
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Generating...';
   try {
-    const res = await fetch('/api/generate-summary',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:d.name,title:d.title,skills:d.skills.join(', '),exps:d.exps})});
+    const res = await fetch('/api/generate-summary', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({name:d.name, title:d.title, skills:d.skills.join(', '), exps:d.exps})
+    });
     const data = await res.json();
-    if(data.summary){document.getElementById('rSummary').value=data.summary;updatePreview();}
-  } catch(e){alert('Could not generate. Try again.');}
-  finally{btn.disabled=false;btn.innerHTML='✦ Generate Summary with AI';}
+    if (data.summary) {
+      document.getElementById('rSummary').value = data.summary;
+      updatePreview(); updateProgress();
+      // Auto-open summary section
+      const sec = document.getElementById('sec-summary');
+      if (!sec.classList.contains('open')) sec.classList.add('open');
+      showToast('Summary generated!', 'success');
+    }
+  } catch(e) {
+    showToast('Could not generate. Please try again.', 'error');
+  }
+  finally { btn.disabled=false; btn.innerHTML='✦ Generate Summary with AI'; }
 }
 
+/* ── AI ENHANCE ── */
 async function enhanceWithAI() {
   const btn = document.getElementById('aiEnhanceBtn');
   btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Enhancing...';
   try {
     const d = getFormData();
-    const res = await fetch('/api/enhance-resume',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+    const res = await fetch('/api/enhance-resume', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(d)
+    });
     const data = await res.json();
-    if(data.enhanced){
-      data.enhanced.forEach((e,i)=>{const id=expEntries[i];if(id&&document.getElementById('edesc_'+id))document.getElementById('edesc_'+id).value=e;});
-      if(data.summary)document.getElementById('rSummary').value=data.summary;
-      updatePreview(); alert('✅ Resume enhanced!');
+    if (data.enhanced) {
+      data.enhanced.forEach((e, i) => {
+        const id = expEntries[i];
+        if (id && document.getElementById('edesc_'+id)) document.getElementById('edesc_'+id).value = e;
+      });
+      if (data.summary) document.getElementById('rSummary').value = data.summary;
+      updatePreview();
+      showToast('Resume enhanced with AI! ✨', 'success');
     }
-  } catch(e){alert('Enhancement failed. Try again.');}
-  finally{btn.disabled=false;btn.innerHTML='✦ Enhance Resume with AI';}
+  } catch(e) {
+    showToast('Enhancement failed. Please try again.', 'error');
+  }
+  finally { btn.disabled=false; btn.innerHTML='✨ AI Enhance All Descriptions'; }
 }
 
+/* ── DOWNLOAD ── */
 function handleDownload() {
-  if(getDownloadsLeft()<=0){
-    document.getElementById('dlBtn').style.display='none';
-    document.getElementById('limitBanner').style.display='block';
+  const d = getFormData();
+  if (d.name === 'Your Name' || !document.getElementById('rName').value.trim()) {
+    showToast('Please enter your name first!', 'error'); return;
+  }
+  if (getDownloadsLeft() <= 0) {
+    document.getElementById('dlBtn').style.display = 'none';
+    document.getElementById('limitBanner').style.display = 'block';
     return;
   }
   downloadResumePDF();
   incrementDownloads();
   updateDlUI();
+  showToast('PDF downloaded! 🎉', 'success');
 }
 
 function downloadResumePDF() {
-  const {jsPDF}=window.jspdf;
-  const doc=new jsPDF({unit:'mm',format:'a4'});
-  const d=getFormData();
-  const margin=15,pw=210-margin*2,lh=6;
-  let y=15;
-  const colors={modern:[92,79,199],classic:[26,58,92],minimal:[26,26,26],emerald:[6,95,70],bold:[220,38,38]};
-  const [r,g,b]=colors[currentTemplate]||[92,79,199];
-  if(currentTemplate!=='minimal'&&currentTemplate!=='bold'){
-    doc.setFillColor(r,g,b);doc.rect(0,0,210,36,'F');doc.setTextColor(255,255,255);
-  }else{doc.setTextColor(r,g,b);}
-  doc.setFontSize(18);doc.setFont('helvetica','bold');doc.text(d.name,margin,y+6);y+=8;
-  doc.setFontSize(11);doc.setFont('helvetica','normal');doc.text(d.title,margin,y+2);y+=6;
-  const contact=[d.email,d.phone,d.location].filter(Boolean).join(' | ');
-  doc.setFontSize(9);doc.text(contact,margin,y+2);y+=12;
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF({unit:'mm', format:'a4'});
+  const d = getFormData();
+  const margin = 15, pw = 210 - margin * 2, lh = 6;
+  let y = 15;
+  const colors = {modern:[92,79,199], classic:[26,58,92], minimal:[26,26,26], emerald:[6,95,70], bold:[220,38,38]};
+  const [r,g,b] = colors[currentTemplate] || [92,79,199];
+
+  if (currentTemplate !== 'minimal' && currentTemplate !== 'bold') {
+    doc.setFillColor(r,g,b); doc.rect(0,0,210,38,'F'); doc.setTextColor(255,255,255);
+  } else { doc.setTextColor(r,g,b); }
+
+  doc.setFontSize(20); doc.setFont('helvetica','bold'); doc.text(d.name, margin, y+6); y+=9;
+  doc.setFontSize(12); doc.setFont('helvetica','normal'); doc.text(d.title, margin, y); y+=7;
+  const contact = [d.email, d.phone, d.location].filter(Boolean).join(' · ');
+  doc.setFontSize(9); doc.text(contact, margin, y); y += 14;
   doc.setTextColor(30,30,30);
-  const section=(title)=>{
-    doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(r,g,b);
-    doc.text(title.toUpperCase(),margin,y);y+=1;
-    doc.setDrawColor(r,g,b);doc.line(margin,y,210-margin,y);y+=5;
-    doc.setTextColor(30,30,30);doc.setFont('helvetica','normal');
+
+  const section = (title) => {
+    if (y > 275) { doc.addPage(); y = 15; }
+    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(r,g,b);
+    doc.text(title.toUpperCase(), margin, y); y += 1;
+    doc.setDrawColor(r,g,b); doc.line(margin, y, 210-margin, y); y += 5;
+    doc.setTextColor(30,30,30); doc.setFont('helvetica','normal');
   };
-  const addText=(text,size=9,bold=false)=>{
-    doc.setFontSize(size);doc.setFont('helvetica',bold?'bold':'normal');
-    doc.splitTextToSize(text,pw).forEach(line=>{if(y>280){doc.addPage();y=15;}doc.text(line,margin,y);y+=lh;});
+  const addText = (text, size=9, bold=false) => {
+    if (!text) return;
+    doc.setFontSize(size); doc.setFont('helvetica', bold?'bold':'normal');
+    doc.splitTextToSize(text, pw).forEach(line => {
+      if (y > 278) { doc.addPage(); y = 15; }
+      doc.text(line, margin, y); y += lh;
+    });
   };
-  if(d.summary){section('Summary');addText(d.summary);y+=2;}
-  if(d.exps.length){section('Experience');d.exps.forEach(e=>{addText(`${e.title} — ${e.company}`,9,true);addText(`${e.start}${e.end?' – '+e.end:''}`,8);if(e.desc)addText(e.desc,9);y+=2;});}
-  if(d.edus.length){section('Education');d.edus.forEach(e=>{addText(`${e.degree} — ${e.inst}`,9,true);addText(`${e.year}${e.grade?' | '+e.grade:''}`,8);y+=2;});}
-  if(d.skills.length){section('Skills');addText(d.skills.join(' · '),9);}
-  const name=document.getElementById('rName').value||'resume';
+
+  if (d.summary) { section('Summary'); addText(d.summary); y += 3; }
+  if (d.exps.length) {
+    section('Experience');
+    d.exps.forEach(e => {
+      addText(`${e.title} — ${e.company}`, 10, true);
+      addText(`${e.start}${e.end?' – '+e.end:''}`, 8);
+      if (e.desc) addText(e.desc, 9);
+      y += 3;
+    });
+  }
+  if (d.edus.length) {
+    section('Education');
+    d.edus.forEach(e => {
+      addText(`${e.degree} — ${e.inst}`, 10, true);
+      addText(`${e.year}${e.grade?' · '+e.grade:''}`, 8);
+      y += 2;
+    });
+  }
+  if (d.skills.length) { section('Skills'); addText(d.skills.join(' · '), 9); }
+
+  doc.setFontSize(8); doc.setTextColor(180,180,180);
+  doc.text('Created with CoverAI — coveraii.com', margin, 290);
+
+  const name = document.getElementById('rName').value || 'resume';
   doc.save(`${name.replace(/\s+/g,'-')}-resume.pdf`);
 }
 </script>
