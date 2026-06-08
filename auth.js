@@ -76,24 +76,12 @@ onAuthStateChanged(auth, async (user) => {
 
     if (authContainer) {
       authContainer.innerHTML = `
-        <div style="display:flex; align-items:center; gap:12px; position:relative;" id="user-menu-container">
+        <div style="display:flex; align-items:center; gap:10px;" id="user-menu-container">
           ${isPro ? '<span style="background:linear-gradient(90deg,#f59e0b,#d97706);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;">PRO</span>' : ''}
-          <img src="${user.photoURL}" alt="${user.displayName}" style="width:32px; height:32px; border-radius:50%; border:2px solid #5c4fc7; cursor:pointer;" onclick="const d=document.getElementById('user-dropdown');d.style.display=d.style.display==='none'?'block':'none'"/>
-          <div id="user-dropdown" style="display:none; position:absolute; top:45px; right:0; background:#fff; border:1px solid #e8e8e8; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.1); padding:8px; min-width:150px; z-index:999;">
-            <div style="font-size:12px; color:#1a1a1a; font-weight:600; padding:6px 12px; border-bottom:1px solid #f0f0f0; margin-bottom:4px;">${user.displayName}</div>
-            <button onclick="signOutUser()" style="width:100%; text-align:left; background:none; border:none; padding:8px 12px; font-size:13px; color:#e24b4a; cursor:pointer; border-radius:4px;">Sign Out</button>
-          </div>
+          <img src="${user.photoURL}" alt="${user.displayName}" style="width:28px; height:28px; border-radius:50%; border:2px solid #5c4fc7;"/>
+          <button onclick="signOutUser()" style="background:none; border:1px solid #d0d0d0; padding:4px 10px; font-size:12px; font-weight:600; color:#e24b4a; cursor:pointer; border-radius:6px; transition:all 0.2s;">Sign Out</button>
         </div>
       `;
-      
-      // Close dropdown when clicking outside
-      document.addEventListener('click', (e) => {
-        const menu = document.getElementById('user-menu-container');
-        const dropdown = document.getElementById('user-dropdown');
-        if (menu && !menu.contains(e.target) && dropdown) {
-          dropdown.style.display = 'none';
-        }
-      });
     }
   } else {
     // User is signed out
