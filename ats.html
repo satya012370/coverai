@@ -286,9 +286,15 @@
     document.getElementById('resultCard').style.display = 'none';
 
     try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (window.auth && window.auth.currentUser) {
+        const idToken = await window.auth.currentUser.getIdToken();
+        headers['Authorization'] = `Bearer ${idToken}`;
+      }
+
       const res = await fetch('/api/ats-check', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: headers,
         body: JSON.stringify({ resumeText, jobDesc })
       });
       const data = await res.json();

@@ -291,9 +291,19 @@ footer{text-align:center;padding:2rem 1rem;font-size:13px;color:#888;border-top:
     const u = getUsage(); u.count++;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
   }
-  function getRemaining() { return Math.max(0, FREE_LIMIT - getUsage().count); }
+  function getRemaining() {
+    if (window.currentUser && window.currentUser.isPro) return 999;
+    return Math.max(0, FREE_LIMIT - getUsage().count);
+  }
 
   function updateUsageUI() {
+    if (window.currentUser && window.currentUser.isPro) {
+      const bar = document.querySelector('.usage-bar');
+      if (bar) bar.style.display = 'none';
+      document.getElementById('genBtn').disabled = false;
+      document.getElementById('genBtn').textContent = '✦ Generate LinkedIn Message';
+      return;
+    }
     const remaining = getRemaining();
     document.getElementById('remainCount').textContent = remaining;
     document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('used', i >= remaining));
@@ -303,7 +313,10 @@ footer{text-align:center;padding:2rem 1rem;font-size:13px;color:#888;border-top:
     }
   }
 
-  window.addEventListener('DOMContentLoaded', updateUsageUI);
+  window.addEventListener('DOMContentLoaded', () => {
+    // Wait a brief moment for auth state to populate
+    setTimeout(updateUsageUI, 500);
+  });
 
   // ── TYPE SELECTOR ─────────────────────────────────────────────
   document.querySelectorAll('.type-btn').forEach(btn => {

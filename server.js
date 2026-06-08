@@ -33,6 +33,48 @@ function getRemainingCount(ip) {
   if (!usageMap[ip] || usageMap[ip].date !== today) return FREE_LIMIT;
   return FREE_LIMIT - usageMap[ip].count;
 }
+
+// ─── FIREBASE AUTH/PRO VERIFICATION ───────────────────────────
+async function checkProStatus(req) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) return false;
+  
+  const token = authHeader.split(" ")[1];
+  try {
+    const apiKey = process.env.FIREBASE_API_KEY || "AIzaSyBfR2_eSuJoDuQtTNGV1ZQdtP5AQCWpnWk";
+    const projId = process.env.FIREBASE_PROJECT_ID || "coverai-a26bf";
+    
+    // 1. Verify token with Identity Toolkit
+    const verifyRes = await fetch(
+      `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken: token })
+      }
+    );
+    
+    if (!verifyRes.ok) return false;
+    const verifyData = await verifyRes.json();
+    const uid = verifyData.users?.[0]?.localId;
+    if (!uid) return false;
+    
+    // 2. Fetch Firestore user doc
+    const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${projId}/databases/(default)/documents/users/${uid}`;
+    const dbRes = await fetch(firestoreUrl, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    
+    if (!dbRes.ok) return false;
+    const dbData = await dbRes.json();
+    
+    const isPro = dbData.fields?.pro?.booleanValue === true;
+    return isPro;
+  } catch(e) {
+    console.error("Auth verification failed:", e);
+    return false;
+  }
+}
 // ──────────────────────────────────────────────────────────────
 
 // ─── RESUME PARSE ─────────────────────────────────────────────
@@ -92,7 +134,9 @@ app.post("/api/generate", async (req, res) => {
   try {
     const ip = req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress;
 
-    if (!checkLimit(ip)) {
+    const isPro = await checkProStatus(req);
+
+    if (!isPro && !checkLimit(ip)) {
       return res.status(429).json({
         error: "LIMIT_REACHED",
         message: "You have used your 5 free cover letters for today. Come back tomorrow or upgrade to Pro for unlimited access."
@@ -135,8 +179,10 @@ STRICT RULES:
     const letter = data?.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!letter) throw new Error("No letter returned");
 
-    incrementUsage(ip);
-    res.json({ letter, remaining: getRemainingCount(ip) });
+    if (!isPro) {
+      incrementUsage(ip);
+    }
+    res.json({ letter, remaining: isPro ? "unlimited" : getRemainingCount(ip) });
 
   } catch (error) {
     res.status(500).json({ error: error.message });

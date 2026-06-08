@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='32' height='32' rx='8' fill='%235c4fc7'/%3E%3Cpath d='M18 9C13.582 9 10 12.582 10 17C10 21.418 13.582 25 18 25' stroke='white' stroke-width='2.8' stroke-linecap='round'/%3E%3Cpath d='M23 9.5L24.2 12.5L27 13.7L24.2 14.9L23 17.9L21.8 14.9L19 13.7L21.8 12.5Z' fill='%23F59E0B'/%3E%3C/svg%3E"/>
+<title>Admin Dashboard — CoverAI</title>
+<link rel="stylesheet" href="mobile.css"/>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8fafc; color: #0f172a; min-height: 100vh; }
+nav { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 56px; }
+.logo { font-size: 18px; font-weight: 600; color: #5c4fc7; text-decoration: none; display: flex; align-items: center; gap: 9px; }
+.logo span { color: #1a1a1a; }
+.nav-links { display: flex; gap: 1.5rem; align-items: center; }
+.nav-links a { font-size: 14px; color: #475569; text-decoration: none; }
+
+.container { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
+.header { margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; }
+.header h1 { font-size: 24px; font-weight: 800; }
+.header p { color: #64748b; font-size: 14px; margin-top: 4px; }
+
+/* DANGER ZONE / DENIED */
+.denied-card { background: #fff; border: 1px solid #fee2e2; border-radius: 12px; padding: 3rem 2rem; text-align: center; max-width: 500px; margin: 4rem auto; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05); }
+.denied-card h2 { color: #dc2626; font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+.denied-card p { color: #475569; font-size: 14px; line-height: 1.6; }
+
+/* TABS */
+.tabs { display: flex; gap: 10px; border-bottom: 1px solid #e2e8f0; margin-bottom: 1.5rem; }
+.tab { padding: 10px 16px; font-size: 14px; font-weight: 600; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; }
+.tab.active { color: #5c4fc7; border-color: #5c4fc7; }
+
+/* CARDS LIST */
+.req-list { display: flex; flex-direction: column; gap: 16px; }
+.req-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05); }
+@media (max-width: 640px) {
+  .req-card { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .req-actions { width: 100%; justify-content: flex-end; }
+}
+.req-info { display: flex; flex-direction: column; gap: 6px; }
+.req-meta { display: flex; gap: 12px; font-size: 12px; color: #64748b; flex-wrap: wrap; }
+.req-meta span { background: #f1f5f9; padding: 2px 8px; border-radius: 4px; }
+.req-email { font-size: 16px; font-weight: 700; color: #0f172a; }
+.req-txnid { font-family: monospace; font-size: 13px; background: #fef3c7; color: #92400e; padding: 3px 8px; border-radius: 6px; width: fit-content; font-weight: 600; margin-top: 4px; }
+
+.req-actions { display: flex; gap: 10px; }
+.btn { padding: 8px 16px; font-size: 13px; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s; }
+.btn-approve { background: #22c55e; color: #fff; }
+.btn-approve:hover { background: #16a34a; }
+.btn-reject { background: #ef4444; color: #fff; }
+.btn-reject:hover { background: #dc2626; }
+
+/* LOADING & EMPTY */
+.loading, .empty { text-align: center; padding: 3rem; background: #fff; border-radius: 12px; border: 1px dashed #cbd5e1; color: #64748b; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="32" height="32" rx="8" fill="#5c4fc7"/>
+      <path d="M18 9C13.582 9 10 12.582 10 17C10 21.418 13.582 25 18 25" stroke="white" stroke-width="2.8" stroke-linecap="round"/>
+      <path d="M23 9.5L24.2 12.5L27 13.7L24.2 14.9L23 17.9L21.8 14.9L19 13.7L21.8 12.5Z" fill="#F59E0B"/>
+    </svg>
+    Cover<span>AI</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <div id="auth-container"></div>
+  </div>
+</nav>
+
+<div class="container" id="mainContainer">
+  <!-- AUTH LOADER -->
+  <div class="loading" id="authLoader">
+    Loading admin authorization...
+  </div>
+
+  <!-- ACCESS DENIED -->
+  <div class="denied-card" id="accessDenied" style="display:none;">
+    <h2>🚫 Access Denied</h2>
+    <p>This area is restricted to the administrator. If you are the owner, please sign in with your administrator email account (satya012370@gmail.com).</p>
+  </div>
+
+  <!-- ADMIN WORKSPACE -->
+  <div id="adminWorkspace" style="display:none;">
+    <div class="header">
+      <div>
+        <h1>👑 Admin Dashboard</h1>
+        <p>Manage pending manual UPI payment approvals</p>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" id="tabPending" onclick="switchTab('pending')">Pending Requests</div>
+      <div class="tab" id="tabApproved" onclick="switchTab('approved')">Approved Users</div>
+    </div>
+
+    <!-- PENDING LIST -->
+    <div id="pendingSection">
+      <div class="req-list" id="pendingList">
+        <div class="loading">Loading requests...</div>
+      </div>
+    </div>
+
+    <!-- APPROVED LIST -->
+    <div id="approvedSection" style="display:none;">
+      <div class="req-list" id="approvedList">
+        <div class="loading">Loading approved users...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { collection, query, where, getDocs, doc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const ADMIN_EMAIL = "satya012370@gmail.com";
+let currentTab = "pending";
+
+const checkAuthInterval = setInterval(() => {
+  if (window.auth && window.db) {
+    clearInterval(checkAuthInterval);
+    onAuthStateChanged(window.auth, (user) => {
+      document.getElementById('authLoader').style.display = 'none';
+      if (user && user.email === ADMIN_EMAIL) {
+        document.getElementById('adminWorkspace').style.display = 'block';
+        document.getElementById('accessDenied').style.display = 'none';
+        loadRequests();
+      } else {
+        document.getElementById('adminWorkspace').style.display = 'none';
+        document.getElementById('accessDenied').style.display = 'block';
+      }
+    });
+  }
+}, 100);
+
+window.switchTab = function(tab) {
+  currentTab = tab;
+  document.getElementById('tabPending').classList.toggle('active', tab === 'pending');
+  document.getElementById('tabApproved').classList.toggle('active', tab === 'approved');
+  document.getElementById('pendingSection').style.display = tab === 'pending' ? 'block' : 'none';
+  document.getElementById('approvedSection').style.display = tab === 'approved' ? 'block' : 'none';
+  loadRequests();
+}
+
+async function loadRequests() {
+  const listContainer = currentTab === 'pending' ? document.getElementById('pendingList') : document.getElementById('approvedList');
+  listContainer.innerHTML = '<div class="loading">Loading data...</div>';
+
+  try {
+    const q = query(collection(window.db, "payment_requests"), where("status", "==", currentTab));
+    const querySnapshot = await getDocs(q);
+    
+    if (querySnapshot.empty) {
+      listContainer.innerHTML = `<div class="empty">No ${currentTab} requests found.</div>`;
+      return;
+    }
+
+    listContainer.innerHTML = '';
+    querySnapshot.forEach((documentSnap) => {
+      const data = documentSnap.data();
+      const card = document.createElement('div');
+      card.className = 'req-card';
+      
+      const date = new Date(data.submittedAt).toLocaleString();
+      
+      let actionButtons = '';
+      if (currentTab === 'pending') {
+        actionButtons = `
+          <div class="req-actions">
+            <button class="btn btn-reject" onclick="processPayment('${documentSnap.id}', '${data.userId}', 'rejected')">Reject</button>
+            <button class="btn btn-approve" onclick="processPayment('${documentSnap.id}', '${data.userId}', 'approved')">Approve & Pro</button>
+          </div>
+        `;
+      }
+
+      card.innerHTML = `
+        <div class="req-info">
+          <div class="req-email">${data.email}</div>
+          <div class="req-txnid">UTR/TXN: ${data.txnId}</div>
+          <div class="req-meta">
+            <span>Name: ${data.name}</span>
+            <span>Plan: ${data.plan}</span>
+            <span>Date: ${date}</span>
+          </div>
+        </div>
+        ${actionButtons}
+      `;
+      listContainer.appendChild(card);
+    });
+  } catch (err) {
+    listContainer.innerHTML = `<div class="empty" style="color:red;">Error loading data: ${err.message}</div>`;
+  }
+}
+
+window.processPayment = async function(txnId, userId, newStatus) {
+  if (!confirm(`Are you sure you want to set this request to ${newStatus}?`)) return;
+
+  try {
+    // 1. Update the request status in payment_requests
+    const reqRef = doc(window.db, "payment_requests", txnId);
+    await updateDoc(reqRef, { status: newStatus });
+
+    // 2. If approved, set the user's pro status to true in the users collection
+    if (newStatus === 'approved') {
+      const userRef = doc(window.db, "users", userId);
+      await updateDoc(userRef, { pro: true });
+      alert('Success! Request approved and user upgraded to Pro.');
+    } else {
+      alert('Request rejected.');
+    }
+
+    loadRequests();
+  } catch (err) {
+    alert('Failed to process request: ' + err.message);
+  }
+}
+</script>
+<script src="mobile.js"></script>
+<script type="module" src="auth.js"></script>
+</body>
+</html>

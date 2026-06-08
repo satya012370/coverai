@@ -17,6 +17,10 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
+// Expose Firebase services globally for other scripts
+window.auth = auth;
+window.db = db;
+
 // Expose functions globally so buttons can trigger them
 window.signInWithGoogle = async () => {
   try {

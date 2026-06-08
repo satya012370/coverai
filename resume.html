@@ -481,6 +481,7 @@ let eduEntries = [];
 window.addEventListener('DOMContentLoaded', () => {
   addExp(); addEdu();
   updatePreview(); updateDlUI(); updateProgress();
+  setTimeout(updateDlUI, 500); // Wait for auth to populate
 });
 
 /* ── TOAST ── */
@@ -535,8 +536,18 @@ function updateProgress() {
 /* ── DOWNLOADS ── */
 function getDownloadsUsed() { return parseInt(localStorage.getItem(DL_KEY) || '0'); }
 function incrementDownloads() { localStorage.setItem(DL_KEY, getDownloadsUsed() + 1); }
-function getDownloadsLeft() { return Math.max(0, FREE_DOWNLOADS - getDownloadsUsed()); }
+function getDownloadsLeft() {
+  if (window.currentUser && window.currentUser.isPro) return 999;
+  return Math.max(0, FREE_DOWNLOADS - getDownloadsUsed());
+}
 function updateDlUI() {
+  if (window.currentUser && window.currentUser.isPro) {
+    document.getElementById('dlCounter').style.display = 'none';
+    document.getElementById('limitBanner').style.display = 'none';
+    document.getElementById('dlBtn').style.display = 'flex';
+    document.getElementById('dlBtn').textContent = '⬇ Download PDF — Unlimited Pro';
+    return;
+  }
   const left = getDownloadsLeft();
   document.getElementById('dlRemain').textContent = left;
   document.querySelectorAll('.dl-dot').forEach((d, i) => d.classList.toggle('used', i >= left));

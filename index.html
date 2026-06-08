@@ -433,9 +433,15 @@
     }
     setLoading(true);
     try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (window.auth && window.auth.currentUser) {
+        const idToken = await window.auth.currentUser.getIdToken();
+        headers['Authorization'] = `Bearer ${idToken}`;
+      }
+
       const res = await fetch('/api/generate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: headers,
         body: JSON.stringify({ name, profession, exp, skills, achievement, company, jobtitle, jobdesc, tone: selectedTone, resumeText })
       });
       const data = await res.json();

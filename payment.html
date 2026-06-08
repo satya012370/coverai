@@ -268,8 +268,11 @@ nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;
   </div>
 </div>
 
-<script>
-function copyUPI() {
+<script type="module">
+import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+window.copyUPI = function() {
   const upi = document.getElementById('upiId').textContent.trim();
   navigator.clipboard.writeText(upi).then(() => {
     const btn = event.target;
@@ -278,7 +281,37 @@ function copyUPI() {
   });
 }
 
-async function submitPayment() {
+const checkAuthInterval = setInterval(() => {
+  if (window.auth) {
+    clearInterval(checkAuthInterval);
+    onAuthStateChanged(window.auth, (user) => {
+      const emailInput = document.getElementById('userEmail');
+      const submitBtn = document.getElementById('submitBtn');
+      
+      if (user) {
+        emailInput.value = user.email;
+        emailInput.readOnly = true;
+        emailInput.style.background = '#f0f0f0';
+        emailInput.style.color = '#666';
+        submitBtn.disabled = false;
+        submitBtn.textContent = "✅ I've paid — Confirm my order";
+      } else {
+        emailInput.value = '';
+        emailInput.placeholder = '⚠️ Please SIGN IN first (top right) to buy Pro';
+        emailInput.readOnly = true;
+        submitBtn.disabled = true;
+        submitBtn.textContent = "⚠️ Please Sign In first";
+      }
+    });
+  }
+}, 100);
+
+window.submitPayment = async function() {
+  if (!window.currentUser) {
+    alert('Please sign in using Google at the top right before submitting payment.');
+    return;
+  }
+
   const email  = document.getElementById('userEmail').value.trim();
   const txnId  = document.getElementById('txnId').value.trim();
   const name   = document.getElementById('userName').value.trim();
@@ -287,25 +320,35 @@ async function submitPayment() {
     alert('Please enter your email and UPI transaction ID.');
     return;
   }
-  if (!email.includes('@')) {
-    alert('Please enter a valid email address.');
-    return;
-  }
 
   const btn = document.getElementById('submitBtn');
   btn.disabled = true;
   btn.textContent = 'Submitting...';
 
   try {
-    // Send to your backend
-    const res = await fetch('/api/payment-request', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, txnId, name, amount: 49, plan: 'pro-monthly' })
+    // Write payment request directly to Firestore
+    const reqRef = doc(window.db, "payment_requests", txnId);
+    await setDoc(reqRef, {
+      userId: window.currentUser.uid,
+      email: email,
+      txnId: txnId,
+      name: name || 'Not provided',
+      amount: 49,
+      plan: 'pro-monthly',
+      status: 'pending',
+      submittedAt: new Date().toISOString()
     });
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Submission failed');
+    // Also send a request to backend as backup/logging
+    try {
+      await fetch('/api/payment-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, txnId, name, amount: 49, plan: 'pro-monthly' })
+      });
+    } catch(e) {
+      console.warn("Backend backup failed, but Firestore saved:", e);
+    }
 
     // Show success
     document.getElementById('confirmedEmail').textContent = email;
@@ -315,7 +358,7 @@ async function submitPayment() {
     document.querySelector('.qr-wrap').style.display = 'none';
 
   } catch(err) {
-    alert('Error: ' + err.message + '\n\nPlease email us directly at coveraii@gmail.com with your transaction ID.');
+    alert('Error submitting payment: ' + err.message + '\n\nPlease contact support at coveraii@gmail.com');
     btn.disabled = false;
     btn.textContent = '✅ I\'ve paid — Confirm my order';
   }
