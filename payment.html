@@ -64,7 +64,7 @@ nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;
 
 /* QR CODE placeholder */
 .qr-wrap{background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:16px;text-align:center;margin-bottom:16px}
-.qr-img{width:160px;height:160px;margin:0 auto;background:#f5f5f5;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#aaa;overflow:hidden}
+.qr-img{width:200px;height:200px;margin:0 auto;background:#f5f5f5;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#aaa;overflow:hidden}
 .qr-img img{width:100%;height:100%;object-fit:contain}
 .qr-label{font-size:12px;color:#666;margin-top:8px}
 
@@ -216,17 +216,7 @@ nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;
         <!-- QR CODE — Replace src with your actual UPI QR image -->
         <div class="qr-wrap">
           <div class="qr-img" id="qrContainer">
-            <!-- 
-              REPLACE THIS: 
-              Add your UPI QR code image here.
-              1. Open GPay/PhonePe → Your QR code → Save/Screenshot it
-              2. Upload it to your CoverAI folder as "upi-qr.png"
-              3. Replace the text below with: <img src="upi-qr.png" alt="UPI QR Code"/>
-            -->
-            <span style="padding:1rem;font-size:13px;color:#888;text-align:center">
-              📱 Add your UPI QR<br/>image here<br/><br/>
-              Save as upi-qr.png<br/>in your project folder
-            </span>
+<img src="upi-qr.png" alt="Scan to pay via PhonePe UPI" style="width:100%;height:100%;object-fit:contain;border-radius:8px"/>
           </div>
           <div class="qr-label">Scan with any UPI app</div>
         </div>
@@ -234,7 +224,7 @@ nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;
         <!-- UPI ID -->
         <div class="upi-box">
           <div style="font-size:12px;color:#555;margin-bottom:4px">Or pay directly to UPI ID:</div>
-          <!-- REPLACE YOUR_UPI_ID@upi with your actual UPI ID -->
+          <!-- REPLACE 8879503896@ybl with your actual UPI ID -->
           <div class="upi-id" id="upiId">8879503896@ybl</div>
           <button onclick="copyUPI()" style="font-size:12px;background:#166534;color:#fff;border:none;border-radius:6px;padding:5px 14px;cursor:pointer;margin-top:6px">Copy UPI ID</button>
           <div class="upi-apps">
@@ -325,7 +315,7 @@ async function submitPayment() {
     document.querySelector('.qr-wrap').style.display = 'none';
 
   } catch(err) {
-    alert('Error: ' + err.message + '\n\nPlease email us directly at support@coveraii.com with your transaction ID.');
+    alert('Error: ' + err.message + '\n\nPlease email us directly at coveraii@gmail.com with your transaction ID.');
     btn.disabled = false;
     btn.textContent = '✅ I\'ve paid — Confirm my order';
   }
