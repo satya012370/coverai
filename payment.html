@@ -448,38 +448,20 @@ window.startRazorpayPayment = async function() {
       },
       theme: { color: '#5c4fc7' },
 
-      // ── Enable UPI with QR Code + all payment methods ──────────
-      config: {
-        display: {
-          blocks: {
-            upi_qr: {
-              name: 'Pay via UPI QR Code',
-              instruments: [
-                { method: 'upi', flows: ['qr'] }
-              ]
-            },
-            upi_apps: {
-              name: 'Pay via UPI Apps',
-              instruments: [
-                { method: 'upi', flows: ['collect', 'intent'] }
-              ]
-            },
-            other_methods: {
-              name: 'Other Payment Methods',
-              instruments: [
-                { method: 'card' },
-                { method: 'netbanking' },
-                { method: 'wallet' },
-                { method: 'paylater' }
-              ]
-            }
-          },
-          sequence: ['block.upi_qr', 'block.upi_apps', 'block.other_methods'],
-          preferences: {
-            show_default_blocks: false
-          }
-        }
-      },
+      // NOTE: UPI QR config is commented out — UPI is only available in LIVE mode after KYC.
+      // Uncomment the block below when you switch to live keys:
+      //
+      // config: {
+      //   display: {
+      //     blocks: {
+      //       upi_qr:  { name: 'Pay via UPI QR', instruments: [{ method: 'upi', flows: ['qr'] }] },
+      //       upi_apps:{ name: 'Pay via UPI Apps', instruments: [{ method: 'upi', flows: ['collect','intent'] }] },
+      //       others:  { name: 'Other Methods', instruments: [{ method:'card' },{ method:'netbanking' },{ method:'wallet' }] }
+      //     },
+      //     sequence: ['block.upi_qr','block.upi_apps','block.others'],
+      //     preferences: { show_default_blocks: false }
+      //   }
+      // },
 
       handler: async function(response) {
         await handlePaymentSuccess(response, user);
@@ -487,7 +469,7 @@ window.startRazorpayPayment = async function() {
 
       modal: {
         ondismiss: function() {
-          payBtn.disabled    = false;
+          payBtn.disabled       = false;
           btnText.style.display = 'inline';
           spinner.style.display = 'none';
         }
