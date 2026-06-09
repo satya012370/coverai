@@ -95,27 +95,35 @@ function renderAuthUI(user, isPro) {
   }
 }
 
-// ─── SIGN IN ──────────────────────────────────────────────────
+// ─── SIGN IN ─────────────────────────────────────────────
 window.signInWithGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
-    // Create Firestore user doc if first login
-    const userRef = doc(db, "users", user.uid);
-    const userSnap = await getDoc(userRef);
-    if (!userSnap.exists()) {
-      await setDoc(userRef, {
-        email: user.email,
-        name: user.displayName,
-        pro: false,
-        createdAt: new Date().toISOString()
-      });
+    // Try to create Firestore user doc — but don't block sign-in if it fails
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      const userSnap = await getDoc(userRef);
+      if (!userSnap.exists()) {
+        await setDoc(userRef, {
+          email: user.email,
+          name: user.displayName,
+          pro: false,
+          createdAt: new Date().toISOString()
+        });
+      }
+    } catch (firestoreErr) {
+      // Firestore offline is OK — auth still works, doc will be created later
+      console.warn('Firestore user doc creation skipped (offline?):', firestoreErr.message);
     }
+    // onAuthStateChanged will fire next and update the UI
   } catch (error) {
-    console.error("Login failed:", error);
-    if (error.code !== 'auth/popup-closed-by-user') {
-      alert("Login failed: " + error.message);
+    console.error('Google sign-in failed:', error);
+    // Only show alert for real auth errors, not network/Firestore issues
+    const silentCodes = ['auth/popup-closed-by-user', 'auth/cancelled-popup-request'];
+    if (!silentCodes.includes(error.code)) {
+      alert('Sign in failed. Please check your internet connection and try again.');
     }
   }
 };
@@ -164,10 +172,16 @@ renderAuthLoading();
 
 onAuthStateChanged(auth, async (user) => {
   if (user) {
-    // Fetch Pro status from Firestore
-    const userRef = doc(db, 'users', user.uid);
-    const userSnap = await getDoc(userRef);
-    const isPro = userSnap.exists() && userSnap.data().pro === true;
+    // Try to fetch Pro status — default to false if Firestore is offline
+    let isPro = false;
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      const userSnap = await getDoc(userRef);
+      isPro = userSnap.exists() && userSnap.data().pro === true;
+    } catch (firestoreErr) {
+      console.warn('Could not fetch Pro status (offline?), defaulting to free:', firestoreErr.message);
+      // isPro stays false — safe default; user can reload once online
+    }
 
     window.currentUser = {
       uid: user.uid,
