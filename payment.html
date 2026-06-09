@@ -448,6 +448,39 @@ window.startRazorpayPayment = async function() {
       },
       theme: { color: '#5c4fc7' },
 
+      // ── Enable UPI with QR Code + all payment methods ──────────
+      config: {
+        display: {
+          blocks: {
+            upi_qr: {
+              name: 'Pay via UPI QR Code',
+              instruments: [
+                { method: 'upi', flows: ['qr'] }
+              ]
+            },
+            upi_apps: {
+              name: 'Pay via UPI Apps',
+              instruments: [
+                { method: 'upi', flows: ['collect', 'intent'] }
+              ]
+            },
+            other_methods: {
+              name: 'Other Payment Methods',
+              instruments: [
+                { method: 'card' },
+                { method: 'netbanking' },
+                { method: 'wallet' },
+                { method: 'paylater' }
+              ]
+            }
+          },
+          sequence: ['block.upi_qr', 'block.upi_apps', 'block.other_methods'],
+          preferences: {
+            show_default_blocks: false
+          }
+        }
+      },
+
       handler: async function(response) {
         await handlePaymentSuccess(response, user);
       },
