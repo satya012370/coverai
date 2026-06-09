@@ -233,7 +233,7 @@ footer a{color:#5c4fc7}
     <h2>Daily limit reached</h2>
     <p>You've used your 2 free interview prep sessions today. Upgrade to Pro for unlimited sessions.</p>
     <div id="paywall-cta-container" style="margin-bottom:8px">
-      <button class="modal-cta" onclick="window.location.href='payment.html'">Get Pro — ₹499/month →</button>
+      <button class="modal-cta" onclick="window.location.href='payment.html'">Get Pro — ₹199/month →</button>
     </div>
     <div class="modal-close" onclick="closeModal()">Come back tomorrow</div>
   </div>
@@ -418,7 +418,7 @@ function showError(msg) {
 function showLimitModal() {
   const container = document.getElementById('paywall-cta-container');
   if (window.currentUser) {
-    container.innerHTML = `<button class="modal-cta" onclick="window.location.href='payment.html'">Get Pro — ₹499/month →</button>`;
+    container.innerHTML = `<button class="modal-cta" onclick="window.location.href='payment.html'">Get Pro — ₹199/month →</button>`;
   } else {
     container.innerHTML = `
       <div style="font-size:12px;color:#e24b4a;font-weight:600;margin-bottom:8px;">⚠️ Sign in to link Pro to your account</div>

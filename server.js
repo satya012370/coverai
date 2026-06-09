@@ -320,7 +320,7 @@ if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
 // Create a Razorpay order (frontend calls this before opening checkout)
 app.post("/api/razorpay/create-order", async (req, res) => {
   try {
-    const { amount = 499, currency = "INR", email } = req.body;
+    const { amount = 199, currency = "INR", email } = req.body;
 
     const orderBody = JSON.stringify({
       amount: amount * 100,          // Razorpay expects paise
@@ -384,7 +384,7 @@ app.post("/api/razorpay/payment-success", async (req, res) => {
     const record = {
       paymentId, orderId, signature,
       email, uid,
-      amount: 499,
+      amount: 199,
       plan: "pro-monthly",
       verified: !!(orderId && signature),
       capturedAt: new Date().toISOString()
