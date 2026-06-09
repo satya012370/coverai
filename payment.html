@@ -5,10 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='32' height='32' rx='8' fill='%235c4fc7'/%3E%3Cpath d='M18 9C13.582 9 10 12.582 10 17C10 21.418 13.582 25 18 25' stroke='white' stroke-width='2.8' stroke-linecap='round'/%3E%3Cpath d='M23 9.5L24.2 12.5L27 13.7L24.2 14.9L23 17.9L21.8 14.9L19 13.7L21.8 12.5Z' fill='%23F59E0B'/%3E%3C/svg%3E"/>
 <title>Get Pro — CoverAI ₹49/month</title>
+<meta name="description" content="Upgrade to CoverAI Pro for ₹49/month. Unlock unlimited cover letters, resume templates, ATS checker, and more."/>
 <link rel="stylesheet" href="mobile.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#1a1a1a;min-height:100vh}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#1a1a1a;min-height:100vh}
 nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:200}
 .logo{font-size:18px;font-weight:600;color:#5c4fc7;text-decoration:none;display:flex;align-items:center;gap:9px}
 .logo span{color:#1a1a1a}
@@ -19,8 +22,8 @@ nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;
 .page-wrap{max-width:900px;margin:0 auto;padding:2rem 1rem 4rem}
 
 /* HERO */
-.pay-hero{text-align:center;padding:2rem 1rem;background:linear-gradient(135deg,#eeedfe 0%,#fff 100%);border-radius:16px;margin-bottom:2rem;border:1px solid #e0dbf7}
-.pay-hero .badge{display:inline-block;background:#5c4fc7;color:#fff;font-size:11px;font-weight:700;padding:4px 14px;border-radius:20px;margin-bottom:12px}
+.pay-hero{text-align:center;padding:2.5rem 1rem;background:linear-gradient(135deg,#eeedfe 0%,#fff 100%);border-radius:16px;margin-bottom:2rem;border:1px solid #e0dbf7}
+.pay-hero .badge{display:inline-block;background:#5c4fc7;color:#fff;font-size:11px;font-weight:700;padding:4px 14px;border-radius:20px;margin-bottom:12px;letter-spacing:.5px}
 .pay-hero h1{font-size:28px;font-weight:800;margin-bottom:8px}
 .pay-hero h1 span{color:#5c4fc7}
 .pay-hero p{font-size:15px;color:#555;max-width:480px;margin:0 auto}
@@ -39,56 +42,72 @@ nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;
 .feature-text span{font-size:12px;color:#666}
 
 /* PRICE TAG */
-.price-tag{background:#5c4fc7;color:#fff;border-radius:12px;padding:16px;text-align:center;margin-top:16px}
-.price-tag .amount{font-size:36px;font-weight:800}
-.price-tag .per{font-size:14px;opacity:.8}
-.price-tag .note{font-size:11px;opacity:.7;margin-top:4px}
+.price-tag{background:linear-gradient(135deg,#5c4fc7 0%,#7c6ee6 100%);color:#fff;border-radius:12px;padding:20px;text-align:center;margin-top:16px;box-shadow:0 4px 20px rgba(92,79,199,.3)}
+.price-tag .amount{font-size:40px;font-weight:800;letter-spacing:-1px}
+.price-tag .per{font-size:14px;opacity:.85;margin-left:4px}
+.price-tag .note{font-size:11px;opacity:.7;margin-top:6px}
 
-/* RIGHT — PAYMENT */
-.payment-card{background:#fff;border:1px solid #e8e8e8;border-radius:16px;padding:1.5rem}
-.payment-card h2{font-size:16px;font-weight:700;margin-bottom:6px;color:#1a1a1a}
+/* RIGHT — PAYMENT CARD */
+.payment-card{background:#fff;border:1px solid #e8e8e8;border-radius:16px;padding:1.5rem;display:flex;flex-direction:column;gap:0}
+
+.payment-card h2{font-size:17px;font-weight:700;margin-bottom:4px;color:#1a1a1a}
 .payment-card .subtitle{font-size:13px;color:#666;margin-bottom:20px}
 
-/* STEPS */
-.steps{display:flex;flex-direction:column;gap:16px;margin-bottom:20px}
-.step-item{display:flex;gap:14px;align-items:flex-start}
-.step-circle{width:28px;height:28px;border-radius:50%;background:#5c4fc7;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.step-body strong{display:block;font-size:13px;font-weight:600;margin-bottom:3px}
-.step-body span{font-size:12px;color:#666}
+/* RAZORPAY PAYMENT AREA */
+.rzp-branding{display:flex;align-items:center;gap:10px;background:#f8f7ff;border:1px solid #e0dbf7;border-radius:12px;padding:14px 16px;margin-bottom:20px}
+.rzp-logo{width:36px;height:36px;background:#072654;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rzp-logo svg{width:22px;height:22px}
+.rzp-info strong{display:block;font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:2px}
+.rzp-info span{font-size:12px;color:#666}
 
-/* UPI BOX */
-.upi-box{background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:16px;text-align:center;margin-bottom:16px}
-.upi-id{font-size:18px;font-weight:700;color:#166534;letter-spacing:.5px;margin:8px 0}
-.upi-apps{display:flex;justify-content:center;gap:12px;margin-top:10px;flex-wrap:wrap}
-.upi-app{background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;color:#555}
+/* PAYMENT METHODS PILLS */
+.pay-methods{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.pay-method{display:flex;align-items:center;gap:6px;background:#f5f5f5;border:1px solid #e8e8e8;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:500;color:#444}
+.pay-method .dot{width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block}
 
-/* QR CODE placeholder */
-.qr-wrap{background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:16px;text-align:center;margin-bottom:16px}
-.qr-img{width:200px;height:200px;margin:0 auto;background:#f5f5f5;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#aaa;overflow:hidden}
-.qr-img img{width:100%;height:100%;object-fit:contain}
-.qr-label{font-size:12px;color:#666;margin-top:8px}
+/* USER EMAIL */
+.email-display{background:#f8f7ff;border:1px solid #e0dbf7;border-radius:8px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.email-display .email-icon{font-size:16px}
+.email-display .email-text{font-size:13px;color:#444;flex:1}
+.email-display .email-text strong{display:block;font-size:11px;color:#888;margin-bottom:1px;text-transform:uppercase;letter-spacing:.3px}
 
-/* SUBMIT FORM */
-.submit-form{display:flex;flex-direction:column;gap:10px}
-.submit-form input{width:100%;font-size:14px;color:#1a1a1a;background:#fafafa;border:1px solid #e0e0e0;border-radius:8px;padding:10px 13px;font-family:inherit}
-.submit-form input:focus{outline:none;border-color:#5c4fc7;background:#fff}
-.submit-btn{width:100%;padding:13px;font-size:15px;font-weight:700;background:#5c4fc7;color:#fff;border:none;border-radius:10px;cursor:pointer;transition:background .2s}
-.submit-btn:hover{background:#4a3db5}
-.submit-btn:disabled{background:#a8a2e0;cursor:not-allowed}
+/* PAY BUTTON */
+.rzp-pay-btn{
+  width:100%;padding:15px;font-size:16px;font-weight:700;
+  background:linear-gradient(135deg,#5c4fc7 0%,#7c6ee6 100%);
+  color:#fff;border:none;border-radius:12px;cursor:pointer;
+  transition:all .2s;box-shadow:0 4px 16px rgba(92,79,199,.35);
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  letter-spacing:.2px;position:relative;overflow:hidden;
+}
+.rzp-pay-btn:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(92,79,199,.45)}
+.rzp-pay-btn:active{transform:translateY(0)}
+.rzp-pay-btn:disabled{background:#a8a2e0;cursor:not-allowed;transform:none;box-shadow:none}
+.rzp-pay-btn .btn-shine{position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);transform:translateX(-100%);transition:transform .5s}
+.rzp-pay-btn:hover .btn-shine{transform:translateX(100%)}
+
+.signin-prompt{background:#fff8ed;border:1px solid #fde68a;border-radius:10px;padding:14px 16px;font-size:13px;color:#92400e;display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.signin-prompt .si-icon{font-size:20px;flex-shrink:0}
 
 /* SUCCESS */
-.success-box{display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:20px;text-align:center;margin-top:12px}
-.success-box .icon{font-size:40px;margin-bottom:10px}
-.success-box h3{font-size:16px;font-weight:700;color:#166534;margin-bottom:6px}
-.success-box p{font-size:13px;color:#15803d;line-height:1.6}
+.success-box{display:none;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #86efac;border-radius:16px;padding:28px 20px;text-align:center;margin-top:4px;animation:fadeIn .4s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.success-box .icon{font-size:48px;margin-bottom:12px;display:block}
+.success-box h3{font-size:18px;font-weight:700;color:#166534;margin-bottom:8px}
+.success-box p{font-size:13px;color:#15803d;line-height:1.7}
+.success-box .payment-id{font-size:11px;color:#16a34a;background:#dcfce7;border:1px solid #86efac;border-radius:6px;padding:4px 10px;display:inline-block;margin-top:10px;font-family:monospace}
 
 /* TRUST BADGES */
-.trust-row{display:flex;justify-content:center;gap:20px;margin-top:16px;flex-wrap:wrap}
+.trust-row{display:flex;justify-content:center;gap:16px;margin-top:16px;flex-wrap:wrap}
 .trust-item{font-size:12px;color:#888;display:flex;align-items:center;gap:5px}
 
-/* GUARANTEE */
-.guarantee{background:#fefce8;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;margin-top:16px;font-size:12px;color:#92400e;display:flex;align-items:flex-start;gap:10px}
-.guarantee-icon{font-size:20px;flex-shrink:0}
+/* SECURITY NOTE */
+.security-note{background:#f8f7ff;border:1px solid #e0dbf7;border-radius:10px;padding:12px 14px;margin-top:14px;font-size:12px;color:#6b5cc8;display:flex;align-items:flex-start;gap:10px}
+.security-note-icon{font-size:16px;flex-shrink:0}
+
+/* SPINNER */
+.spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -107,7 +126,7 @@ nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;
     <a href="index.html">Cover Letter</a>
     <a href="resume.html">Resume Builder</a>
     <a href="pricing.html">Pricing</a>
-    <button class="nav-btn">← Back to site</button>
+    <button class="nav-btn" onclick="history.back()">← Back</button>
   </div>
 </nav>
 
@@ -186,81 +205,73 @@ nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;
     <!-- RIGHT: PAYMENT -->
     <div>
       <div class="payment-card">
-        <h2>Pay via UPI</h2>
-        <div class="subtitle">Instant · Secure · Works with any UPI app</div>
+        <h2>Complete your payment</h2>
+        <div class="subtitle">Secure checkout powered by Razorpay</div>
 
-        <div class="steps">
-          <div class="step-item">
-            <div class="step-circle">1</div>
-            <div class="step-body">
-              <strong>Pay ₹49 via UPI</strong>
-              <span>Scan the QR code or pay to the UPI ID below</span>
-            </div>
+        <!-- Razorpay branding -->
+        <div class="rzp-branding">
+          <div class="rzp-logo">
+            <!-- Razorpay "R" icon -->
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5 3h9.5L20 9l-8 12L5 3z" fill="#3395FF"/>
+              <path d="M12 21l-2-5 5-7-3 12z" fill="#fff" opacity=".7"/>
+            </svg>
           </div>
-          <div class="step-item">
-            <div class="step-circle">2</div>
-            <div class="step-body">
-              <strong>Fill the form below</strong>
-              <span>Enter your email and UPI transaction ID</span>
-            </div>
-          </div>
-          <div class="step-item">
-            <div class="step-circle">3</div>
-            <div class="step-body">
-              <strong>Get Pro access</strong>
-              <span>We verify and send your Pro access code within 1 hour</span>
-            </div>
+          <div class="rzp-info">
+            <strong>Razorpay — 100% Secure</strong>
+            <span>256-bit SSL encryption · PCI DSS Level 1 certified</span>
           </div>
         </div>
 
-        <!-- QR CODE — Replace src with your actual UPI QR image -->
-        <div class="qr-wrap">
-          <div class="qr-img" id="qrContainer">
-<img src="upi-qr.png" alt="Scan to pay via PhonePe UPI" style="width:100%;height:100%;object-fit:contain;border-radius:8px"/>
+        <!-- Accepted payment methods -->
+        <div class="pay-methods">
+          <span class="pay-method"><span class="dot"></span>Cards</span>
+          <span class="pay-method"><span class="dot"></span>NetBanking</span>
+          <span class="pay-method"><span class="dot"></span>UPI</span>
+          <span class="pay-method"><span class="dot"></span>Wallets</span>
+          <span class="pay-method"><span class="dot"></span>EMI</span>
+        </div>
+
+        <!-- Sign-in prompt (shown when not logged in) -->
+        <div class="signin-prompt" id="signinPrompt" style="display:none">
+          <span class="si-icon">⚠️</span>
+          <span>Please <strong>sign in</strong> first (top-right) so we can activate your Pro account after payment.</span>
+        </div>
+
+        <!-- Logged-in user email display -->
+        <div class="email-display" id="emailDisplay" style="display:none">
+          <span class="email-icon">👤</span>
+          <div class="email-text">
+            <strong>Paying as</strong>
+            <span id="payingEmail">—</span>
           </div>
-          <div class="qr-label">Scan with any UPI app</div>
         </div>
 
-        <!-- UPI ID -->
-        <div class="upi-box">
-          <div style="font-size:12px;color:#555;margin-bottom:4px">Or pay directly to UPI ID:</div>
-          <!-- REPLACE 8879503896@ybl with your actual UPI ID -->
-          <div class="upi-id" id="upiId">8879503896@ybl</div>
-          <button onclick="copyUPI()" style="font-size:12px;background:#166534;color:#fff;border:none;border-radius:6px;padding:5px 14px;cursor:pointer;margin-top:6px">Copy UPI ID</button>
-          <div class="upi-apps">
-            <span class="upi-app">GPay</span>
-            <span class="upi-app">PhonePe</span>
-            <span class="upi-app">Paytm</span>
-            <span class="upi-app">BHIM</span>
-            <span class="upi-app">Any UPI</span>
-          </div>
-        </div>
+        <!-- PAY BUTTON -->
+        <button class="rzp-pay-btn" id="rzpPayBtn" onclick="startRazorpayPayment()" disabled>
+          <span class="btn-shine"></span>
+          <span id="btnText">🔒 Pay ₹49 Securely</span>
+          <div class="spinner" id="btnSpinner"></div>
+        </button>
 
-        <!-- SUBMIT FORM -->
-        <div class="submit-form">
-          <input type="email" id="userEmail" placeholder="Your email address *" required/>
-          <input type="text" id="txnId" placeholder="UPI Transaction ID / UTR number *" required/>
-          <input type="text" id="userName" placeholder="Your name (optional)"/>
-          <button class="submit-btn" id="submitBtn" onclick="submitPayment()">
-            ✅ I've paid — Confirm my order
-          </button>
-        </div>
-
+        <!-- SUCCESS -->
         <div class="success-box" id="successBox">
-          <div class="icon">🎉</div>
-          <h3>Payment submitted!</h3>
-          <p>We'll verify your payment and send your Pro access to <strong id="confirmedEmail"></strong> within <strong>1 hour</strong>.<br/><br/>Check your spam folder too. Thank you!</p>
+          <span class="icon">🎉</span>
+          <h3>Payment Successful!</h3>
+          <p>Your Pro access has been activated for<br/><strong id="confirmedEmail"></strong>.<br/><br/>Reload the page or start using Pro features now!</p>
+          <div class="payment-id" id="paymentIdDisplay"></div>
         </div>
 
-        <div class="guarantee">
-          <span class="guarantee-icon">🛡️</span>
-          <span><strong>100% safe.</strong> Your payment goes directly to our UPI account. If we can't verify, we refund within 24 hours.</span>
-        </div>
-
+        <!-- Trust badges -->
         <div class="trust-row">
-          <span class="trust-item">🔒 Secure payment</span>
-          <span class="trust-item">⚡ Access within 1 hr</span>
+          <span class="trust-item">🔒 Bank-grade security</span>
+          <span class="trust-item">⚡ Instant activation</span>
           <span class="trust-item">↩️ Easy refund</span>
+        </div>
+
+        <div class="security-note">
+          <span class="security-note-icon">🛡️</span>
+          <span><strong>Your payment is safe.</strong> All transactions are processed by Razorpay — India's most trusted payment gateway. CoverAI never stores your card details.</span>
         </div>
       </div>
     </div>
@@ -269,100 +280,176 @@ nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;
 </div>
 
 <script type="module">
-import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-window.copyUPI = function() {
-  const upi = document.getElementById('upiId').textContent.trim();
-  navigator.clipboard.writeText(upi).then(() => {
-    const btn = event.target;
-    btn.textContent = 'Copied!';
-    setTimeout(() => btn.textContent = 'Copy UPI ID', 2000);
-  });
-}
+// Razorpay Test Key
+const RZP_KEY_ID = "rzp_test_SzLih3caxuIRqY";
 
+let currentUser = null;
+
+// Wait for Firebase auth to initialise
 const checkAuthInterval = setInterval(() => {
   if (window.auth) {
     clearInterval(checkAuthInterval);
     onAuthStateChanged(window.auth, (user) => {
-      const emailInput = document.getElementById('userEmail');
-      const submitBtn = document.getElementById('submitBtn');
-      
+      currentUser = user;
+      window.currentUser = user; // expose globally for payment handler
+
+      const signinPrompt = document.getElementById('signinPrompt');
+      const emailDisplay  = document.getElementById('emailDisplay');
+      const payingEmail   = document.getElementById('payingEmail');
+      const payBtn        = document.getElementById('rzpPayBtn');
+
       if (user) {
-        emailInput.value = user.email;
-        emailInput.readOnly = true;
-        emailInput.style.background = '#f0f0f0';
-        emailInput.style.color = '#666';
-        submitBtn.disabled = false;
-        submitBtn.textContent = "✅ I've paid — Confirm my order";
+        signinPrompt.style.display = 'none';
+        emailDisplay.style.display = 'flex';
+        payingEmail.textContent = user.email;
+        payBtn.disabled = false;
       } else {
-        emailInput.value = '';
-        emailInput.placeholder = '⚠️ Please SIGN IN first (top right) to buy Pro';
-        emailInput.readOnly = true;
-        submitBtn.disabled = true;
-        submitBtn.textContent = "⚠️ Please Sign In first";
+        signinPrompt.style.display = 'flex';
+        emailDisplay.style.display = 'none';
+        payBtn.disabled = true;
+        document.getElementById('btnText').textContent = '⚠️ Sign In to Pay';
       }
     });
   }
 }, 100);
 
-window.submitPayment = async function() {
-  if (!window.currentUser) {
-    alert('Please sign in using Google at the top right before submitting payment.');
+window.startRazorpayPayment = async function() {
+  if (!currentUser) {
+    alert('Please sign in first before making a payment.');
     return;
   }
 
-  const email  = document.getElementById('userEmail').value.trim();
-  const txnId  = document.getElementById('txnId').value.trim();
-  const name   = document.getElementById('userName').value.trim();
+  const payBtn    = document.getElementById('rzpPayBtn');
+  const btnText   = document.getElementById('btnText');
+  const spinner   = document.getElementById('btnSpinner');
 
-  if (!email || !txnId) {
-    alert('Please enter your email and UPI transaction ID.');
-    return;
-  }
-
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = true;
-  btn.textContent = 'Submitting...';
+  payBtn.disabled = true;
+  btnText.style.display = 'none';
+  spinner.style.display = 'block';
 
   try {
-    // Write payment request directly to Firestore
-    const reqRef = doc(window.db, "payment_requests", txnId);
-    await setDoc(reqRef, {
-      userId: window.currentUser.uid,
-      email: email,
-      txnId: txnId,
-      name: name || 'Not provided',
-      amount: 49,
-      plan: 'pro-monthly',
-      status: 'pending',
-      submittedAt: new Date().toISOString()
-    });
-
-    // Also send a request to backend as backup/logging
+    // Create a Razorpay order via backend
+    let orderId = null;
     try {
-      await fetch('/api/payment-request', {
+      const orderRes = await fetch('/api/razorpay/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, txnId, name, amount: 49, plan: 'pro-monthly' })
+        body: JSON.stringify({ amount: 49, currency: 'INR', email: currentUser.email })
       });
+      if (orderRes.ok) {
+        const orderData = await orderRes.json();
+        orderId = orderData.id;
+      }
     } catch(e) {
-      console.warn("Backend backup failed, but Firestore saved:", e);
+      console.warn('Could not create order from backend, proceeding without order ID:', e);
     }
 
-    // Show success
-    document.getElementById('confirmedEmail').textContent = email;
-    document.getElementById('successBox').style.display = 'block';
-    document.querySelector('.submit-form').style.display = 'none';
-    document.querySelector('.upi-box').style.display = 'none';
-    document.querySelector('.qr-wrap').style.display = 'none';
+    const options = {
+      key: RZP_KEY_ID,
+      amount: 4900,           // in paise (₹49 × 100)
+      currency: 'INR',
+      name: 'CoverAI',
+      description: 'Pro Plan — Monthly',
+      image: "data:image/svg+xml,%3Csvg width='64' height='64' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='32' height='32' rx='8' fill='%235c4fc7'/%3E%3Cpath d='M18 9C13.582 9 10 12.582 10 17C10 21.418 13.582 25 18 25' stroke='white' stroke-width='2.8' stroke-linecap='round'/%3E%3Cpath d='M23 9.5L24.2 12.5L27 13.7L24.2 14.9L23 17.9L21.8 14.9L19 13.7L21.8 12.5Z' fill='%23F59E0B'/%3E%3C/svg%3E",
+      order_id: orderId || undefined,
+      prefill: {
+        name: currentUser.displayName || '',
+        email: currentUser.email,
+      },
+      theme: { color: '#5c4fc7' },
+      modal: { backdropclose: false },
+
+      handler: async function(response) {
+        // Payment successful — activate Pro in Firestore
+        try {
+          const userRef = doc(window.db, 'users', currentUser.uid);
+          await setDoc(userRef, {
+            pro: true,
+            proActivatedAt: new Date().toISOString(),
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpayOrderId: response.razorpay_order_id || null,
+            plan: 'pro-monthly',
+            email: currentUser.email,
+          }, { merge: true });
+
+          // Log payment in Firestore
+          const payRef = doc(window.db, 'payments', response.razorpay_payment_id);
+          await setDoc(payRef, {
+            userId: currentUser.uid,
+            email: currentUser.email,
+            amount: 49,
+            currency: 'INR',
+            plan: 'pro-monthly',
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpayOrderId: response.razorpay_order_id || null,
+            razorpaySignature: response.razorpay_signature || null,
+            paidAt: new Date().toISOString(),
+            status: 'captured'
+          });
+
+          // Also notify backend
+          try {
+            await fetch('/api/razorpay/payment-success', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                paymentId: response.razorpay_payment_id,
+                orderId: response.razorpay_order_id,
+                signature: response.razorpay_signature,
+                email: currentUser.email,
+                uid: currentUser.uid
+              })
+            });
+          } catch(e) {
+            console.warn('Backend notification failed, but Firestore already updated:', e);
+          }
+
+          // Show success UI
+          document.getElementById('confirmedEmail').textContent = currentUser.email;
+          document.getElementById('paymentIdDisplay').textContent = 'Payment ID: ' + response.razorpay_payment_id;
+          document.getElementById('successBox').style.display = 'block';
+          payBtn.style.display = 'none';
+          document.getElementById('emailDisplay').style.display = 'none';
+          document.querySelector('.rzp-branding').style.display = 'none';
+          document.querySelector('.pay-methods').style.display = 'none';
+
+        } catch(err) {
+          alert('Payment received but could not activate Pro automatically.\nPlease contact coveraii@gmail.com with your Payment ID: ' + response.razorpay_payment_id);
+          payBtn.disabled = false;
+          btnText.style.display = 'inline';
+          spinner.style.display = 'none';
+        }
+      },
+
+      "modal.ondismiss": function() {
+        payBtn.disabled = false;
+        btnText.style.display = 'inline';
+        spinner.style.display = 'none';
+        btnText.textContent = '🔒 Pay ₹49 Securely';
+      }
+    };
+
+    const rzp = new Razorpay(options);
+
+    rzp.on('payment.failed', function(response) {
+      alert('Payment failed: ' + (response.error.description || 'Unknown error') + '\n\nPlease try again or contact support.');
+      payBtn.disabled = false;
+      btnText.style.display = 'inline';
+      spinner.style.display = 'none';
+    });
+
+    rzp.open();
 
   } catch(err) {
-    alert('Error submitting payment: ' + err.message + '\n\nPlease contact support at coveraii@gmail.com');
-    btn.disabled = false;
-    btn.textContent = '✅ I\'ve paid — Confirm my order';
+    alert('Could not open payment gateway: ' + err.message);
+    payBtn.disabled = false;
+    btnText.style.display = 'inline';
+    spinner.style.display = 'none';
   }
-}
+};
 </script>
 <script src="mobile.js"></script>
 </body>

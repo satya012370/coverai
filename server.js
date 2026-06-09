@@ -308,44 +308,79 @@ app.get("/test", async (req, res) => {
 });
 
 
-// ─── PAYMENT REQUEST ──────────────────────────────────────────
-// Stores payment requests — you verify manually and email the user
-const paymentRequests = []; // In production use a database
+// ─── RAZORPAY PAYMENT ─────────────────────────────────────────
+const RAZORPAY_KEY_ID     = process.env.RAZORPAY_KEY_ID     || "rzp_test_SzLih3caxuIRqY";
+const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || "p66zVchZiIteqOUxvhupXmz5";
 
-app.post("/api/payment-request", async (req, res) => {
+// Create a Razorpay order (frontend calls this before opening checkout)
+app.post("/api/razorpay/create-order", async (req, res) => {
   try {
-    const { email, txnId, name, amount, plan } = req.body;
-    if (!email || !txnId) return res.status(400).json({ error: "Email and transaction ID required" });
+    const { amount = 49, currency = "INR", email } = req.body;
 
-    const request = {
-      id: Date.now(),
-      email, txnId, name: name || 'Not provided',
-      amount: amount || 49, plan: plan || 'pro-monthly',
-      submittedAt: new Date().toISOString(),
-      status: 'pending'
-    };
+    const orderBody = JSON.stringify({
+      amount: amount * 100,          // Razorpay expects paise
+      currency,
+      receipt: `order_${Date.now()}`,
+      notes: { email: email || "" }
+    });
 
-    paymentRequests.push(request);
-    console.log("\n💰 NEW PAYMENT REQUEST:");
-    console.log("   Email:", email);
-    console.log("   TXN ID:", txnId);
-    console.log("   Name:", name);
-    console.log("   Amount: ₹", amount);
-    console.log("   Time:", request.submittedAt);
-    console.log("   → Verify on UPI app and send Pro access to this email\n");
+    const credentials = Buffer.from(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`).toString("base64");
+    const rzpRes = await fetch("https://api.razorpay.com/v1/orders", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Basic ${credentials}`
+      },
+      body: orderBody
+    });
 
-    res.json({ success: true, message: "Payment request received" });
+    const order = await rzpRes.json();
+    if (!rzpRes.ok) {
+      console.error("Razorpay order creation failed:", order);
+      return res.status(500).json({ error: order.error?.description || "Order creation failed" });
+    }
+
+    console.log("\n🛒 Razorpay order created:", order.id, "| ₹", amount, "|", email);
+    res.json(order);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// View all pending payments (admin only — add a secret key in production)
+// Log confirmed Razorpay payments (frontend also writes to Firestore directly)
+const confirmedPayments = [];
+
+app.post("/api/razorpay/payment-success", async (req, res) => {
+  try {
+    const { paymentId, orderId, signature, email, uid } = req.body;
+    if (!paymentId || !email) return res.status(400).json({ error: "paymentId and email required" });
+
+    const record = {
+      paymentId, orderId, signature,
+      email, uid,
+      amount: 49,
+      plan: "pro-monthly",
+      capturedAt: new Date().toISOString()
+    };
+    confirmedPayments.push(record);
+
+    console.log("\n✅ RAZORPAY PAYMENT CONFIRMED:");
+    console.log("   Payment ID:", paymentId);
+    console.log("   Order ID  :", orderId);
+    console.log("   Email     :", email);
+    console.log("   Time      :", record.capturedAt, "\n");
+
+    res.json({ success: true, message: "Payment logged" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Admin: view confirmed Razorpay payments
 app.get("/api/admin/payments", (req, res) => {
   const key = req.query.key;
-  // CHANGE THIS SECRET KEY to something only you know
   if (key !== "coverai012370") return res.status(401).json({ error: "Unauthorized" });
-  res.json({ total: paymentRequests.length, requests: paymentRequests });
+  res.json({ total: confirmedPayments.length, payments: confirmedPayments });
 });
 
 const PORT = process.env.PORT || 3000;
