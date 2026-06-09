@@ -329,8 +329,8 @@ nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;
 
 <!-- ═══════════════════════════ SCRIPTS ═══════════════════════ -->
 <script type="module">
-// Razorpay Test Key
-const RZP_KEY_ID = "rzp_test_SzLih3caxuIRqY";
+// Razorpay Live Key (account activated)
+const RZP_KEY_ID = "rzp_live_SzV0Dg5rrF3L11";
 
 // ── UI helpers ──────────────────────────────────────────────
 function showSection(name) {
@@ -448,20 +448,17 @@ window.startRazorpayPayment = async function() {
       },
       theme: { color: '#5c4fc7' },
 
-      // NOTE: UPI QR config is commented out — UPI is only available in LIVE mode after KYC.
-      // Uncomment the block below when you switch to live keys:
-      //
-      // config: {
-      //   display: {
-      //     blocks: {
-      //       upi_qr:  { name: 'Pay via UPI QR', instruments: [{ method: 'upi', flows: ['qr'] }] },
-      //       upi_apps:{ name: 'Pay via UPI Apps', instruments: [{ method: 'upi', flows: ['collect','intent'] }] },
-      //       others:  { name: 'Other Methods', instruments: [{ method:'card' },{ method:'netbanking' },{ method:'wallet' }] }
-      //     },
-      //     sequence: ['block.upi_qr','block.upi_apps','block.others'],
-      //     preferences: { show_default_blocks: false }
-      //   }
-      // },
+      config: {
+        display: {
+          blocks: {
+            upi_qr:  { name: 'Pay via UPI QR', instruments: [{ method: 'upi', flows: ['qr'] }] },
+            upi_apps:{ name: 'Pay via UPI Apps', instruments: [{ method: 'upi', flows: ['collect','intent'] }] },
+            others:  { name: 'Other Methods', instruments: [{ method:'card' },{ method:'netbanking' },{ method:'wallet' }] }
+          },
+          sequence: ['block.upi_qr','block.upi_apps','block.others'],
+          preferences: { show_default_blocks: false }
+        }
+      },
 
       handler: async function(response) {
         await handlePaymentSuccess(response, user);

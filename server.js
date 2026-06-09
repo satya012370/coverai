@@ -1,4 +1,5 @@
 require("dotenv").config();
+const crypto = require("crypto");
 const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
@@ -308,9 +309,13 @@ app.get("/test", async (req, res) => {
 });
 
 
-// ─── RAZORPAY PAYMENT ─────────────────────────────────────────
-const RAZORPAY_KEY_ID     = process.env.RAZORPAY_KEY_ID     || "rzp_test_SzLih3caxuIRqY";
-const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || "p66zVchZiIteqOUxvhupXmz5";
+// ─── RAZORPAY PAYMENT (LIVE) ──────────────────────────────────
+const RAZORPAY_KEY_ID     = process.env.RAZORPAY_KEY_ID;
+const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;
+
+if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
+  console.warn("⚠️  RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET not set in .env — payments will fail!");
+}
 
 // Create a Razorpay order (frontend calls this before opening checkout)
 app.post("/api/razorpay/create-order", async (req, res) => {
@@ -350,16 +355,38 @@ app.post("/api/razorpay/create-order", async (req, res) => {
 // Log confirmed Razorpay payments (frontend also writes to Firestore directly)
 const confirmedPayments = [];
 
+// Verify Razorpay payment signature (critical for live payments)
+function verifyRazorpaySignature(orderId, paymentId, signature) {
+  if (!RAZORPAY_KEY_SECRET) return false;
+  const body = orderId + "|" + paymentId;
+  const expectedSignature = crypto
+    .createHmac("sha256", RAZORPAY_KEY_SECRET)
+    .update(body)
+    .digest("hex");
+  return expectedSignature === signature;
+}
+
 app.post("/api/razorpay/payment-success", async (req, res) => {
   try {
     const { paymentId, orderId, signature, email, uid } = req.body;
     if (!paymentId || !email) return res.status(400).json({ error: "paymentId and email required" });
+
+    // Verify signature for live payments (order-based)
+    if (orderId && signature) {
+      const isValid = verifyRazorpaySignature(orderId, paymentId, signature);
+      if (!isValid) {
+        console.error("❌ INVALID RAZORPAY SIGNATURE for payment:", paymentId);
+        return res.status(400).json({ error: "Payment verification failed — invalid signature" });
+      }
+      console.log("✅ Razorpay signature verified for payment:", paymentId);
+    }
 
     const record = {
       paymentId, orderId, signature,
       email, uid,
       amount: 49,
       plan: "pro-monthly",
+      verified: !!(orderId && signature),
       capturedAt: new Date().toISOString()
     };
     confirmedPayments.push(record);
@@ -367,10 +394,11 @@ app.post("/api/razorpay/payment-success", async (req, res) => {
     console.log("\n✅ RAZORPAY PAYMENT CONFIRMED:");
     console.log("   Payment ID:", paymentId);
     console.log("   Order ID  :", orderId);
+    console.log("   Verified  :", record.verified ? "YES ✅" : "NO (no order)");
     console.log("   Email     :", email);
     console.log("   Time      :", record.capturedAt, "\n");
 
-    res.json({ success: true, message: "Payment logged" });
+    res.json({ success: true, message: "Payment verified and logged" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -445,3 +473,57 @@ Rules:
     res.status(500).json({ error: err.message });
   }
 });
+
+// ─── INTERVIEW Q&A GENERATOR ───────────────────────────────────
+app.post("/api/interview-prep", async (req, res) => {
+  try {
+    const { jobTitle, company, jobDescription, experience, focusAreas } = req.body;
+    if (!jobTitle) return res.status(400).json({ error: "Job title is required" });
+
+    const focusStr = focusAreas && focusAreas.length ? focusAreas.join(", ") : "behavioral, technical, situational";
+
+    const prompt = `You are an expert interview coach. Generate 8 highly targeted interview questions with strong model answers for this candidate.
+
+Job Title: ${jobTitle}
+Company: ${company || "Not specified"}
+Years of Experience: ${experience || "Not specified"}
+Job Description: ${jobDescription || "Not provided"}
+Focus Areas: ${focusStr}
+
+Return ONLY a valid JSON array with exactly 8 objects:
+[
+  {
+    "category": "Behavioral" | "Technical" | "Situational" | "Culture Fit",
+    "question": "The interview question",
+    "answer": "A strong 3-5 sentence model answer using STAR method where applicable",
+    "tip": "One short coaching tip for delivering this answer well"
+  }
+]
+
+Rules:
+- Questions must be SPECIFIC to the job title and company, not generic
+- Answers should use first person ("I did...", "In my experience...")
+- Include a mix: 3 behavioral, 2 technical, 2 situational, 1 culture fit
+- Tips should be practical (e.g. "pause for 2 seconds before answering", "mention a specific metric")
+- Return ONLY the JSON array, no markdown, no extra text`;
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) }
+    );
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error?.message || "Gemini API error");
+
+    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
+    const questions = JSON.parse(raw.replace(/```json|```/g, "").trim());
+
+    res.json({ questions });
+
+  } catch (err) {
+    console.error("Interview prep error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
