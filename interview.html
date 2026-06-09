@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='32' height='32' rx='8' fill='%235c4fc7'/%3E%3Cpath d='M18 9C13.582 9 10 12.582 10 17C10 21.418 13.582 25 18 25' stroke='white' stroke-width='2.8' stroke-linecap='round'/%3E%3Cpath d='M23 9.5L24.2 12.5L27 13.7L24.2 14.9L23 17.9L21.8 14.9L19 13.7L21.8 12.5Z' fill='%23F59E0B'/%3E%3C/svg%3E"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Interview Q&A Prep — CoverAI</title>
+<meta name="description" content="Generate role-specific interview questions and model answers with AI. Behavioral, technical, situational — all personalised to your job and company."/>
+<link rel="stylesheet" href="mobile.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#1a1a1a;min-height:100vh}
+
+/* NAV */
+nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:200}
+.logo{font-size:18px;font-weight:700;color:#5c4fc7;text-decoration:none;display:flex;align-items:center;gap:9px}
+.logo span{color:#1a1a1a}
+.nav-links{display:flex;gap:1.5rem;align-items:center}
+.nav-links a{font-size:14px;color:#555;text-decoration:none}
+.nav-links a:hover{color:#5c4fc7}
+.nav-btn{background:#5c4fc7;color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:13px;font-weight:600;cursor:pointer}
+
+/* HERO */
+.hero{text-align:center;padding:2.5rem 1rem 2rem;background:linear-gradient(135deg,#fef3e2 0%,#fff 100%);border-bottom:1px solid #e8e8e8}
+.hero-badge{display:inline-block;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;font-size:11px;font-weight:700;padding:4px 14px;border-radius:20px;margin-bottom:12px}
+.hero h1{font-size:30px;font-weight:800;margin-bottom:8px;line-height:1.3}
+.hero h1 span{color:#f59e0b}
+.hero p{font-size:15px;color:#555;max-width:500px;margin:0 auto 16px;line-height:1.6}
+.hero-pills{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.hero-pill{background:#fff;border:1px solid #fde68a;color:#92400e;font-size:12px;font-weight:600;padding:4px 14px;border-radius:20px}
+
+/* USAGE */
+.usage-wrap{max-width:760px;margin:1rem auto 0;padding:0 1rem}
+.usage-box{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.usage-left{font-size:13px;color:#555}
+.usage-left strong{color:#f59e0b}
+.usage-dots{display:flex;gap:5px}
+.dot{width:11px;height:11px;border-radius:50%;background:#f59e0b}
+.dot.used{background:#e0e0e0}
+
+/* TOOL */
+.tool-wrap{max-width:760px;margin:0 auto;padding:1.5rem 1rem 3rem}
+.card{background:#fff;border:1px solid #e8e8e8;border-radius:14px;padding:1.5rem;margin-bottom:1rem}
+.card-title{font-size:12px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px}
+label{display:block;font-size:13px;color:#444;margin-bottom:5px;margin-top:14px;font-weight:500}
+label:first-of-type{margin-top:0}
+input,select,textarea{width:100%;font-size:14px;color:#1a1a1a;background:#fafafa;border:1px solid #e0e0e0;border-radius:8px;padding:9px 13px;font-family:inherit;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#f59e0b;background:#fff}
+textarea{resize:vertical;line-height:1.6}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:540px){.row{grid-template-columns:1fr}}
+
+/* FOCUS CHIPS */
+.focus-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.focus-chip{padding:7px 14px;font-size:12px;font-weight:600;border:1.5px solid #e0e0e0;border-radius:20px;background:#fafafa;color:#555;cursor:pointer;transition:all .15s;user-select:none}
+.focus-chip:hover{border-color:#f59e0b;color:#92400e}
+.focus-chip.active{background:#fef3c7;border-color:#f59e0b;color:#92400e}
+
+/* GEN BUTTON */
+.gen-btn{width:100%;padding:15px;font-size:16px;font-weight:700;border:none;border-radius:10px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;cursor:pointer;margin-top:8px;transition:all .2s;box-shadow:0 4px 16px rgba(245,158,11,.3);display:flex;align-items:center;justify-content:center;gap:10px}
+.gen-btn:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(245,158,11,.4)}
+.gen-btn:disabled{background:#fcd34d;cursor:not-allowed;transform:none;box-shadow:none}
+.spinner{display:inline-block;width:18px;height:18px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error{color:#c0392b;font-size:13px;margin-top:10px;display:none;background:#fdf0ef;border:1px solid #f5c6c6;border-radius:8px;padding:10px 14px}
+
+/* RESULTS */
+.results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px}
+.results-title{font-size:17px;font-weight:700}
+.results-actions{display:flex;gap:8px}
+.action-btn{font-size:12px;font-weight:600;padding:6px 14px;border-radius:8px;cursor:pointer;border:1px solid #e0e0e0;background:#fff;color:#555;transition:all .15s}
+.action-btn:hover{background:#f5f5f5}
+
+/* QUESTION CARDS */
+.q-card{background:#fff;border:1.5px solid #e8e8e8;border-radius:14px;padding:1.2rem 1.4rem;margin-bottom:12px;transition:all .2s;animation:fadeUp .3s ease}
+.q-card:hover{border-color:#fde68a;box-shadow:0 4px 16px rgba(245,158,11,.1)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.q-meta{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.q-num{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.q-category{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.3px}
+.cat-behavioral{background:#ede9fe;color:#5b21b6}
+.cat-technical{background:#dbeafe;color:#1e40af}
+.cat-situational{background:#dcfce7;color:#166534}
+.cat-culture{background:#fef3c7;color:#92400e}
+.cat-culture-fit{background:#fef3c7;color:#92400e}
+.q-question{font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:12px;line-height:1.5}
+
+.q-toggle{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:10px 12px;background:#f8f8f8;border-radius:8px;margin-bottom:8px;border:1px solid #f0f0f0;transition:background .15s;user-select:none}
+.q-toggle:hover{background:#f0f0f0}
+.q-toggle-label{font-size:12px;font-weight:600;color:#555}
+.q-toggle-arrow{font-size:12px;color:#aaa;transition:transform .2s}
+.q-toggle.open .q-toggle-arrow{transform:rotate(180deg)}
+.q-body{display:none;padding:10px 12px;border-radius:8px;margin-bottom:6px;font-size:13px;line-height:1.75}
+.q-body.show{display:block;animation:fadeUp .2s ease}
+.answer-body{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}
+.tip-body{background:#fffbeb;border:1px solid #fde68a;color:#92400e}
+.tip-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px}
+
+/* LIMIT MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:20px;padding:2rem;max-width:400px;width:90%;text-align:center;position:relative}
+.modal-x{position:absolute;top:12px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:#aaa}
+.modal h2{font-size:20px;font-weight:700;margin-bottom:8px}
+.modal p{font-size:14px;color:#666;line-height:1.6;margin-bottom:16px}
+.modal-cta{width:100%;padding:12px;font-size:15px;font-weight:700;background:#f59e0b;color:#fff;border:none;border-radius:10px;cursor:pointer;margin-bottom:8px}
+.modal-close{font-size:13px;color:#aaa;cursor:pointer;text-decoration:underline}
+
+footer{text-align:center;padding:2rem 1rem;font-size:13px;color:#888;border-top:1px solid #e8e8e8;background:#fff}
+footer a{color:#5c4fc7}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="32" height="32" rx="8" fill="#5c4fc7"/>
+      <path d="M18 9C13.582 9 10 12.582 10 17C10 21.418 13.582 25 18 25" stroke="white" stroke-width="2.8" stroke-linecap="round"/>
+      <path d="M23 9.5L24.2 12.5L27 13.7L24.2 14.9L23 17.9L21.8 14.9L19 13.7L21.8 12.5Z" fill="#F59E0B"/>
+    </svg>
+    Cover<span>AI</span>
+  </a>
+  <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+  <div class="nav-links">
+    <a href="index.html">Cover Letter</a>
+    <a href="resume.html">📄 Resume Builder</a>
+    <a href="ats.html">🎯 ATS Checker</a>
+    <a href="linkedin.html">LinkedIn</a>
+    <a href="interview.html" style="color:#f59e0b;font-weight:700">🎤 Interview Prep</a>
+    <a href="pricing.html">Pricing</a>
+    <button class="nav-btn" onclick="window.location.href='payment.html'" style="background:#f59e0b">Get Pro</button>
+    <div id="auth-container"></div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">🎤 Pro Feature — Interview Q&A</div>
+  <h1>Ace your interview with<br/><span>AI-generated Q&A prep</span></h1>
+  <p>Enter the job title and company — get 8 targeted questions with model answers and coaching tips. Behavioral, technical, situational — all in one go.</p>
+  <div class="hero-pills">
+    <span class="hero-pill">🎯 Role-specific questions</span>
+    <span class="hero-pill">💡 STAR method answers</span>
+    <span class="hero-pill">🏆 Coaching tips</span>
+    <span class="hero-pill">⚡ Free: 2 per day</span>
+  </div>
+</div>
+
+<!-- USAGE BAR -->
+<div class="usage-wrap">
+  <div class="usage-box" id="usageBox">
+    <div class="usage-left">You have <strong id="remainCount">2</strong> free prep sessions remaining today</div>
+    <div class="usage-dots" id="usageDots">
+      <div class="dot"></div><div class="dot"></div>
+    </div>
+  </div>
+</div>
+
+<div class="tool-wrap">
+
+  <!-- INPUT -->
+  <div class="card">
+    <div class="card-title">📋 Job Details</div>
+    <div class="row">
+      <div>
+        <label>Job Title *</label>
+        <input type="text" id="jobTitle" placeholder="e.g. Senior Software Engineer"/>
+      </div>
+      <div>
+        <label>Company</label>
+        <input type="text" id="company" placeholder="e.g. Google, Amazon..."/>
+      </div>
+    </div>
+    <div class="row" style="margin-top:0">
+      <div>
+        <label>Years of Experience</label>
+        <select id="experience">
+          <option value="">Any level</option>
+          <option value="0-1 years (fresher)">Fresher / 0-1 years</option>
+          <option value="1-3 years">1–3 years</option>
+          <option value="3-5 years">3–5 years</option>
+          <option value="5-8 years">5–8 years</option>
+          <option value="8+ years (senior/lead)">8+ years (Senior/Lead)</option>
+        </select>
+      </div>
+      <div>
+        <label>Job Description (optional)</label>
+        <textarea id="jobDesc" rows="2" placeholder="Paste key responsibilities or requirements..."></textarea>
+      </div>
+    </div>
+
+    <label>Focus Areas (select all that apply)</label>
+    <div class="focus-chips" id="focusChips">
+      <div class="focus-chip active" data-focus="Behavioral">👤 Behavioral</div>
+      <div class="focus-chip active" data-focus="Technical">⚙️ Technical</div>
+      <div class="focus-chip active" data-focus="Situational">🧩 Situational</div>
+      <div class="focus-chip" data-focus="Culture Fit">🤝 Culture Fit</div>
+      <div class="focus-chip" data-focus="Leadership">🏆 Leadership</div>
+      <div class="focus-chip" data-focus="Problem Solving">🔍 Problem Solving</div>
+    </div>
+  </div>
+
+  <button class="gen-btn" id="genBtn" onclick="generatePrep()">
+    <span id="btnText">🎤 Generate My Interview Q&A</span>
+    <div class="spinner" id="btnSpinner" style="display:none"></div>
+  </button>
+  <div class="error" id="error"></div>
+
+  <!-- RESULTS -->
+  <div id="resultsSection" style="display:none;margin-top:1.5rem">
+    <div class="results-header">
+      <div class="results-title">🎤 Your Interview Q&A</div>
+      <div class="results-actions">
+        <button class="action-btn" onclick="regenerate()">↻ Regenerate</button>
+        <button class="action-btn" onclick="expandAll()">↕ Expand All</button>
+        <button class="action-btn" onclick="copyAll()" id="copyAllBtn">📋 Copy All</button>
+      </div>
+    </div>
+    <div id="questionsContainer"></div>
+  </div>
+
+</div>
+
+<footer>Built with ❤️ · <strong>CoverAI</strong> · <a href="index.html">Cover Letter</a> · <a href="resume.html">Resume Builder</a> · <a href="ats.html">ATS Checker</a> · <a href="linkedin.html">LinkedIn</a> · <a href="pricing.html">Pricing</a> · <a href="privacy.html">Privacy Policy</a> · <a href="terms.html">Terms</a></footer>
+
+<!-- LIMIT MODAL -->
+<div class="modal-overlay" id="limitModal">
+  <div class="modal">
+    <button class="modal-x" onclick="closeModal()">✕</button>
+    <div style="font-size:44px;margin-bottom:10px">🎤</div>
+    <h2>Daily limit reached</h2>
+    <p>You've used your 2 free interview prep sessions today. Upgrade to Pro for unlimited sessions.</p>
+    <div id="paywall-cta-container" style="margin-bottom:8px">
+      <button class="modal-cta" onclick="window.location.href='payment.html'">Get Pro — ₹499/month →</button>
+    </div>
+    <div class="modal-close" onclick="closeModal()">Come back tomorrow</div>
+  </div>
+</div>
+
+<script>
+const FREE_LIMIT = 2;
+const STORAGE_KEY = 'coverai_interview_usage';
+let lastQuestions = [];
+let allExpanded = false;
+
+// ── USAGE ──────────────────────────────────────────────────────
+function getToday() { return new Date().toISOString().split('T')[0]; }
+function getUsage() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return { date: getToday(), count: 0 };
+  const p = JSON.parse(raw);
+  return p.date !== getToday() ? { date: getToday(), count: 0 } : p;
+}
+function incrementUsage() {
+  const u = getUsage(); u.count++;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
+}
+function getRemaining() {
+  if (window.currentUser && window.currentUser.isPro) return 999;
+  return Math.max(0, FREE_LIMIT - getUsage().count);
+}
+function updateUsageUI() {
+  if (window.currentUser && window.currentUser.isPro) {
+    document.getElementById('usageBox').style.display = 'none';
+    return;
+  }
+  const r = getRemaining();
+  document.getElementById('remainCount').textContent = r;
+  document.querySelectorAll('#usageDots .dot').forEach((d, i) => d.classList.toggle('used', i >= r));
+  if (r === 0) {
+    document.getElementById('genBtn').disabled = true;
+    document.getElementById('btnText').textContent = '⚡ Daily limit reached';
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => setTimeout(updateUsageUI, 600));
+window.addEventListener('coverai:authchange', updateUsageUI);
+
+// ── FOCUS CHIPS ────────────────────────────────────────────────
+document.querySelectorAll('.focus-chip').forEach(chip => {
+  chip.addEventListener('click', () => chip.classList.toggle('active'));
+});
+function getSelectedFocus() {
+  return [...document.querySelectorAll('.focus-chip.active')].map(c => c.dataset.focus);
+}
+
+// ── GENERATE ───────────────────────────────────────────────────
+async function generatePrep() {
+  if (getRemaining() <= 0) { showLimitModal(); return; }
+
+  const jobTitle = document.getElementById('jobTitle').value.trim();
+  const company  = document.getElementById('company').value.trim();
+  const jobDesc  = document.getElementById('jobDesc').value.trim();
+  const experience = document.getElementById('experience').value;
+  const focusAreas = getSelectedFocus();
+
+  if (!jobTitle) { showError('Please enter the job title.'); return; }
+  if (focusAreas.length === 0) { showError('Please select at least one focus area.'); return; }
+
+  setLoading(true);
+  document.getElementById('resultsSection').style.display = 'none';
+
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (window.auth && window.auth.currentUser) {
+      headers['Authorization'] = `Bearer ${await window.auth.currentUser.getIdToken()}`;
+    }
+
+    const res = await fetch('/api/interview-prep', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ jobTitle, company, jobDescription: jobDesc, experience, focusAreas })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Something went wrong');
+    if (!data.questions || !data.questions.length) throw new Error('No questions returned');
+
+    lastQuestions = data.questions;
+    renderQuestions(data.questions);
+
+    incrementUsage();
+    updateUsageUI();
+
+  } catch(err) {
+    showError('Error: ' + err.message);
+  } finally {
+    setLoading(false);
+  }
+}
+
+function regenerate() {
+  document.getElementById('resultsSection').style.display = 'none';
+  generatePrep();
+}
+
+// ── RENDER ─────────────────────────────────────────────────────
+function catClass(c) {
+  const map = { 'Behavioral':'cat-behavioral','Technical':'cat-technical','Situational':'cat-situational','Culture Fit':'cat-culture','Leadership':'cat-behavioral','Problem Solving':'cat-technical' };
+  return map[c] || 'cat-situational';
+}
+
+function renderQuestions(qs) {
+  const container = document.getElementById('questionsContainer');
+  container.innerHTML = qs.map((q, i) => `
+    <div class="q-card" id="qcard_${i}">
+      <div class="q-meta">
+        <div class="q-num">${i+1}</div>
+        <span class="q-category ${catClass(q.category)}">${q.category}</span>
+      </div>
+      <div class="q-question">${q.question}</div>
+
+      <div class="q-toggle" onclick="toggleSection(${i},'answer')" id="toggle_answer_${i}">
+        <span class="q-toggle-label">💬 Model Answer</span>
+        <span class="q-toggle-arrow">▾</span>
+      </div>
+      <div class="q-body answer-body" id="body_answer_${i}">${q.answer}</div>
+
+      <div class="q-toggle" onclick="toggleSection(${i},'tip')" id="toggle_tip_${i}">
+        <span class="q-toggle-label">💡 Coaching Tip</span>
+        <span class="q-toggle-arrow">▾</span>
+      </div>
+      <div class="q-body tip-body" id="body_tip_${i}">${q.tip}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('resultsSection').style.display = 'block';
+  document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  allExpanded = false;
+}
+
+function toggleSection(idx, type) {
+  const body = document.getElementById(`body_${type}_${idx}`);
+  const toggle = document.getElementById(`toggle_${type}_${idx}`);
+  const isOpen = body.classList.contains('show');
+  body.classList.toggle('show', !isOpen);
+  toggle.classList.toggle('open', !isOpen);
+}
+
+function expandAll() {
+  const btn = document.querySelector('.action-btn[onclick="expandAll()"]');
+  allExpanded = !allExpanded;
+  document.querySelectorAll('.q-body').forEach(b => b.classList.toggle('show', allExpanded));
+  document.querySelectorAll('.q-toggle').forEach(t => t.classList.toggle('open', allExpanded));
+  btn.textContent = allExpanded ? '↕ Collapse All' : '↕ Expand All';
+}
+
+function copyAll() {
+  const text = lastQuestions.map((q, i) =>
+    `Q${i+1} [${q.category}]: ${q.question}\n\nAnswer: ${q.answer}\n\nTip: ${q.tip}`
+  ).join('\n\n' + '─'.repeat(50) + '\n\n');
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyAllBtn');
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => btn.textContent = '📋 Copy All', 2500);
+  });
+}
+
+// ── HELPERS ────────────────────────────────────────────────────
+function setLoading(on) {
+  const btn = document.getElementById('genBtn');
+  const txt = document.getElementById('btnText');
+  const spin = document.getElementById('btnSpinner');
+  btn.disabled = on;
+  txt.style.display = on ? 'none' : 'inline';
+  spin.style.display = on ? 'inline-block' : 'none';
+  if (!on) txt.textContent = '🎤 Generate My Interview Q&A';
+  document.getElementById('error').style.display = 'none';
+}
+
+function showError(msg) {
+  const el = document.getElementById('error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function showLimitModal() {
+  const container = document.getElementById('paywall-cta-container');
+  if (window.currentUser) {
+    container.innerHTML = `<button class="modal-cta" onclick="window.location.href='payment.html'">Get Pro — ₹499/month →</button>`;
+  } else {
+    container.innerHTML = `
+      <div style="font-size:12px;color:#e24b4a;font-weight:600;margin-bottom:8px;">⚠️ Sign in to link Pro to your account</div>
+      <button class="modal-cta" onclick="signInFromModal()" style="background:#4285F4;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#fff"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#fff"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#fff"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#fff"/></svg>
+        Sign In with Google to Upgrade
+      </button>`;
+  }
+  document.getElementById('limitModal').classList.add('show');
+}
+
+async function signInFromModal() {
+  if (window.signInWithGoogle) {
+    document.getElementById('paywall-cta-container').innerHTML = `<div style="text-align:center;padding:8px;font-size:13px;color:#f59e0b;">Signing in…</div>`;
+    await window.signInWithGoogle();
+  }
+}
+
+function closeModal() { document.getElementById('limitModal').classList.remove('show'); }
+</script>
+<script src="mobile.js"></script>
+<script type="module" src="auth.js"></script>
+</body>
+</html>

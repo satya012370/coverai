@@ -4,8 +4,8 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='32' height='32' rx='8' fill='%235c4fc7'/%3E%3Cpath d='M18 9C13.582 9 10 12.582 10 17C10 21.418 13.582 25 18 25' stroke='white' stroke-width='2.8' stroke-linecap='round'/%3E%3Cpath d='M23 9.5L24.2 12.5L27 13.7L24.2 14.9L23 17.9L21.8 14.9L19 13.7L21.8 12.5Z' fill='%23F59E0B'/%3E%3C/svg%3E"/>
-<title>Get Pro — CoverAI ₹49/month</title>
-<meta name="description" content="Upgrade to CoverAI Pro for ₹49/month. Unlock unlimited cover letters, resume templates, ATS checker, and more."/>
+<title>Get Pro — CoverAI ₹499/month</title>
+<meta name="description" content="Upgrade to CoverAI Pro for ₹499/month. Unlock unlimited cover letters, resume templates, ATS checker, and more."/>
 <link rel="stylesheet" href="mobile.css"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
@@ -146,7 +146,7 @@ nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;
   <!-- HERO -->
   <div class="pay-hero">
     <div class="badge">⭐ Pro Plan — Limited Time Price</div>
-    <h1>Get <span>CoverAI Pro</span> for just ₹49</h1>
+    <h1>Get <span>CoverAI Pro</span> for just ₹499</h1>
     <p>One-time monthly payment. Unlock all Pro features instantly after payment.</p>
   </div>
 
@@ -208,7 +208,7 @@ nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;
         </div>
 
         <div class="price-tag">
-          <div class="amount">₹49 <span class="per">/ month</span></div>
+          <div class="amount">₹499 <span class="per">/ month</span></div>
           <div class="note">Cancel anytime · Instant access after payment</div>
         </div>
       </div>
@@ -292,7 +292,7 @@ nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;
           <!-- Pay button -->
           <button class="rzp-pay-btn" id="rzpPayBtn" onclick="startRazorpayPayment()">
             <span class="btn-shine"></span>
-            <span id="btnText">🔒 Pay ₹49 Securely</span>
+            <span id="btnText">🔒 Pay ₹499 Securely</span>
             <div class="spinner" id="btnSpinner"></div>
           </button>
 
@@ -424,7 +424,7 @@ window.startRazorpayPayment = async function() {
       const orderRes = await fetch('/api/razorpay/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: 49, currency: 'INR', email: user.email })
+        body: JSON.stringify({ amount: 499, currency: 'INR', email: user.email })
       });
       if (orderRes.ok) {
         const orderData = await orderRes.json();
@@ -436,7 +436,7 @@ window.startRazorpayPayment = async function() {
 
     const options = {
       key: RZP_KEY_ID,
-      amount: 4900,
+      amount: 49900,
       currency: 'INR',
       name: 'CoverAI',
       description: 'Pro Plan — Monthly',
@@ -513,7 +513,7 @@ async function handlePaymentSuccess(response, user) {
     await setDoc(payRef, {
       userId: user.uid,
       email: user.email,
-      amount: 49,
+      amount: 499,
       currency: 'INR',
       plan: 'pro-monthly',
       razorpayPaymentId: response.razorpay_payment_id,

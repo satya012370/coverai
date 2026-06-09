@@ -278,7 +278,7 @@
     </div>
     <div class="output-text" id="outputText"></div>
     <div class="pro-banner">
-      <div class="pro-text"><strong>Want unlimited letters & LinkedIn message generator?</strong><br/>Upgrade to Pro for just ₹49/month.</div>
+      <div class="pro-text"><strong>Want unlimited letters & LinkedIn message generator?</strong><br/>Upgrade to Pro for just ₹499/month.</div>
       <button class="pro-upgrade-btn" onclick="showPaywall()">Upgrade to Pro →</button>
     </div>
   </div>
@@ -303,7 +303,7 @@
     <h2>Upgrade to Pro</h2>
     <p>You've used your free letters for today. Upgrade to Pro and generate unlimited cover letters anytime.</p>
     <div class="modal-price">
-      <div class="price">₹49<span class="per">/month</span></div>
+      <div class="price">₹499<span class="per">/month</span></div>
       <div style="font-size:12px;color:#888;margin-top:4px">Cancel anytime · Instant access</div>
     </div>
     <ul class="modal-features">
@@ -314,7 +314,7 @@
       <li>Priority AI — faster generation</li>
     </ul>
     <div id="paywall-cta-container" style="margin-bottom: 10px;">
-      <button class="modal-cta" onclick="goToPro()">Get Pro Now — ₹49/month →</button>
+      <button class="modal-cta" onclick="goToPro()">Get Pro Now — ₹499/month →</button>
     </div>
     <div class="modal-close" onclick="closePaywall()">No thanks, I'll wait until tomorrow</div>
   </div>
@@ -413,7 +413,7 @@
     const container = document.getElementById('paywall-cta-container');
 
     if (window.currentUser) {
-      container.innerHTML = `<button class="modal-cta" onclick="goToPro()">Get Pro Now — ₹49/month →</button>`;
+      container.innerHTML = `<button class="modal-cta" onclick="goToPro()">Get Pro Now — ₹499/month →</button>`;
     } else {
       container.innerHTML = `
         <div style="font-size:12px;color:#e24b4a;font-weight:600;margin-bottom:8px;">⚠️ Please sign in first to link your Pro account</div>
@@ -445,7 +445,7 @@
     if (!modal || !modal.classList.contains('show')) return;
     const container = document.getElementById('paywall-cta-container');
     if (detail.user) {
-      container.innerHTML = `<button class="modal-cta" onclick="goToPro()">Get Pro Now — ₹49/month →</button>`;
+      container.innerHTML = `<button class="modal-cta" onclick="goToPro()">Get Pro Now — ₹499/month →</button>`;
     }
   });
 
