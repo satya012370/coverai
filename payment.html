@@ -12,6 +12,8 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#1a1a1a;min-height:100vh}
+
+/* ── NAV ── */
 nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:200}
 .logo{font-size:18px;font-weight:600;color:#5c4fc7;text-decoration:none;display:flex;align-items:center;gap:9px}
 .logo span{color:#1a1a1a}
@@ -21,18 +23,18 @@ nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;
 
 .page-wrap{max-width:900px;margin:0 auto;padding:2rem 1rem 4rem}
 
-/* HERO */
+/* ── HERO ── */
 .pay-hero{text-align:center;padding:2.5rem 1rem;background:linear-gradient(135deg,#eeedfe 0%,#fff 100%);border-radius:16px;margin-bottom:2rem;border:1px solid #e0dbf7}
 .pay-hero .badge{display:inline-block;background:#5c4fc7;color:#fff;font-size:11px;font-weight:700;padding:4px 14px;border-radius:20px;margin-bottom:12px;letter-spacing:.5px}
 .pay-hero h1{font-size:28px;font-weight:800;margin-bottom:8px}
 .pay-hero h1 span{color:#5c4fc7}
 .pay-hero p{font-size:15px;color:#555;max-width:480px;margin:0 auto}
 
-/* LAYOUT */
+/* ── LAYOUT ── */
 .pay-layout{display:grid;grid-template-columns:1fr 1fr;gap:24px}
 @media(max-width:640px){.pay-layout{grid-template-columns:1fr}}
 
-/* LEFT — WHAT YOU GET */
+/* ── FEATURES CARD ── */
 .features-card{background:#fff;border:1px solid #e8e8e8;border-radius:16px;padding:1.5rem}
 .features-card h2{font-size:16px;font-weight:700;margin-bottom:16px;color:#1a1a1a}
 .feature-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid #f5f5f5}
@@ -40,78 +42,85 @@ nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;
 .feature-icon{font-size:20px;flex-shrink:0;width:28px;text-align:center}
 .feature-text strong{display:block;font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:2px}
 .feature-text span{font-size:12px;color:#666}
-
-/* PRICE TAG */
 .price-tag{background:linear-gradient(135deg,#5c4fc7 0%,#7c6ee6 100%);color:#fff;border-radius:12px;padding:20px;text-align:center;margin-top:16px;box-shadow:0 4px 20px rgba(92,79,199,.3)}
 .price-tag .amount{font-size:40px;font-weight:800;letter-spacing:-1px}
 .price-tag .per{font-size:14px;opacity:.85;margin-left:4px}
 .price-tag .note{font-size:11px;opacity:.7;margin-top:6px}
 
-/* RIGHT — PAYMENT CARD */
-.payment-card{background:#fff;border:1px solid #e8e8e8;border-radius:16px;padding:1.5rem;display:flex;flex-direction:column;gap:0}
-
+/* ── PAYMENT CARD ── */
+.payment-card{background:#fff;border:1px solid #e8e8e8;border-radius:16px;padding:1.5rem}
 .payment-card h2{font-size:17px;font-weight:700;margin-bottom:4px;color:#1a1a1a}
 .payment-card .subtitle{font-size:13px;color:#666;margin-bottom:20px}
 
-/* RAZORPAY PAYMENT AREA */
-.rzp-branding{display:flex;align-items:center;gap:10px;background:#f8f7ff;border:1px solid #e0dbf7;border-radius:12px;padding:14px 16px;margin-bottom:20px}
+/* ── RAZORPAY BRANDING ── */
+.rzp-branding{display:flex;align-items:center;gap:10px;background:#f8f7ff;border:1px solid #e0dbf7;border-radius:12px;padding:14px 16px;margin-bottom:16px}
 .rzp-logo{width:36px;height:36px;background:#072654;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.rzp-logo svg{width:22px;height:22px}
 .rzp-info strong{display:block;font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:2px}
 .rzp-info span{font-size:12px;color:#666}
-
-/* PAYMENT METHODS PILLS */
 .pay-methods{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
 .pay-method{display:flex;align-items:center;gap:6px;background:#f5f5f5;border:1px solid #e8e8e8;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:500;color:#444}
 .pay-method .dot{width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block}
 
-/* USER EMAIL */
-.email-display{background:#f8f7ff;border:1px solid #e0dbf7;border-radius:8px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px}
-.email-display .email-icon{font-size:16px}
-.email-display .email-text{font-size:13px;color:#444;flex:1}
-.email-display .email-text strong{display:block;font-size:11px;color:#888;margin-bottom:1px;text-transform:uppercase;letter-spacing:.3px}
+/* ── AUTH STATES ── */
 
-/* PAY BUTTON */
-.rzp-pay-btn{
-  width:100%;padding:15px;font-size:16px;font-weight:700;
-  background:linear-gradient(135deg,#5c4fc7 0%,#7c6ee6 100%);
-  color:#fff;border:none;border-radius:12px;cursor:pointer;
-  transition:all .2s;box-shadow:0 4px 16px rgba(92,79,199,.35);
-  display:flex;align-items:center;justify-content:center;gap:10px;
-  letter-spacing:.2px;position:relative;overflow:hidden;
-}
-.rzp-pay-btn:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(92,79,199,.45)}
-.rzp-pay-btn:active{transform:translateY(0)}
-.rzp-pay-btn:disabled{background:#a8a2e0;cursor:not-allowed;transform:none;box-shadow:none}
-.rzp-pay-btn .btn-shine{position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);transform:translateX(-100%);transition:transform .5s}
-.rzp-pay-btn:hover .btn-shine{transform:translateX(100%)}
+/* State 1: Not logged in */
+.auth-gate{background:linear-gradient(135deg,#fff8ed,#fffbf5);border:1.5px solid #fde68a;border-radius:14px;padding:20px;margin-bottom:16px;text-align:center}
+.auth-gate .gate-icon{font-size:36px;margin-bottom:10px}
+.auth-gate h3{font-size:15px;font-weight:700;color:#92400e;margin-bottom:6px}
+.auth-gate p{font-size:13px;color:#b45309;margin-bottom:16px;line-height:1.5}
+.google-signin-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;background:#fff;border:1.5px solid #d0d0d0;border-radius:10px;font-size:14px;font-weight:600;color:#444;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:all .2s}
+.google-signin-btn:hover{box-shadow:0 4px 16px rgba(0,0,0,0.14);border-color:#aaa}
+.google-signin-btn svg{flex-shrink:0}
 
-.signin-prompt{background:#fff8ed;border:1px solid #fde68a;border-radius:10px;padding:14px 16px;font-size:13px;color:#92400e;display:flex;align-items:center;gap:10px;margin-bottom:16px}
-.signin-prompt .si-icon{font-size:20px;flex-shrink:0}
+/* State 2: Logged in, free user — email display */
+.email-display{background:#f8f7ff;border:1px solid #e0dbf7;border-radius:10px;padding:11px 14px;margin-bottom:16px;display:none;align-items:center;gap:12px}
+.email-display .avatar{width:34px;height:34px;border-radius:50%;border:2px solid #5c4fc7;object-fit:cover;flex-shrink:0}
+.email-display .avatar-placeholder{width:34px;height:34px;border-radius:50%;background:#5c4fc7;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.email-display .email-info{flex:1;min-width:0}
+.email-display .email-label{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.3px;font-weight:600}
+.email-display .email-val{font-size:13px;color:#3c3489;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.signout-link{font-size:11px;color:#e24b4a;cursor:pointer;font-weight:600;white-space:nowrap;text-decoration:underline}
 
-/* SUCCESS */
-.success-box{display:none;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #86efac;border-radius:16px;padding:28px 20px;text-align:center;margin-top:4px;animation:fadeIn .4s ease}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.success-box .icon{font-size:48px;margin-bottom:12px;display:block}
-.success-box h3{font-size:18px;font-weight:700;color:#166534;margin-bottom:8px}
-.success-box p{font-size:13px;color:#15803d;line-height:1.7}
-.success-box .payment-id{font-size:11px;color:#16a34a;background:#dcfce7;border:1px solid #86efac;border-radius:6px;padding:4px 10px;display:inline-block;margin-top:10px;font-family:monospace}
-
-/* TRUST BADGES */
-.trust-row{display:flex;justify-content:center;gap:16px;margin-top:16px;flex-wrap:wrap}
-.trust-item{font-size:12px;color:#888;display:flex;align-items:center;gap:5px}
-
-/* SECURITY NOTE */
-.security-note{background:#f8f7ff;border:1px solid #e0dbf7;border-radius:10px;padding:12px 14px;margin-top:14px;font-size:12px;color:#6b5cc8;display:flex;align-items:flex-start;gap:10px}
-.security-note-icon{font-size:16px;flex-shrink:0}
-
-/* SPINNER */
+/* ── PAY BUTTON ── */
+.rzp-pay-btn{width:100%;padding:15px;font-size:16px;font-weight:700;background:linear-gradient(135deg,#5c4fc7 0%,#7c6ee6 100%);color:#fff;border:none;border-radius:12px;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(92,79,199,.35);display:flex;align-items:center;justify-content:center;gap:10px;letter-spacing:.2px;position:relative;overflow:hidden;margin-bottom:0}
+.rzp-pay-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 24px rgba(92,79,199,.45)}
+.rzp-pay-btn:disabled{background:#a8a2e0;cursor:not-allowed;box-shadow:none;transform:none}
+.btn-shine{position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);transform:translateX(-100%);transition:transform .5s}
+.rzp-pay-btn:hover:not(:disabled) .btn-shine{transform:translateX(100%)}
 .spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── ALREADY PRO STATE ── */
+.already-pro-box{display:none;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:16px;padding:28px 20px;text-align:center;animation:fadeUp .4s ease}
+.already-pro-box .pro-icon{font-size:52px;margin-bottom:12px;display:block}
+.already-pro-box h3{font-size:18px;font-weight:800;color:#166534;margin-bottom:8px}
+.already-pro-box p{font-size:13px;color:#15803d;line-height:1.7;margin-bottom:20px}
+.already-pro-box .go-btn{display:inline-block;background:#166534;color:#fff;font-size:14px;font-weight:700;padding:11px 24px;border-radius:10px;text-decoration:none;transition:background .2s}
+.already-pro-box .go-btn:hover{background:#14532d}
+
+/* ── SUCCESS STATE ── */
+.success-box{display:none;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:16px;padding:28px 20px;text-align:center;animation:fadeUp .4s ease}
+.success-box .icon{font-size:52px;margin-bottom:12px;display:block}
+.success-box h3{font-size:18px;font-weight:800;color:#166534;margin-bottom:8px}
+.success-box p{font-size:13px;color:#15803d;line-height:1.7}
+.success-box .payment-id{font-size:11px;color:#16a34a;background:#dcfce7;border:1px solid #86efac;border-radius:6px;padding:4px 10px;display:inline-block;margin-top:10px;font-family:monospace}
+.success-box .cta-row{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+.success-box .cta-btn{padding:10px 20px;border-radius:9px;font-size:13px;font-weight:700;text-decoration:none;border:none;cursor:pointer;transition:all .2s}
+.success-box .cta-primary{background:#166534;color:#fff}
+.success-box .cta-primary:hover{background:#14532d}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── TRUST ── */
+.trust-row{display:flex;justify-content:center;gap:16px;margin-top:16px;flex-wrap:wrap}
+.trust-item{font-size:12px;color:#888;display:flex;align-items:center;gap:5px}
+.security-note{background:#f8f7ff;border:1px solid #e0dbf7;border-radius:10px;padding:12px 14px;margin-top:14px;font-size:12px;color:#6b5cc8;display:flex;align-items:flex-start;gap:10px}
+.security-note-icon{font-size:16px;flex-shrink:0}
 </style>
 </head>
 <body>
 
+<!-- ═══════════════════════════ NAV ═══════════════════════════ -->
 <nav>
   <a href="index.html" class="logo">
     <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -126,21 +135,24 @@ nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;
     <a href="index.html">Cover Letter</a>
     <a href="resume.html">Resume Builder</a>
     <a href="pricing.html">Pricing</a>
-    <button class="nav-btn" onclick="history.back()">← Back</button>
+    <!-- Auth container — auth.js populates this with login/logout UI -->
+    <div id="auth-container"></div>
   </div>
 </nav>
 
+<!-- ═══════════════════════ PAGE CONTENT ══════════════════════ -->
 <div class="page-wrap">
 
+  <!-- HERO -->
   <div class="pay-hero">
     <div class="badge">⭐ Pro Plan — Limited Time Price</div>
     <h1>Get <span>CoverAI Pro</span> for just ₹49</h1>
-    <p>One-time monthly payment. Unlock all Pro features instantly after payment confirmation.</p>
+    <p>One-time monthly payment. Unlock all Pro features instantly after payment.</p>
   </div>
 
   <div class="pay-layout">
 
-    <!-- LEFT: WHAT YOU GET -->
+    <!-- ════════════ LEFT: FEATURES ════════════ -->
     <div>
       <div class="features-card">
         <h2>✅ What you get with Pro</h2>
@@ -202,241 +214,258 @@ nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;
       </div>
     </div>
 
-    <!-- RIGHT: PAYMENT -->
+    <!-- ════════════ RIGHT: PAYMENT ════════════ -->
     <div>
       <div class="payment-card">
-        <h2>Complete your payment</h2>
-        <div class="subtitle">Secure checkout powered by Razorpay</div>
 
-        <!-- Razorpay branding -->
-        <div class="rzp-branding">
-          <div class="rzp-logo">
-            <!-- Razorpay "R" icon -->
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M5 3h9.5L20 9l-8 12L5 3z" fill="#3395FF"/>
-              <path d="M12 21l-2-5 5-7-3 12z" fill="#fff" opacity=".7"/>
-            </svg>
-          </div>
-          <div class="rzp-info">
-            <strong>Razorpay — 100% Secure</strong>
-            <span>256-bit SSL encryption · PCI DSS Level 1 certified</span>
+        <!-- ─── STATE 0: Already Pro ─── -->
+        <div class="already-pro-box" id="alreadyProBox">
+          <span class="pro-icon">⭐</span>
+          <h3>You're already a Pro member!</h3>
+          <p>Your account has full Pro access. Enjoy unlimited cover letters, resume downloads, LinkedIn messages and more.</p>
+          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+            <a href="index.html" class="go-btn" style="background:#166534;color:#fff;font-size:14px;font-weight:700;padding:11px 24px;border-radius:10px;text-decoration:none;">✦ Write a Cover Letter</a>
+            <a href="resume.html" class="go-btn" style="background:#5c4fc7;color:#fff;font-size:14px;font-weight:700;padding:11px 24px;border-radius:10px;text-decoration:none;">📄 Build Resume</a>
           </div>
         </div>
 
-        <!-- Accepted payment methods -->
-        <div class="pay-methods">
-          <span class="pay-method"><span class="dot"></span>Cards</span>
-          <span class="pay-method"><span class="dot"></span>NetBanking</span>
-          <span class="pay-method"><span class="dot"></span>UPI</span>
-          <span class="pay-method"><span class="dot"></span>Wallets</span>
-          <span class="pay-method"><span class="dot"></span>EMI</span>
-        </div>
+        <!-- ─── STATE 1: Logged Out — Sign In Prompt ─── -->
+        <div id="loggedOutSection">
+          <h2>Complete your payment</h2>
+          <div class="subtitle">Sign in first to link Pro to your account</div>
 
-        <!-- Sign-in prompt (shown when not logged in) -->
-        <div class="signin-prompt" id="signinPrompt" style="display:none">
-          <span class="si-icon">⚠️</span>
-          <span>Please <strong>sign in</strong> first (top-right) so we can activate your Pro account after payment.</span>
-        </div>
-
-        <!-- Logged-in user email display -->
-        <div class="email-display" id="emailDisplay" style="display:none">
-          <span class="email-icon">👤</span>
-          <div class="email-text">
-            <strong>Paying as</strong>
-            <span id="payingEmail">—</span>
+          <div class="auth-gate" id="authGate">
+            <div class="gate-icon">🔐</div>
+            <h3>Sign in to get Pro access</h3>
+            <p>We need your Google account to link Pro features to you after payment. It only takes a second!</p>
+            <button class="google-signin-btn" id="googleSignInBtn" onclick="handleGoogleSignIn()">
+              <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+              </svg>
+              Continue with Google
+            </button>
           </div>
         </div>
 
-        <!-- PAY BUTTON -->
-        <button class="rzp-pay-btn" id="rzpPayBtn" onclick="startRazorpayPayment()" disabled>
-          <span class="btn-shine"></span>
-          <span id="btnText">🔒 Pay ₹49 Securely</span>
-          <div class="spinner" id="btnSpinner"></div>
-        </button>
+        <!-- ─── STATE 2: Logged In, Free User — Pay Section ─── -->
+        <div id="loggedInSection" style="display:none">
+          <h2>Complete your payment</h2>
+          <div class="subtitle">Secure checkout powered by Razorpay</div>
 
-        <!-- SUCCESS -->
+          <!-- Razorpay branding -->
+          <div class="rzp-branding">
+            <div class="rzp-logo">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:22px;height:22px">
+                <path d="M5 3h9.5L20 9l-8 12L5 3z" fill="#3395FF"/>
+                <path d="M12 21l-2-5 5-7-3 12z" fill="#fff" opacity=".7"/>
+              </svg>
+            </div>
+            <div class="rzp-info">
+              <strong>Razorpay — 100% Secure</strong>
+              <span>256-bit SSL · PCI DSS Level 1 certified</span>
+            </div>
+          </div>
+
+          <!-- Accepted payment methods -->
+          <div class="pay-methods">
+            <span class="pay-method"><span class="dot"></span>Cards</span>
+            <span class="pay-method"><span class="dot"></span>NetBanking</span>
+            <span class="pay-method"><span class="dot"></span>UPI</span>
+            <span class="pay-method"><span class="dot"></span>Wallets</span>
+            <span class="pay-method"><span class="dot"></span>EMI</span>
+          </div>
+
+          <!-- Logged-in user email + logout -->
+          <div class="email-display" id="emailDisplay">
+            <div class="avatar-placeholder" id="avatarPlaceholder">?</div>
+            <img class="avatar" id="avatarImg" src="" alt="" style="display:none"/>
+            <div class="email-info">
+              <div class="email-label">Paying as</div>
+              <div class="email-val" id="payingEmail">—</div>
+            </div>
+            <span class="signout-link" onclick="handleSignOut()">Sign out</span>
+          </div>
+
+          <!-- Pay button -->
+          <button class="rzp-pay-btn" id="rzpPayBtn" onclick="startRazorpayPayment()">
+            <span class="btn-shine"></span>
+            <span id="btnText">🔒 Pay ₹49 Securely</span>
+            <div class="spinner" id="btnSpinner"></div>
+          </button>
+
+          <!-- Trust badges -->
+          <div class="trust-row">
+            <span class="trust-item">🔒 Bank-grade security</span>
+            <span class="trust-item">⚡ Instant activation</span>
+            <span class="trust-item">↩️ Easy refund</span>
+          </div>
+
+          <div class="security-note">
+            <span class="security-note-icon">🛡️</span>
+            <span><strong>Your payment is safe.</strong> All transactions are processed by Razorpay — India's most trusted payment gateway. CoverAI never stores your card details.</span>
+          </div>
+        </div>
+
+        <!-- ─── STATE 3: Payment Success ─── -->
         <div class="success-box" id="successBox">
           <span class="icon">🎉</span>
-          <h3>Payment Successful!</h3>
-          <p>Your Pro access has been activated for<br/><strong id="confirmedEmail"></strong>.<br/><br/>Reload the page or start using Pro features now!</p>
+          <h3>Welcome to Pro!</h3>
+          <p>Your Pro access is now active for<br/><strong id="confirmedEmail"></strong>.<br/><br/>The ⭐ PRO badge is now showing in your nav above. All Pro features are unlocked!</p>
           <div class="payment-id" id="paymentIdDisplay"></div>
+          <div class="cta-row">
+            <a href="index.html" class="cta-btn cta-primary">✦ Write a Cover Letter</a>
+            <a href="resume.html" class="cta-btn" style="background:#5c4fc7;color:#fff">📄 Build Resume</a>
+          </div>
         </div>
 
-        <!-- Trust badges -->
-        <div class="trust-row">
-          <span class="trust-item">🔒 Bank-grade security</span>
-          <span class="trust-item">⚡ Instant activation</span>
-          <span class="trust-item">↩️ Easy refund</span>
-        </div>
-
-        <div class="security-note">
-          <span class="security-note-icon">🛡️</span>
-          <span><strong>Your payment is safe.</strong> All transactions are processed by Razorpay — India's most trusted payment gateway. CoverAI never stores your card details.</span>
-        </div>
       </div>
     </div>
 
   </div>
 </div>
 
+<!-- ═══════════════════════════ SCRIPTS ═══════════════════════ -->
 <script type="module">
-import { doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
 // Razorpay Test Key
 const RZP_KEY_ID = "rzp_test_SzLih3caxuIRqY";
 
-let currentUser = null;
+// ── UI helpers ──────────────────────────────────────────────
+function showSection(name) {
+  // name: 'loggedOut' | 'loggedIn' | 'alreadyPro' | 'success'
+  document.getElementById('alreadyProBox').style.display    = name === 'alreadyPro' ? 'block' : 'none';
+  document.getElementById('loggedOutSection').style.display = name === 'loggedOut'  ? 'block' : 'none';
+  document.getElementById('loggedInSection').style.display  = name === 'loggedIn'   ? 'block' : 'none';
+  document.getElementById('successBox').style.display       = name === 'success'    ? 'block' : 'none';
+}
 
-// Wait for Firebase auth to initialise
-const checkAuthInterval = setInterval(() => {
-  if (window.auth) {
-    clearInterval(checkAuthInterval);
-    onAuthStateChanged(window.auth, (user) => {
-      currentUser = user;
-      window.currentUser = user; // expose globally for payment handler
+function fillUserInfo(user) {
+  document.getElementById('payingEmail').textContent = user.email || '—';
+  document.getElementById('emailDisplay').style.display = 'flex';
 
-      const signinPrompt = document.getElementById('signinPrompt');
-      const emailDisplay  = document.getElementById('emailDisplay');
-      const payingEmail   = document.getElementById('payingEmail');
-      const payBtn        = document.getElementById('rzpPayBtn');
-
-      if (user) {
-        signinPrompt.style.display = 'none';
-        emailDisplay.style.display = 'flex';
-        payingEmail.textContent = user.email;
-        payBtn.disabled = false;
-      } else {
-        signinPrompt.style.display = 'flex';
-        emailDisplay.style.display = 'none';
-        payBtn.disabled = true;
-        document.getElementById('btnText').textContent = '⚠️ Sign In to Pay';
-      }
-    });
+  const avatarImg         = document.getElementById('avatarImg');
+  const avatarPlaceholder = document.getElementById('avatarPlaceholder');
+  if (user.photoURL) {
+    avatarImg.src = user.photoURL;
+    avatarImg.style.display = 'block';
+    avatarPlaceholder.style.display = 'none';
+  } else {
+    avatarPlaceholder.textContent = (user.name || user.email || 'U')[0].toUpperCase();
+    avatarPlaceholder.style.display = 'flex';
+    avatarImg.style.display = 'none';
   }
-}, 100);
+}
 
-window.startRazorpayPayment = async function() {
-  if (!currentUser) {
-    alert('Please sign in first before making a payment.');
+// ── React to auth changes (fired by auth.js) ─────────────────
+window.addEventListener('coverai:authchange', (e) => {
+  const { user, isPro } = e.detail;
+
+  if (!user) {
+    showSection('loggedOut');
     return;
   }
 
-  const payBtn    = document.getElementById('rzpPayBtn');
-  const btnText   = document.getElementById('btnText');
-  const spinner   = document.getElementById('btnSpinner');
+  if (isPro) {
+    showSection('alreadyPro');
+    return;
+  }
 
-  payBtn.disabled = true;
+  // Free user — show payment section
+  fillUserInfo(user);
+  showSection('loggedIn');
+});
+
+// Also react to sign-out
+window.addEventListener('coverai:signout', () => {
+  showSection('loggedOut');
+});
+
+// ── Sign In from payment card ────────────────────────────────
+window.handleGoogleSignIn = async function() {
+  const btn = document.getElementById('googleSignInBtn');
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
+  btn.childNodes[1] && (btn.lastChild.textContent = ' Signing in...');
+  try {
+    await window.signInWithGoogle();
+  } catch(e) {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+  }
+};
+
+// ── Sign Out from payment card ───────────────────────────────
+window.handleSignOut = function() {
+  if (window.signOutUser) window.signOutUser();
+};
+
+// ── Razorpay Payment ─────────────────────────────────────────
+window.startRazorpayPayment = async function() {
+  const user = window.currentUser;
+  if (!user) {
+    alert('Please sign in first.');
+    return;
+  }
+
+  const payBtn  = document.getElementById('rzpPayBtn');
+  const btnText = document.getElementById('btnText');
+  const spinner = document.getElementById('btnSpinner');
+
+  payBtn.disabled    = true;
   btnText.style.display = 'none';
   spinner.style.display = 'block';
 
   try {
-    // Create a Razorpay order via backend
+    // Try to create a Razorpay order from backend
     let orderId = null;
     try {
       const orderRes = await fetch('/api/razorpay/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: 49, currency: 'INR', email: currentUser.email })
+        body: JSON.stringify({ amount: 49, currency: 'INR', email: user.email })
       });
       if (orderRes.ok) {
         const orderData = await orderRes.json();
         orderId = orderData.id;
       }
     } catch(e) {
-      console.warn('Could not create order from backend, proceeding without order ID:', e);
+      console.warn('Order creation failed, proceeding without order ID:', e);
     }
 
     const options = {
       key: RZP_KEY_ID,
-      amount: 4900,           // in paise (₹49 × 100)
+      amount: 4900,
       currency: 'INR',
       name: 'CoverAI',
       description: 'Pro Plan — Monthly',
       image: "data:image/svg+xml,%3Csvg width='64' height='64' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='32' height='32' rx='8' fill='%235c4fc7'/%3E%3Cpath d='M18 9C13.582 9 10 12.582 10 17C10 21.418 13.582 25 18 25' stroke='white' stroke-width='2.8' stroke-linecap='round'/%3E%3Cpath d='M23 9.5L24.2 12.5L27 13.7L24.2 14.9L23 17.9L21.8 14.9L19 13.7L21.8 12.5Z' fill='%23F59E0B'/%3E%3C/svg%3E",
       order_id: orderId || undefined,
       prefill: {
-        name: currentUser.displayName || '',
-        email: currentUser.email,
+        name: user.name || '',
+        email: user.email
       },
       theme: { color: '#5c4fc7' },
-      modal: { backdropclose: false },
 
       handler: async function(response) {
-        // Payment successful — activate Pro in Firestore
-        try {
-          const userRef = doc(window.db, 'users', currentUser.uid);
-          await setDoc(userRef, {
-            pro: true,
-            proActivatedAt: new Date().toISOString(),
-            razorpayPaymentId: response.razorpay_payment_id,
-            razorpayOrderId: response.razorpay_order_id || null,
-            plan: 'pro-monthly',
-            email: currentUser.email,
-          }, { merge: true });
+        await handlePaymentSuccess(response, user);
+      },
 
-          // Log payment in Firestore
-          const payRef = doc(window.db, 'payments', response.razorpay_payment_id);
-          await setDoc(payRef, {
-            userId: currentUser.uid,
-            email: currentUser.email,
-            amount: 49,
-            currency: 'INR',
-            plan: 'pro-monthly',
-            razorpayPaymentId: response.razorpay_payment_id,
-            razorpayOrderId: response.razorpay_order_id || null,
-            razorpaySignature: response.razorpay_signature || null,
-            paidAt: new Date().toISOString(),
-            status: 'captured'
-          });
-
-          // Also notify backend
-          try {
-            await fetch('/api/razorpay/payment-success', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                paymentId: response.razorpay_payment_id,
-                orderId: response.razorpay_order_id,
-                signature: response.razorpay_signature,
-                email: currentUser.email,
-                uid: currentUser.uid
-              })
-            });
-          } catch(e) {
-            console.warn('Backend notification failed, but Firestore already updated:', e);
-          }
-
-          // Show success UI
-          document.getElementById('confirmedEmail').textContent = currentUser.email;
-          document.getElementById('paymentIdDisplay').textContent = 'Payment ID: ' + response.razorpay_payment_id;
-          document.getElementById('successBox').style.display = 'block';
-          payBtn.style.display = 'none';
-          document.getElementById('emailDisplay').style.display = 'none';
-          document.querySelector('.rzp-branding').style.display = 'none';
-          document.querySelector('.pay-methods').style.display = 'none';
-
-        } catch(err) {
-          alert('Payment received but could not activate Pro automatically.\nPlease contact coveraii@gmail.com with your Payment ID: ' + response.razorpay_payment_id);
-          payBtn.disabled = false;
+      modal: {
+        ondismiss: function() {
+          payBtn.disabled    = false;
           btnText.style.display = 'inline';
           spinner.style.display = 'none';
         }
-      },
-
-      "modal.ondismiss": function() {
-        payBtn.disabled = false;
-        btnText.style.display = 'inline';
-        spinner.style.display = 'none';
-        btnText.textContent = '🔒 Pay ₹49 Securely';
       }
     };
 
     const rzp = new Razorpay(options);
 
     rzp.on('payment.failed', function(response) {
-      alert('Payment failed: ' + (response.error.description || 'Unknown error') + '\n\nPlease try again or contact support.');
-      payBtn.disabled = false;
+      alert('Payment failed: ' + (response.error?.description || 'Unknown error') + '\n\nPlease try again.');
+      payBtn.disabled    = false;
       btnText.style.display = 'inline';
       spinner.style.display = 'none';
     });
@@ -445,12 +474,78 @@ window.startRazorpayPayment = async function() {
 
   } catch(err) {
     alert('Could not open payment gateway: ' + err.message);
-    payBtn.disabled = false;
+    payBtn.disabled    = false;
     btnText.style.display = 'inline';
     spinner.style.display = 'none';
   }
 };
+
+// ── Handle successful payment ────────────────────────────────
+async function handlePaymentSuccess(response, user) {
+  try {
+    // 1. Write to Firestore — activate Pro
+    const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+
+    const userRef = doc(window.db, 'users', user.uid);
+    await setDoc(userRef, {
+      pro: true,
+      proActivatedAt: new Date().toISOString(),
+      razorpayPaymentId: response.razorpay_payment_id,
+      razorpayOrderId: response.razorpay_order_id || null,
+      plan: 'pro-monthly',
+      email: user.email
+    }, { merge: true });
+
+    // 2. Log payment in separate collection
+    const payRef = doc(window.db, 'payments', response.razorpay_payment_id);
+    await setDoc(payRef, {
+      userId: user.uid,
+      email: user.email,
+      amount: 49,
+      currency: 'INR',
+      plan: 'pro-monthly',
+      razorpayPaymentId: response.razorpay_payment_id,
+      razorpayOrderId: response.razorpay_order_id || null,
+      razorpaySignature: response.razorpay_signature || null,
+      paidAt: new Date().toISOString(),
+      status: 'captured'
+    });
+
+    // 3. Notify backend (non-blocking)
+    fetch('/api/razorpay/payment-success', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        paymentId: response.razorpay_payment_id,
+        orderId: response.razorpay_order_id,
+        signature: response.razorpay_signature,
+        email: user.email,
+        uid: user.uid
+      })
+    }).catch(e => console.warn('Backend notify failed:', e));
+
+    // 4. Refresh the nav PRO badge immediately (no page reload needed)
+    if (window.refreshProStatus) {
+      await window.refreshProStatus();
+    }
+
+    // 5. Show success screen
+    document.getElementById('confirmedEmail').textContent = user.email;
+    document.getElementById('paymentIdDisplay').textContent = 'Payment ID: ' + response.razorpay_payment_id;
+    showSection('success');
+
+  } catch(err) {
+    alert(
+      'Payment received ✅ but Pro activation had an issue.\n' +
+      'Please email coveraii@gmail.com with:\n' +
+      'Payment ID: ' + response.razorpay_payment_id
+    );
+  }
+}
 </script>
+
+<!-- Load auth.js AFTER the module script above so window.signInWithGoogle is available -->
+<script type="module" src="auth.js"></script>
 <script src="mobile.js"></script>
 </body>
 </html>
