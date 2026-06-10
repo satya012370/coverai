@@ -20,6 +20,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="mobile.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
@@ -1286,83 +1287,45 @@ function handleDownload() {
 }
 
 function downloadResumePDF() {
-  const {jsPDF} = window.jspdf;
-  const doc = new jsPDF({unit:'mm', format:'a4'});
-  const d = getFormData();
-  
-  // Scale PDF dimensions and spacing based on user's formatting controls
-  const fontScale = (resumeFormat['font-size'] || 9.5) / 9.5;
-  const secSpacing = (resumeFormat['section-spacing'] || 16) / 16;
-  const margin = (resumeFormat['padding'] || 20) * 0.75; // e.g. 20px margin -> 15mm
-  const pw = 210 - margin * 2;
-  const lh = 6 * fontScale * ((resumeFormat['line-height'] || 1.5) / 1.5);
-  
-  const colors = {modern:[92,79,199], classic:[26,58,92], minimal:[26,26,26], emerald:[6,95,70], bold:[220,38,38], executive:[30,41,59], creative:[124,58,237], corporate:[15,23,42], elegant:[41,37,36], tech:[24,24,27], slate:[71,85,105]};
-  const [r,g,b] = colors[currentTemplate] || [92,79,199];
-
-  // Draw Header Background box (if template calls for it)
-  // We scale the header height with the font scale to prevent text overflow
-  const headerHeight = (currentTemplate !== 'minimal' && currentTemplate !== 'bold') ? 38 * fontScale : 25 * fontScale;
-  if (currentTemplate !== 'minimal' && currentTemplate !== 'bold') {
-    doc.setFillColor(r,g,b);
-    doc.rect(0, 0, 210, headerHeight, 'F');
-    doc.setTextColor(255, 255, 255);
-  } else {
-    doc.setTextColor(r,g,b);
-  }
-
-  // Draw Header text dynamically relative to headerHeight with correct baseline spacing
-  let y = 10 + (4 * fontScale);
-  doc.setFontSize(20 * fontScale); doc.setFont('helvetica','bold'); doc.text(d.name, margin, y); y += (8 * fontScale);
-  doc.setFontSize(12 * fontScale); doc.setFont('helvetica','normal'); doc.text(d.title, margin, y); y += (6 * fontScale);
-  const contact = [d.email, d.phone, d.location].filter(Boolean).join(' · ');
-  doc.setFontSize(9 * fontScale); doc.text(contact, margin, y);
-  
-  // Set initial Y position for the first section below the header
-  y = headerHeight + (10 * secSpacing);
-  doc.setTextColor(30,30,30);
-
-  const section = (title) => {
-    if (y > 275) { doc.addPage(); y = 15; }
-    doc.setFontSize(9 * fontScale); doc.setFont('helvetica','bold'); doc.setTextColor(r,g,b);
-    doc.text(title.toUpperCase(), margin, y); y += 1.5 * fontScale;
-    doc.setDrawColor(r,g,b); doc.line(margin, y, 210-margin, y); y += (5 * secSpacing);
-    doc.setTextColor(30,30,30); doc.setFont('helvetica','normal');
-  };
-  const addText = (text, size=9, bold=false) => {
-    if (!text) return;
-    doc.setFontSize(size * fontScale); doc.setFont('helvetica', bold?'bold':'normal');
-    doc.splitTextToSize(text, pw).forEach(line => {
-      if (y > 278) { doc.addPage(); y = 15; }
-      doc.text(line, margin, y); y += lh;
-    });
-  };
-
-  if (d.summary) { section('Summary'); addText(d.summary); y += (3 * secSpacing); }
-  if (d.exps.length) {
-    section('Experience');
-    d.exps.forEach(e => {
-      addText(`${e.title} — ${e.company}`, 10, true);
-      addText(`${e.start}${e.end?' – '+e.end:''}`, 8);
-      if (e.desc) addText(e.desc, 9);
-      y += (3 * secSpacing);
-    });
-  }
-  if (d.edus.length) {
-    section('Education');
-    d.edus.forEach(e => {
-      addText(`${e.degree} — ${e.inst}`, 10, true);
-      addText(`${e.year}${e.grade?' · '+e.grade:''}`, 8);
-      y += (2 * secSpacing);
-    });
-  }
-  if (d.skills.length) { section('Skills'); addText(d.skills.join(' · '), 9); }
-
-  doc.setFontSize(8 * fontScale); doc.setTextColor(180,180,180);
-  doc.text('Created with CoverAI — coveraii.com', margin, 290);
-
+  const element = document.getElementById('resumePreview');
   const name = document.getElementById('rName').value || 'resume';
-  doc.save(`${name.replace(/\s+/g,'-')}-resume.pdf`);
+  
+  // Save active inline styles to restore them later
+  const originalTransform = element.style.transform;
+  const originalBoxShadow = element.style.boxShadow;
+  const originalBorderRadius = element.style.borderRadius;
+  const originalBorder = element.style.border;
+  const originalTransition = element.style.transition;
+  
+  // Temporarily normalize formatting to 100% scale and clear UI borders for PDF capture
+  element.style.transform = 'none';
+  element.style.boxShadow = 'none';
+  element.style.borderRadius = '0';
+  element.style.border = 'none';
+  element.style.transition = 'none';
+  
+  const opt = {
+    margin:       0,
+    filename:     `${name.replace(/\s+/g,'-')}-resume.pdf`,
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { 
+      scale: 2.5, 
+      useCORS: true, 
+      letterRendering: true,
+      logging: false
+    },
+    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+  
+  // Execute html2pdf conversion
+  html2pdf().from(element).set(opt).toPdf().get('pdf').then((pdf) => {
+    // Restore original screen styling after capture is complete
+    element.style.transform = originalTransform;
+    element.style.boxShadow = originalBoxShadow;
+    element.style.borderRadius = originalBorderRadius;
+    element.style.border = originalBorder;
+    element.style.transition = originalTransition;
+  }).save();
 }
 
 /* ── FORMATTING CONTROLS ── */
