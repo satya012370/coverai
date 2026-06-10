@@ -556,7 +556,7 @@ app.post("/api/razorpay/payment-success", async (req, res) => {
         if (rzpRes.ok) {
           const paymentData = await rzpRes.json();
           const isStatusOk = paymentData.status === "captured" || paymentData.status === "authorized";
-          const isAmountOk = paymentData.amount === 100 || paymentData.amount === 19900;
+          const isAmountOk = paymentData.amount === 19900;
           
           if (isStatusOk && isAmountOk) {
             isPaymentValid = true;
@@ -605,7 +605,7 @@ app.post("/api/razorpay/payment-success", async (req, res) => {
     const record = {
       paymentId, orderId, signature,
       email, uid,
-      amount: 1,
+      amount: 199,
       plan: "pro-monthly",
       verified: true,
       capturedAt: new Date().toISOString()
@@ -628,7 +628,7 @@ app.post("/api/razorpay/payment-success", async (req, res) => {
       await dbAdmin.collection("payments").doc(paymentId).set({
         userId: uid,
         email,
-        amount: 1,
+        amount: 199,
         currency: 'INR',
         plan: 'pro-monthly',
         razorpayPaymentId: paymentId,
@@ -681,7 +681,7 @@ app.post("/api/razorpay/payment-success", async (req, res) => {
             fields: {
               userId: { stringValue: uid },
               email: { stringValue: email },
-              amount: { integerValue: "1" },
+              amount: { integerValue: "199" },
               currency: { stringValue: "INR" },
               plan: { stringValue: "pro-monthly" },
               razorpayPaymentId: { stringValue: paymentId },

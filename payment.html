@@ -146,7 +146,7 @@ nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;
   <!-- HERO -->
   <div class="pay-hero">
     <div class="badge">⭐ Pro Plan — Limited Time Price</div>
-    <h1>Get <span>CoverAI Pro</span> for just ₹1</h1>
+    <h1>Get <span>CoverAI Pro</span> for just ₹199</h1>
     <p>One-time monthly payment. Unlock all Pro features instantly after payment.</p>
   </div>
 
@@ -208,7 +208,7 @@ nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;
         </div>
 
         <div class="price-tag">
-          <div class="amount">₹1 <span class="per">/ month</span></div>
+          <div class="amount">₹199 <span class="per">/ month</span></div>
           <div class="note">Cancel anytime · Instant access after payment</div>
         </div>
       </div>
@@ -292,7 +292,7 @@ nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;
           <!-- Pay button -->
           <button class="rzp-pay-btn" id="rzpPayBtn" onclick="startRazorpayPayment()">
             <span class="btn-shine"></span>
-            <span id="btnText">🔒 Pay ₹1 Securely</span>
+            <span id="btnText">🔒 Pay ₹199 Securely</span>
             <div class="spinner" id="btnSpinner"></div>
           </button>
 
@@ -424,7 +424,7 @@ window.startRazorpayPayment = async function() {
       const orderRes = await fetch('/api/razorpay/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: 1, currency: 'INR', email: user.email })
+        body: JSON.stringify({ amount: 199, currency: 'INR', email: user.email })
       });
       if (orderRes.ok) {
         const orderData = await orderRes.json();
@@ -436,7 +436,7 @@ window.startRazorpayPayment = async function() {
 
     const options = {
       key: RZP_KEY_ID,
-      amount: 100,
+      amount: 19900,
       currency: 'INR',
       name: 'CoverAI',
       description: 'Pro Plan — Monthly',
