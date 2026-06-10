@@ -1297,24 +1297,35 @@ function downloadResumePDF() {
   const pw = 210 - margin * 2;
   const lh = 6 * fontScale * ((resumeFormat['line-height'] || 1.5) / 1.5);
   
-  let y = 15;
   const colors = {modern:[92,79,199], classic:[26,58,92], minimal:[26,26,26], emerald:[6,95,70], bold:[220,38,38], executive:[30,41,59], creative:[124,58,237], corporate:[15,23,42], elegant:[41,37,36], tech:[24,24,27], slate:[71,85,105]};
   const [r,g,b] = colors[currentTemplate] || [92,79,199];
 
+  // Draw Header Background box (if template calls for it)
+  // We scale the header height with the font scale to prevent text overflow
+  const headerHeight = (currentTemplate !== 'minimal' && currentTemplate !== 'bold') ? 38 * fontScale : 25 * fontScale;
   if (currentTemplate !== 'minimal' && currentTemplate !== 'bold') {
-    doc.setFillColor(r,g,b); doc.rect(0,0,210,38,'F'); doc.setTextColor(255,255,255);
-  } else { doc.setTextColor(r,g,b); }
+    doc.setFillColor(r,g,b);
+    doc.rect(0, 0, 210, headerHeight, 'F');
+    doc.setTextColor(255, 255, 255);
+  } else {
+    doc.setTextColor(r,g,b);
+  }
 
-  doc.setFontSize(20 * fontScale); doc.setFont('helvetica','bold'); doc.text(d.name, margin, y+6); y+=9;
-  doc.setFontSize(12 * fontScale); doc.setFont('helvetica','normal'); doc.text(d.title, margin, y); y+=7;
+  // Draw Header text dynamically relative to headerHeight with correct baseline spacing
+  let y = 10 + (4 * fontScale);
+  doc.setFontSize(20 * fontScale); doc.setFont('helvetica','bold'); doc.text(d.name, margin, y); y += (8 * fontScale);
+  doc.setFontSize(12 * fontScale); doc.setFont('helvetica','normal'); doc.text(d.title, margin, y); y += (6 * fontScale);
   const contact = [d.email, d.phone, d.location].filter(Boolean).join(' · ');
-  doc.setFontSize(9 * fontScale); doc.text(contact, margin, y); y += 14;
+  doc.setFontSize(9 * fontScale); doc.text(contact, margin, y);
+  
+  // Set initial Y position for the first section below the header
+  y = headerHeight + (10 * secSpacing);
   doc.setTextColor(30,30,30);
 
   const section = (title) => {
     if (y > 275) { doc.addPage(); y = 15; }
     doc.setFontSize(9 * fontScale); doc.setFont('helvetica','bold'); doc.setTextColor(r,g,b);
-    doc.text(title.toUpperCase(), margin, y); y += 1;
+    doc.text(title.toUpperCase(), margin, y); y += 1.5 * fontScale;
     doc.setDrawColor(r,g,b); doc.line(margin, y, 210-margin, y); y += (5 * secSpacing);
     doc.setTextColor(30,30,30); doc.setFont('helvetica','normal');
   };
