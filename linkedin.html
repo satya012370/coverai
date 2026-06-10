@@ -319,6 +319,7 @@ footer{text-align:center;padding:2rem 1rem;font-size:13px;color:#888;border-top:
     // Wait a brief moment for auth state to populate
     setTimeout(updateUsageUI, 500);
   });
+  window.addEventListener('coverai:authchange', updateUsageUI);
 
   // ── TYPE SELECTOR ─────────────────────────────────────────────
   document.querySelectorAll('.type-btn').forEach(btn => {

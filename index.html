@@ -460,13 +460,35 @@
       }
     }
   }
-  // When auth state changes while paywall modal is open, update its CTA
+  // When auth state changes, update UI elements
   window.addEventListener('coverai:authchange', ({ detail }) => {
+    const { user, isPro } = detail;
+    
+    // Update usage bar and pro banners
+    const usageBar = document.querySelector('.usage-bar');
+    const proBanner = document.querySelector('.pro-banner');
+    if (isPro) {
+      if (usageBar) usageBar.style.display = 'none';
+      if (proBanner) proBanner.style.display = 'none';
+    } else {
+      if (usageBar) usageBar.style.display = 'block';
+      if (proBanner) proBanner.style.display = 'flex';
+      // Load remaining count from backend
+      fetch('/api/remaining')
+        .then(res => res.json())
+        .then(data => {
+          updateUsageUI(data.remaining);
+        })
+        .catch(e => {});
+    }
+
+    // Update paywall modal if it's open
     const modal = document.getElementById('paywallModal');
-    if (!modal || !modal.classList.contains('show')) return;
-    const container = document.getElementById('paywall-cta-container');
-    if (detail.user) {
-      container.innerHTML = `<button class="modal-cta" onclick="goToPro()">Get Pro Now — ₹199/month →</button>`;
+    if (modal && modal.classList.contains('show')) {
+      const container = document.getElementById('paywall-cta-container');
+      if (user) {
+        container.innerHTML = `<button class="modal-cta" onclick="goToPro()">Get Pro Now — ₹199/month →</button>`;
+      }
     }
   });
 

@@ -45,6 +45,12 @@ function renderAuthUI(user, isPro) {
   const authContainer = document.getElementById('auth-container');
   if (!authContainer) return;
 
+  // Show/hide standard nav "Get Pro" button based on Pro status
+  const getProBtn = document.querySelector('nav .nav-btn');
+  if (getProBtn) {
+    getProBtn.style.display = isPro ? 'none' : '';
+  }
+
   if (user) {
     const proBadge = isPro
       ? `<span style="background:linear-gradient(90deg,#f59e0b,#d97706);color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;letter-spacing:.3px;white-space:nowrap;">⭐ PRO</span>`
