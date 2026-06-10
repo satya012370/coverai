@@ -335,10 +335,22 @@ textarea{resize:vertical;line-height:1.6}
   --resume-padding: 20px;
   --resume-section-spacing: 16px;
   --resume-font-family: inherit;
+  
+  /* Page boundary guide lines at exactly 297mm (A4 height) intervals */
+  background-color: #fff !important;
+  background-image: linear-gradient(to bottom, transparent calc(297mm - 1px), #cbd5e1 calc(297mm - 1px), #cbd5e1 calc(297mm + 1px), transparent calc(297mm + 1px)) !important;
+  background-size: 100% 297mm !important;
 }
 
 #resumePreview, #resumePreview * {
   font-family: var(--resume-font-family, inherit) !important;
+}
+
+/* Page break behaviors to avoid cutting elements in half horizontally */
+#resumePreview .exp-item,
+#resumePreview .sec-title {
+  page-break-inside: avoid !important;
+  break-inside: avoid !important;
 }
 
 #resumePreview .resume-body {
@@ -1335,6 +1347,9 @@ function downloadResumePDF() {
   element.style.transition = 'none';
   element.style.margin = '0';
   
+  // Temporarily hide the page boundary guides during PDF generation
+  element.style.setProperty('background-image', 'none', 'important');
+  
   if (parent) {
     parent.style.alignItems = 'flex-start';
     parent.style.padding = '0';
@@ -1352,7 +1367,8 @@ function downloadResumePDF() {
       scrollX: 0,
       scrollY: 0
     },
-    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
   };
   
   // Execute html2pdf conversion
@@ -1364,6 +1380,9 @@ function downloadResumePDF() {
     element.style.border = originalBorder;
     element.style.transition = originalTransition;
     element.style.margin = originalMargin;
+    
+    // Restore page guides on screen
+    element.style.removeProperty('background-image');
     
     if (parent) {
       parent.style.alignItems = originalParentAlignItems;
