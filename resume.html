@@ -17,7 +17,7 @@
 <meta name="twitter:description" content="Build a stunning resume with AI in minutes. 11 professional templates, free PDF download."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="mobile.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -334,6 +334,11 @@ textarea{resize:vertical;line-height:1.6}
   --resume-line-height: 1.5;
   --resume-padding: 20px;
   --resume-section-spacing: 16px;
+  --resume-font-family: inherit;
+}
+
+#resumePreview, #resumePreview * {
+  font-family: var(--resume-font-family, inherit) !important;
 }
 
 #resumePreview .resume-body {
@@ -674,6 +679,17 @@ footer a{color:#5c4fc7}
         <span class="acc-arrow">▾</span>
       </div>
       <div class="acc-body">
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 12px; margin-bottom: 6px; font-weight: 600; color: #444;">Font Style (Family)</label>
+          <select id="input-font-family" onchange="changeFormatting('font-family', this.value)" style="width: 100%; padding: 8px; border: 1px solid #d0d0d0; border-radius: 6px; font-size: 12px; background: #fff; cursor: pointer; color: #444; font-weight: 500;">
+            <option value="">Default Template Font</option>
+            <option value="'Inter', sans-serif">Inter (Clean Modern)</option>
+            <option value="'Outfit', sans-serif">Outfit (Stylish Sans)</option>
+            <option value="'Roboto', sans-serif">Roboto (Neutral Sans)</option>
+            <option value="'Merriweather', serif">Merriweather (Elegant Serif)</option>
+            <option value="'Courier New', monospace">Courier New (Monospace Tech)</option>
+          </select>
+        </div>
         <div style="margin-bottom: 14px;">
           <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; font-weight: 600; color: #444;">
             <span>Font Size</span>
@@ -1345,13 +1361,15 @@ let resumeFormat = {
   'font-size': 9.5,
   'line-height': 1.5,
   'section-spacing': 16,
-  'padding': 20
+  'padding': 20,
+  'font-family': ''
 };
 
 function changeFormatting(prop, val) {
-  resumeFormat[prop] = parseFloat(val);
-  const suffix = (prop === 'line-height') ? '' : 'px';
-  document.getElementById(`val-${prop}`).innerText = val + suffix;
+  resumeFormat[prop] = prop === 'font-family' ? val : parseFloat(val);
+  const suffix = (prop === 'line-height' || prop === 'font-family') ? '' : 'px';
+  const label = document.getElementById(`val-${prop}`);
+  if (label) label.innerText = val + suffix;
   const preview = document.getElementById('resumePreview');
   if (preview) {
     preview.style.setProperty(`--resume-${prop}`, val + suffix);
@@ -1365,7 +1383,8 @@ function resetFormatting() {
     'font-size': 9.5,
     'line-height': 1.5,
     'section-spacing': 16,
-    'padding': 20
+    'padding': 20,
+    'font-family': ''
   };
   for (const [prop, val] of Object.entries(defaults)) {
     const input = document.getElementById(`input-${prop}`);
@@ -1383,7 +1402,7 @@ function initFormatting() {
   }
   const preview = document.getElementById('resumePreview');
   for (const [prop, val] of Object.entries(resumeFormat)) {
-    const suffix = (prop === 'line-height') ? '' : 'px';
+    const suffix = (prop === 'line-height' || prop === 'font-family') ? '' : 'px';
     const input = document.getElementById(`input-${prop}`);
     if (input) input.value = val;
     const label = document.getElementById(`val-${prop}`);
