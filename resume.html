@@ -1290,6 +1290,13 @@ function downloadResumePDF() {
   const element = document.getElementById('resumePreview');
   const name = document.getElementById('rName').value || 'resume';
   
+  // Save current scroll positions
+  const originalScrollX = window.scrollX;
+  const originalScrollY = window.scrollY;
+  
+  // Scroll to top to ensure html2canvas captures correctly without offset
+  window.scrollTo(0, 0);
+
   // Save active inline styles to restore them later
   const originalTransform = element.style.transform;
   const originalBoxShadow = element.style.boxShadow;
@@ -1312,7 +1319,9 @@ function downloadResumePDF() {
       scale: 2.5, 
       useCORS: true, 
       letterRendering: true,
-      logging: false
+      logging: false,
+      scrollX: 0,
+      scrollY: 0
     },
     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
   };
@@ -1325,6 +1334,9 @@ function downloadResumePDF() {
     element.style.borderRadius = originalBorderRadius;
     element.style.border = originalBorder;
     element.style.transition = originalTransition;
+    
+    // Restore scroll positions
+    window.scrollTo(originalScrollX, originalScrollY);
   }).save();
 }
 
