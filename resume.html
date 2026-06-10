@@ -1319,13 +1319,24 @@ function downloadResumePDF() {
   const originalBorderRadius = element.style.borderRadius;
   const originalBorder = element.style.border;
   const originalTransition = element.style.transition;
+  const originalPosition = element.style.position;
+  const originalTop = element.style.top;
+  const originalLeft = element.style.left;
+  const originalZIndex = element.style.zIndex;
+  const originalMargin = element.style.margin;
   
   // Temporarily normalize formatting to 100% scale and clear UI borders for PDF capture
+  // We pin it to the viewport top-left (0,0) to completely bypass parent padding/centering offsets
   element.style.transform = 'none';
   element.style.boxShadow = 'none';
   element.style.borderRadius = '0';
   element.style.border = 'none';
   element.style.transition = 'none';
+  element.style.position = 'fixed';
+  element.style.top = '0';
+  element.style.left = '0';
+  element.style.zIndex = '99999';
+  element.style.margin = '0';
   
   const opt = {
     margin:       0,
@@ -1350,6 +1361,11 @@ function downloadResumePDF() {
     element.style.borderRadius = originalBorderRadius;
     element.style.border = originalBorder;
     element.style.transition = originalTransition;
+    element.style.position = originalPosition;
+    element.style.top = originalTop;
+    element.style.left = originalLeft;
+    element.style.zIndex = originalZIndex;
+    element.style.margin = originalMargin;
     
     // Restore scroll positions
     window.scrollTo(originalScrollX, originalScrollY);
