@@ -43,7 +43,7 @@ nav.nav-open .nav-toggle span:nth-child(3) { transform: translateY(-7px) rotate(
     min-height: 56px;
     position: sticky;
     top: 0;
-    z-index: 300;
+    z-index: 300 !important;
     background: #fff;
     display: flex;
     align-items: center;
