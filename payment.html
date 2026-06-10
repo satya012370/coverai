@@ -495,7 +495,7 @@ window.startRazorpayPayment = async function() {
 // ── Handle successful payment ────────────────────────────────
 async function handlePaymentSuccess(response, user) {
   try {
-    const token = await user.getIdToken();
+    const token = await window.auth.currentUser.getIdToken();
 
     // Call backend to verify signature and upgrade the user securely
     const verifyRes = await fetch('/api/razorpay/payment-success', {
