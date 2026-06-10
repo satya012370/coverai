@@ -544,6 +544,7 @@ app.post("/api/razorpay/payment-success", async (req, res) => {
     }
 
     let isPaymentValid = false;
+    let detail = "";
 
     // 1. Verify directly with Razorpay API (highly secure, works with or without orderId)
     if (RAZORPAY_KEY_ID && RAZORPAY_KEY_SECRET) {
@@ -554,20 +555,28 @@ app.post("/api/razorpay/payment-success", async (req, res) => {
         });
         if (rzpRes.ok) {
           const paymentData = await rzpRes.json();
-          // Verify status is captured/authorized and amount is ₹1 (100) or ₹199 (19900)
-          if ((paymentData.status === "captured" || paymentData.status === "authorized") &&
-              (paymentData.amount === 100 || paymentData.amount === 19900)) {
+          const isStatusOk = paymentData.status === "captured" || paymentData.status === "authorized";
+          const isAmountOk = paymentData.amount === 100 || paymentData.amount === 19900;
+          
+          if (isStatusOk && isAmountOk) {
             isPaymentValid = true;
             console.log(`✅ Verified payment ${paymentId} directly with Razorpay API. Status: ${paymentData.status}, Amount: ${paymentData.amount}`);
           } else {
-            console.warn(`⚠️ Razorpay payment status or amount mismatch: Status=${paymentData.status}, Amount=${paymentData.amount}`);
+            detail = `Razorpay API mismatch: status=${paymentData.status} (expected captured/authorized), amount=${paymentData.amount} (expected 100 or 19900)`;
+            console.warn(`⚠️ ${detail}`);
           }
         } else {
-          console.warn("⚠️ Razorpay API returned non-OK response:", rzpRes.status);
+          const errText = await rzpRes.text();
+          detail = `Razorpay API returned non-200: status=${rzpRes.status}, body=${errText.slice(0, 100)}`;
+          console.warn(`⚠️ ${detail}`);
         }
       } catch (err) {
-        console.warn("⚠️ Direct Razorpay API verification failed:", err.message);
+        detail = `Razorpay API fetch failed: ${err.message}`;
+        console.warn(`⚠️ ${detail}`);
       }
+    } else {
+      detail = "Razorpay server keys (RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET) are not set in backend environment.";
+      console.warn(`⚠️ ${detail}`);
     }
 
     // 2. Fallback: Verify signature if orderId and signature are present
@@ -576,15 +585,21 @@ app.post("/api/razorpay/payment-success", async (req, res) => {
         const isValid = verifyRazorpaySignature(orderId, paymentId, signature);
         if (isValid) {
           isPaymentValid = true;
+          detail = ""; // Clear error details since signature succeeded
           console.log("✅ Verified payment via signature verification.");
+        } else {
+          detail += " | Local signature verification failed (invalid signature).";
         }
+      } else {
+        if (!orderId) detail += " | Local signature check skipped (missing orderId).";
+        if (!signature) detail += " | Local signature check skipped (missing signature).";
       }
     }
 
     // 3. Fail if neither method could verify the payment
     if (!isPaymentValid) {
-      console.error("❌ Payment verification failed for payment ID:", paymentId);
-      return res.status(400).json({ error: "Payment verification failed — invalid payment or signature" });
+      console.error("❌ Payment verification failed:", detail);
+      return res.status(400).json({ error: `Payment verification failed — ${detail}` });
     }
 
     const record = {
