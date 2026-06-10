@@ -554,7 +554,7 @@ app.post("/api/razorpay/payment-success", async (req, res) => {
     const record = {
       paymentId, orderId, signature,
       email, uid,
-      amount: 199,
+      amount: 1,
       plan: "pro-monthly",
       verified: true,
       capturedAt: new Date().toISOString()
@@ -577,7 +577,7 @@ app.post("/api/razorpay/payment-success", async (req, res) => {
       await dbAdmin.collection("payments").doc(paymentId).set({
         userId: uid,
         email,
-        amount: 199,
+        amount: 1,
         currency: 'INR',
         plan: 'pro-monthly',
         razorpayPaymentId: paymentId,
@@ -630,7 +630,7 @@ app.post("/api/razorpay/payment-success", async (req, res) => {
             fields: {
               userId: { stringValue: uid },
               email: { stringValue: email },
-              amount: { integerValue: "199" },
+              amount: { integerValue: "1" },
               currency: { stringValue: "INR" },
               plan: { stringValue: "pro-monthly" },
               razorpayPaymentId: { stringValue: paymentId },
