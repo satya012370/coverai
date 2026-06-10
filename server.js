@@ -13,6 +13,34 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
 
+const GEMINI_MODEL = "gemini-1.5-flash";
+
+function parseSafeJSON(text) {
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    try {
+      const startIdx = Math.min(
+        text.indexOf('{') === -1 ? Infinity : text.indexOf('{'),
+        text.indexOf('[') === -1 ? Infinity : text.indexOf('[')
+      );
+      const endIdx = Math.max(
+        text.lastIndexOf('}'),
+        text.lastIndexOf(']')
+      );
+      if (startIdx !== Infinity && endIdx !== -1 && startIdx < endIdx) {
+        return JSON.parse(text.substring(startIdx, endIdx + 1));
+      }
+    } catch (e) {}
+    try {
+      return JSON.parse(text.replace(/```json|```/g, "").trim());
+    } catch (e) {
+      throw new Error("Invalid JSON structure: " + e.message);
+    }
+  }
+}
+
 console.log("=================================");
 console.log("API Key Loaded:", process.env.GEMINI_API_KEY ? "YES" : "NO");
 console.log("=================================");
@@ -116,13 +144,13 @@ Return ONLY JSON, no markdown, no backticks.
 Resume: ${extractedText.slice(0, 4000)}`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
       { method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) }
     );
     const data = await response.json();
     const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
-    const parsed = JSON.parse(raw.replace(/```json|```/g, "").trim());
+    const parsed = parseSafeJSON(raw);
     res.json({ success: true, data: { ...parsed, rawText: extractedText.slice(0, 3000) } });
 
   } catch (err) {
@@ -171,7 +199,7 @@ STRICT RULES:
 8. Output the letter ONLY.`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
       { method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) }
     );
@@ -200,7 +228,7 @@ Name: ${name}, Title: ${title}, Skills: ${skills}, Experience: ${expText}
 Rules: 2-3 sentences, first person, confident, no clichés. Output summary text ONLY.`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
       { method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) }
     );
@@ -223,13 +251,13 @@ Experience: ${JSON.stringify(exps)}, Current summary: ${summary||"none"}
 Rules: Strong action verbs, specific impact, under 2 sentences each. ONLY JSON, no markdown.`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
       { method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) }
     );
     const data = await response.json();
     const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
-    res.json(JSON.parse(raw.replace(/```json|```/g,"").trim()));
+    res.json(parseSafeJSON(raw));
   } catch(err) {
     res.status(500).json({ error: err.message });
   }
@@ -277,14 +305,14 @@ Rules:
 - Return ONLY the JSON object`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
       { method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) }
     );
     const data = await response.json();
     if (!response.ok) throw new Error(data.error?.message || "API error");
     const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
-    const result = JSON.parse(raw.replace(/```json|```/g, "").trim());
+    const result = parseSafeJSON(raw);
     res.json(result);
   } catch (err) {
     res.status(500).json({ error: "ATS check failed: " + err.message });
@@ -299,7 +327,7 @@ app.get("/api/remaining", (req, res) => {
 app.get("/test", async (req, res) => {
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
       { method:"POST", headers:{"Content-Type":"application/json"},
         body: JSON.stringify({ contents:[{ parts:[{ text:"Say hello in one sentence." }] }] }) }
     );
@@ -455,7 +483,7 @@ Rules:
 - Return ONLY the JSON array, no markdown, no explanation`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
       { method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) }
     );
@@ -464,7 +492,7 @@ Rules:
     if (!response.ok) throw new Error(data.error?.message || "API error");
 
     const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
-    const messages = JSON.parse(raw.replace(/```json|```/g, "").trim());
+    const messages = parseSafeJSON(raw);
 
     res.json({ messages });
 
@@ -508,7 +536,7 @@ Rules:
 - Return ONLY the JSON array, no markdown, no extra text`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
       { method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) }
     );
@@ -517,7 +545,7 @@ Rules:
     if (!response.ok) throw new Error(data.error?.message || "Gemini API error");
 
     const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
-    const questions = JSON.parse(raw.replace(/```json|```/g, "").trim());
+    const questions = parseSafeJSON(raw);
 
     res.json({ questions });
 

@@ -6,15 +6,15 @@
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg width='180' height='180' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='32' height='32' rx='8' fill='%235c4fc7'/%3E%3C/svg%3E"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>AI Resume Builder — CoverAI</title>
-<meta name="description" content="Build a stunning, ATS-friendly resume in minutes with AI. Choose from 5 beautiful templates, let AI enhance your content, and download your professional PDF for free."/>
+<meta name="description" content="Build a stunning, ATS-friendly resume in minutes with AI. Choose from 11 professional templates, let AI enhance your content, and download your professional PDF for free."/>
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="https://www.coveraii.com/resume.html"/>
 <meta property="og:title" content="AI Resume Builder — CoverAI"/>
-<meta property="og:description" content="Build a professional resume in minutes. 5 templates, AI-enhanced content, free PDF download."/>
+<meta property="og:description" content="Build a professional resume in minutes. 11 templates, AI-enhanced content, free PDF download."/>
 <meta property="og:image" content="https://www.coveraii.com/og-image.png"/>
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:title" content="AI Resume Builder — CoverAI"/>
-<meta name="twitter:description" content="Build a stunning resume with AI in minutes. Free PDF download, no sign-up needed."/>
+<meta name="twitter:description" content="Build a stunning resume with AI in minutes. 11 professional templates, free PDF download."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -81,6 +81,8 @@ nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;
 
 /* ── TEMPLATE GRID ── */
 .template-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:4px}
+.tpl-divider{grid-column:1/-1;display:flex;align-items:center;gap:8px;margin:6px 0 2px;font-size:10px;font-weight:700;color:#f59e0b;text-transform:uppercase;letter-spacing:.08em}
+.tpl-divider::after{content:'';flex:1;height:1px;background:#fde68a}
 @media(max-width:480px){.template-grid{grid-template-columns:repeat(3,1fr)}}
 .tpl-card{border:2px solid #e8e8e8;border-radius:10px;padding:8px 4px 6px;cursor:pointer;text-align:center;font-size:10px;font-weight:700;color:#555;background:#fff;transition:all .2s;position:relative}
 .tpl-card:hover{border-color:#a8a2e0;transform:translateY(-2px);box-shadow:0 4px 12px rgba(92,79,199,.15)}
@@ -231,6 +233,100 @@ textarea{resize:vertical;line-height:1.6}
 .tpl-bold .exp-date{font-size:8px;color:#888;margin-top:1px}
 .tpl-bold .exp-desc{font-size:8.5px;color:#444;margin-top:4px;line-height:1.6}
 
+/* ── PRO TEMPLATES ── */
+.tpl-pro-lock{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,.7);backdrop-filter:blur(1px);display:flex;align-items:center;justify-content:center;border-radius:8px;z-index:2;cursor:pointer}
+.tpl-pro-badge{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;font-size:8px;font-weight:800;padding:2px 8px;border-radius:10px;letter-spacing:.3px}
+.tpl-card.pro-unlocked .tpl-pro-lock{display:none}
+
+.tpl-executive .resume-header{background:linear-gradient(135deg,#1e293b,#334155);color:#fff;padding:28px 32px;border-bottom:4px solid #f59e0b}
+.tpl-executive .resume-header h1{font-size:24px;font-weight:900;letter-spacing:-.5px;margin-bottom:3px}
+.tpl-executive .resume-header .subtitle{font-size:12px;opacity:.85;font-weight:500;color:#fde68a}
+.tpl-executive .resume-header .contact-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:9px;opacity:.8}
+.tpl-executive .resume-body{padding:20px 32px}
+.tpl-executive .sec-title{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#1e293b;margin:18px 0 8px;padding-bottom:4px;border-bottom:2.5px solid #f59e0b}
+.tpl-executive .sec-title:first-child{margin-top:0}
+.tpl-executive .skill-pill{display:inline-block;background:#1e293b;color:#fff;font-size:8px;padding:3px 10px;border-radius:4px;margin:2px;font-weight:600}
+.tpl-executive .exp-item{margin-bottom:13px}
+.tpl-executive .exp-title{font-weight:700;font-size:10px}
+.tpl-executive .exp-company{color:#f59e0b;font-size:9px;font-weight:700}
+.tpl-executive .exp-date{font-size:8px;color:#888;margin-top:1px}
+.tpl-executive .exp-desc{font-size:8.5px;color:#444;margin-top:4px;line-height:1.6}
+
+.tpl-creative .resume-header{background:linear-gradient(135deg,#7c3aed,#ec4899);color:#fff;padding:28px 32px;position:relative;overflow:hidden}
+.tpl-creative .resume-header::after{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.08)}
+.tpl-creative .resume-header h1{font-size:22px;font-weight:800;letter-spacing:-.3px;margin-bottom:3px}
+.tpl-creative .resume-header .subtitle{font-size:12px;opacity:.9;font-weight:500}
+.tpl-creative .resume-header .contact-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:9px;opacity:.85}
+.tpl-creative .resume-body{display:grid;grid-template-columns:1fr 2.2fr}
+.tpl-creative .resume-sidebar{background:linear-gradient(180deg,#faf5ff,#fdf2f8);padding:20px;border-right:1px solid #e9d5ff}
+.tpl-creative .resume-main{padding:20px 24px}
+.tpl-creative .sec-title{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#7c3aed;margin:16px 0 8px;padding-bottom:3px;border-bottom:2px solid #7c3aed}
+.tpl-creative .sec-title:first-child{margin-top:0}
+.tpl-creative .skill-pill{display:inline-block;background:linear-gradient(135deg,#7c3aed,#ec4899);color:#fff;font-size:8px;padding:3px 10px;border-radius:20px;margin:2px;font-weight:600}
+.tpl-creative .exp-item{margin-bottom:13px}
+.tpl-creative .exp-title{font-weight:700;font-size:10px}
+.tpl-creative .exp-company{color:#ec4899;font-size:9px;font-weight:600}
+.tpl-creative .exp-date{font-size:8px;color:#888;margin-top:1px}
+.tpl-creative .exp-desc{font-size:8.5px;color:#444;margin-top:4px;line-height:1.6}
+
+.tpl-corporate .resume-header{background:#0f172a;color:#fff;padding:24px 32px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;border-bottom:3px solid #3b82f6}
+.tpl-corporate .resume-header h1{font-size:21px;font-weight:800;letter-spacing:-.3px}
+.tpl-corporate .resume-header .subtitle{font-size:11px;color:#93c5fd;margin-top:3px;font-weight:500}
+.tpl-corporate .resume-header .contact-col{font-size:9px;opacity:.85;text-align:right;line-height:2}
+.tpl-corporate .resume-body{padding:20px 32px}
+.tpl-corporate .sec-title{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#0f172a;margin:18px 0 8px;padding-bottom:4px;border-bottom:2.5px solid #3b82f6}
+.tpl-corporate .sec-title:first-child{margin-top:0}
+.tpl-corporate .skill-pill{display:inline-block;background:#dbeafe;color:#1e40af;font-size:8px;padding:3px 10px;border-radius:4px;margin:2px;font-weight:600}
+.tpl-corporate .exp-item{margin-bottom:13px;padding-left:12px;border-left:3px solid #3b82f6}
+.tpl-corporate .exp-title{font-weight:700;font-size:10px}
+.tpl-corporate .exp-company{color:#3b82f6;font-size:9px;font-weight:600}
+.tpl-corporate .exp-date{font-size:8px;color:#888}
+.tpl-corporate .exp-desc{font-size:8.5px;color:#444;margin-top:4px;line-height:1.6}
+
+.tpl-elegant .resume-header{padding:30px 34px 18px;border-bottom:1px solid #e5e7eb;background:#fafaf9}
+.tpl-elegant .resume-header h1{font-size:26px;font-weight:300;letter-spacing:3px;text-transform:uppercase;color:#292524}
+.tpl-elegant .resume-header .subtitle{font-size:12px;color:#78716c;margin-top:6px;font-weight:400;letter-spacing:1px}
+.tpl-elegant .resume-header .contact-row{display:flex;flex-wrap:wrap;gap:16px;margin-top:12px;font-size:9px;color:#a8a29e}
+.tpl-elegant .resume-body{padding:20px 34px}
+.tpl-elegant .sec-title{font-size:8px;font-weight:400;text-transform:uppercase;letter-spacing:.2em;color:#78716c;margin:18px 0 8px;padding-bottom:6px;border-bottom:1px solid #e5e7eb}
+.tpl-elegant .sec-title:first-child{margin-top:0}
+.tpl-elegant .skill-pill{display:inline-block;border:1px solid #d6d3d1;color:#44403c;font-size:8px;padding:3px 10px;border-radius:20px;margin:2px;font-weight:500}
+.tpl-elegant .exp-item{margin-bottom:13px}
+.tpl-elegant .exp-title{font-weight:600;font-size:10px;color:#292524}
+.tpl-elegant .exp-company{color:#78716c;font-size:9px;font-weight:500}
+.tpl-elegant .exp-date{font-size:8px;color:#a8a29e;margin-top:1px}
+.tpl-elegant .exp-desc{font-size:8.5px;color:#57534e;margin-top:4px;line-height:1.6}
+
+.tpl-tech .resume-header{background:#18181b;color:#fff;padding:28px 32px;font-family:'Courier New',monospace;border-left:5px solid #22c55e}
+.tpl-tech .resume-header h1{font-size:22px;font-weight:800;letter-spacing:-.3px;font-family:'Inter',sans-serif}
+.tpl-tech .resume-header .subtitle{font-size:11px;color:#22c55e;font-weight:600;font-family:'Courier New',monospace}
+.tpl-tech .resume-header .contact-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:9px;opacity:.7;font-family:'Inter',sans-serif}
+.tpl-tech .resume-body{padding:20px 32px}
+.tpl-tech .sec-title{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#22c55e;margin:18px 0 8px;padding-bottom:3px;border-bottom:2px solid #22c55e;font-family:'Courier New',monospace}
+.tpl-tech .sec-title:first-child{margin-top:0}
+.tpl-tech .skill-pill{display:inline-block;background:#18181b;color:#22c55e;font-size:8px;padding:3px 10px;border-radius:3px;margin:2px;font-weight:600;font-family:'Courier New',monospace;border:1px solid #22c55e}
+.tpl-tech .exp-item{margin-bottom:13px}
+.tpl-tech .exp-title{font-weight:700;font-size:10px}
+.tpl-tech .exp-company{color:#22c55e;font-size:9px;font-weight:600}
+.tpl-tech .exp-date{font-size:8px;color:#888;margin-top:1px}
+.tpl-tech .exp-desc{font-size:8.5px;color:#444;margin-top:4px;line-height:1.6}
+
+.tpl-slate .resume-header{padding:28px 32px 20px;background:#f8fafc;border-bottom:2.5px solid #475569}
+.tpl-slate .resume-header h1{font-size:23px;font-weight:800;color:#1e293b;letter-spacing:-.5px;margin-bottom:3px}
+.tpl-slate .resume-header .subtitle{font-size:12px;color:#475569;font-weight:600;text-transform:uppercase;letter-spacing:1.5px}
+.tpl-slate .resume-header .contact-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:9px;color:#64748b}
+.tpl-slate .resume-body{padding:20px 32px}
+.tpl-slate .sec-title{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#475569;margin:18px 0 10px;display:flex;align-items:center;gap:8px}
+.tpl-slate .sec-title::after{content:'';flex:1;height:1px;background:#e2e8f0}
+.tpl-slate .sec-title:first-child{margin-top:0}
+.tpl-slate .skill-pill{display:inline-block;background:#f1f5f9;color:#334155;font-size:8px;padding:3px 10px;border-radius:4px;margin:2px 2px 2px 0;font-weight:600;border:1px solid #cbd5e1}
+.tpl-slate .exp-item{margin-bottom:13px;position:relative;padding-left:18px;border-left:1.5px solid #cbd5e1}
+.tpl-slate .exp-item::before{content:'';position:absolute;left:-4.5px;top:3px;width:8px;height:8px;border-radius:50%;background:#475569}
+.tpl-slate .exp-title{font-weight:700;font-size:10px;color:#1e293b}
+.tpl-slate .exp-company{color:#475569;font-size:9px;font-weight:600}
+.tpl-slate .exp-date{font-size:8px;color:#64748b;margin-top:1px}
+.tpl-slate .exp-desc{font-size:8.5px;color:#334155;margin-top:4px;line-height:1.6}
+
 /* ── TOAST ── */
 .toast-container{position:fixed;top:80px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
 .toast{background:#1a1a1a;color:#fff;font-size:13px;font-weight:500;padding:12px 18px;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.25);display:flex;align-items:center;gap:10px;animation:toastIn .3s ease;min-width:220px}
@@ -272,7 +368,7 @@ footer a{color:#5c4fc7}
   <h1>Build a <span>stunning resume</span><br/>that gets you hired</h1>
   <p>Choose a template, fill in your details, let AI polish your content — download a professional PDF in minutes. No sign-up required.</p>
   <div class="hero-pills">
-    <div class="hero-pill">✅ 5 beautiful templates</div>
+    <div class="hero-pill">✅ 11 professional templates</div>
     <div class="hero-pill">✨ AI content enhancement</div>
     <div class="hero-pill">⚡ 3 free PDF downloads</div>
     <div class="hero-pill">🔒 Data stays private</div>
@@ -338,6 +434,56 @@ footer a{color:#5c4fc7}
               <div class="tpl-preview-header" style="background:#fff;border-left:5px solid #dc2626;height:100%;display:flex;align-items:center;padding-left:4px"><div style="background:#1a1a1a;height:4px;width:50%;border-radius:2px"></div></div>
             </div>
             <div class="active-check">✓</div>Bold
+          </div>
+
+          <!-- PRO TEMPLATES -->
+          <div class="tpl-divider">Pro Templates ⭐</div>
+          <div class="tpl-card" data-tpl="executive" onclick="selectTemplate('executive',this)" title="Executive — Professional navy & gold">
+            <div class="tpl-pro-lock"><span class="tpl-pro-badge">PRO</span></div>
+            <div class="tpl-preview">
+              <div class="tpl-preview-header" style="background:linear-gradient(135deg,#1e293b,#334155);border-bottom:2px solid #f59e0b"></div>
+              <div class="tpl-preview-lines"><div class="tpl-preview-line"></div><div class="tpl-preview-line short"></div></div>
+            </div>
+            <div class="active-check">✓</div>Executive
+          </div>
+          <div class="tpl-card" data-tpl="creative" onclick="selectTemplate('creative',this)" title="Creative — Vibrant gradient">
+            <div class="tpl-pro-lock"><span class="tpl-pro-badge">PRO</span></div>
+            <div class="tpl-preview">
+              <div class="tpl-preview-header" style="background:linear-gradient(135deg,#7c3aed,#ec4899)"></div>
+              <div class="tpl-preview-lines"><div class="tpl-preview-line"></div><div class="tpl-preview-line short"></div></div>
+            </div>
+            <div class="active-check">✓</div>Creative
+          </div>
+          <div class="tpl-card" data-tpl="corporate" onclick="selectTemplate('corporate',this)" title="Corporate — Clean navy & blue">
+            <div class="tpl-pro-lock"><span class="tpl-pro-badge">PRO</span></div>
+            <div class="tpl-preview">
+              <div class="tpl-preview-header" style="background:#0f172a;border-bottom:2px solid #3b82f6"></div>
+              <div class="tpl-preview-lines"><div class="tpl-preview-line"></div><div class="tpl-preview-line short"></div></div>
+            </div>
+            <div class="active-check">✓</div>Corporate
+          </div>
+          <div class="tpl-card" data-tpl="elegant" onclick="selectTemplate('elegant',this)" title="Elegant — Stylish ivory & charcoal">
+            <div class="tpl-pro-lock"><span class="tpl-pro-badge">PRO</span></div>
+            <div class="tpl-preview" style="border:1px solid #e0e0e0">
+              <div class="tpl-preview-header" style="background:#fafaf9;border-bottom:1px solid #e5e7eb;height:35%"></div>
+              <div class="tpl-preview-lines"><div class="tpl-preview-line"></div><div class="tpl-preview-line short"></div></div>
+            </div>
+            <div class="active-check">✓</div>Elegant
+          </div>
+          <div class="tpl-card" data-tpl="tech" onclick="selectTemplate('tech',this)" title="Tech — Terminal styling">
+            <div class="tpl-pro-lock"><span class="tpl-pro-badge">PRO</span></div>
+            <div class="tpl-preview">
+              <div class="tpl-preview-header" style="background:#18181b;border-left:3px solid #22c55e;height:100%"></div>
+            </div>
+            <div class="active-check">✓</div>Tech
+          </div>
+          <div class="tpl-card" data-tpl="slate" onclick="selectTemplate('slate',this)" title="Slate — Sleek timeline gray">
+            <div class="tpl-pro-lock"><span class="tpl-pro-badge">PRO</span></div>
+            <div class="tpl-preview">
+              <div class="tpl-preview-header" style="background:#475569;border-bottom:2px solid #cbd5e1"></div>
+              <div class="tpl-preview-lines"><div class="tpl-preview-line"></div><div class="tpl-preview-line short"></div></div>
+            </div>
+            <div class="active-check">✓</div>Slate
           </div>
         </div>
       </div>
@@ -484,6 +630,15 @@ window.addEventListener('DOMContentLoaded', () => {
   setTimeout(updateDlUI, 500); // Wait for auth to populate
 });
 
+window.addEventListener('coverai:authchange', () => {
+  updateDlUI();
+  updateProgress();
+});
+window.addEventListener('coverai:signout', () => {
+  updateDlUI();
+  updateProgress();
+});
+
 /* ── TOAST ── */
 function showToast(msg, type='info', duration=3000) {
   const c = document.getElementById('toastContainer');
@@ -541,7 +696,16 @@ function getDownloadsLeft() {
   return Math.max(0, FREE_DOWNLOADS - getDownloadsUsed());
 }
 function updateDlUI() {
-  if (window.currentUser && window.currentUser.isPro) {
+  const isPro = !!(window.currentUser && window.currentUser.isPro);
+  document.querySelectorAll('.tpl-card').forEach(card => {
+    const tpl = card.getAttribute('data-tpl');
+    const isProTpl = ['executive','creative','corporate','elegant','tech','slate'].includes(tpl);
+    if (isProTpl) {
+      card.classList.toggle('pro-unlocked', isPro);
+    }
+  });
+
+  if (isPro) {
     document.getElementById('dlCounter').style.display = 'none';
     document.getElementById('limitBanner').style.display = 'none';
     document.getElementById('dlBtn').style.display = 'flex';
@@ -573,6 +737,10 @@ function updateDlUI() {
     }
     banner.style.display = 'block';
     document.getElementById('dlCounter').style.display = 'none';
+  } else {
+    document.getElementById('dlBtn').style.display = 'flex';
+    document.getElementById('limitBanner').style.display = 'none';
+    document.getElementById('dlCounter').style.display = 'flex';
   }
 }
 
@@ -581,7 +749,13 @@ function selectTemplate(tpl, el) {
   document.querySelectorAll('.tpl-card').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
   currentTemplate = tpl;
-  const names = {modern:'Modern',classic:'Classic',minimal:'Minimal',emerald:'Emerald',bold:'Bold'};
+  const names = {modern:'Modern',classic:'Classic',minimal:'Minimal',emerald:'Emerald',bold:'Bold',executive:'Executive',creative:'Creative',corporate:'Corporate',elegant:'Elegant',tech:'Tech',slate:'Slate'};
+  const proTemplates = ['executive','creative','corporate','elegant','tech','slate'];
+  if (proTemplates.includes(tpl) && !(window.currentUser && window.currentUser.isPro)) {
+    showToast('This is a Pro template. Upgrade to unlock it!', 'error', 3000);
+    window.location.href = 'payment.html';
+    return;
+  }
   document.getElementById('tpl-status').textContent = names[tpl] || tpl;
   updatePreview();
   showToast(`Template switched to ${names[tpl]}`, 'info', 1500);
@@ -700,8 +874,8 @@ function updatePreview() {
   const skillsHtml = d.skills.map(s => `<span class="skill-pill">${esc(s)}</span>`).join('');
   const summaryHtml = d.summary ? `<div class="sec-title">Summary</div><p style="font-size:8.5px;color:#444;line-height:1.7">${esc(d.summary)}</p>` : '';
 
-  if (tpl === 'modern' || tpl === 'emerald') {
-    const cls = tpl === 'modern' ? 'tpl-modern' : 'tpl-emerald';
+  if (tpl === 'modern' || tpl === 'emerald' || tpl === 'creative') {
+    const cls = tpl === 'modern' ? 'tpl-modern' : tpl === 'emerald' ? 'tpl-emerald' : 'tpl-creative';
     html = `<div class="${cls}">
       <div class="resume-header">
         <h1>${esc(d.name)}</h1><div class="subtitle">${esc(d.title)}</div>
@@ -717,8 +891,9 @@ function updatePreview() {
           ${d.exps.length?`<div class="sec-title">Experience</div>${expHtml}`:''}
         </div>
       </div></div>`;
-  } else if (tpl === 'classic') {
-    html = `<div class="tpl-classic">
+  } else if (tpl === 'classic' || tpl === 'corporate') {
+    const cls = tpl === 'classic' ? 'tpl-classic' : 'tpl-corporate';
+    html = `<div class="${cls}">
       <div class="resume-header">
         <div><h1>${esc(d.name)}</h1><div class="subtitle">${esc(d.title)}</div></div>
         <div class="contact-col">${contact.map(c=>`<div>${esc(c)}</div>`).join('')}</div>
@@ -752,6 +927,19 @@ function updatePreview() {
         ${d.exps.length?`<div class="sec-title">Experience</div>${expHtml}`:''}
         ${d.edus.length?`<div class="sec-title">Education</div>${eduHtml}`:''}
         ${d.skills.length?`<div class="sec-title">Skills</div><div style="padding-bottom:8px">${skillsHtml}</div>`:''}
+      </div></div>`;
+  } else if (tpl === 'executive' || tpl === 'elegant' || tpl === 'tech' || tpl === 'slate') {
+    const cls = 'tpl-' + tpl;
+    html = `<div class="${cls}">
+      <div class="resume-header">
+        <h1>${esc(d.name)}</h1><div class="subtitle">${esc(d.title)}</div>
+        <div class="contact-row">${contact.map(c=>`<span>• ${esc(c)}</span>`).join('')}</div>
+      </div>
+      <div class="resume-body">
+        ${summaryHtml}
+        ${d.exps.length?`<div class="sec-title">Experience</div>${expHtml}`:''}
+        ${d.edus.length?`<div class="sec-title">Education</div>${eduHtml}`:''}
+        ${d.skills.length?`<div class="sec-title">Skills</div><div>${skillsHtml}</div>`:''}
       </div></div>`;
   }
   document.getElementById('resumePreview').innerHTML = html;
@@ -831,7 +1019,7 @@ function downloadResumePDF() {
   const d = getFormData();
   const margin = 15, pw = 210 - margin * 2, lh = 6;
   let y = 15;
-  const colors = {modern:[92,79,199], classic:[26,58,92], minimal:[26,26,26], emerald:[6,95,70], bold:[220,38,38]};
+  const colors = {modern:[92,79,199], classic:[26,58,92], minimal:[26,26,26], emerald:[6,95,70], bold:[220,38,38], executive:[30,41,59], creative:[124,58,237], corporate:[15,23,42], elegant:[41,37,36], tech:[24,24,27], slate:[71,85,105]};
   const [r,g,b] = colors[currentTemplate] || [92,79,199];
 
   if (currentTemplate !== 'minimal' && currentTemplate !== 'bold') {
