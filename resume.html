@@ -327,6 +327,64 @@ textarea{resize:vertical;line-height:1.6}
 .tpl-slate .exp-date{font-size:8px;color:#64748b;margin-top:1px}
 .tpl-slate .exp-desc{font-size:8.5px;color:#334155;margin-top:4px;line-height:1.6}
 
+/* ── DYNAMIC RESUME FORMATTING OVERRIDES ── */
+#resumePreview {
+  --resume-font-size: 9.5px;
+  --resume-line-height: 1.5;
+  --resume-padding: 20px;
+  --resume-section-spacing: 16px;
+}
+
+#resumePreview .resume-body {
+  padding: var(--resume-padding, 20px) calc(var(--resume-padding, 20px) * 1.4) !important;
+}
+
+/* Grid templates: clear body padding, sidebar and main handle padding separately */
+#resumePreview .tpl-modern .resume-body,
+#resumePreview .tpl-emerald .resume-body,
+#resumePreview .tpl-creative .resume-body {
+  padding: 0 !important;
+}
+
+#resumePreview .resume-sidebar {
+  padding: var(--resume-padding, 20px) !important;
+}
+
+#resumePreview .resume-main {
+  padding: var(--resume-padding, 20px) calc(var(--resume-padding, 20px) * 1.2) !important;
+}
+
+#resumePreview .sec-title {
+  font-size: calc(var(--resume-font-size, 9.5px) + 0.5px) !important;
+  margin-top: var(--resume-section-spacing, 16px) !important;
+  margin-bottom: calc(var(--resume-section-spacing, 16px) * 0.5) !important;
+}
+
+#resumePreview .skill-pill {
+  font-size: calc(var(--resume-font-size, 9.5px) - 1.5px) !important;
+}
+
+#resumePreview .exp-item {
+  margin-bottom: calc(var(--resume-section-spacing, 16px) * 0.8) !important;
+}
+
+#resumePreview .exp-title {
+  font-size: calc(var(--resume-font-size, 9.5px) + 1px) !important;
+}
+
+#resumePreview .exp-company {
+  font-size: var(--resume-font-size, 9.5px) !important;
+}
+
+#resumePreview .exp-date {
+  font-size: calc(var(--resume-font-size, 9.5px) - 1.5px) !important;
+}
+
+#resumePreview .exp-desc {
+  font-size: var(--resume-font-size, 9.5px) !important;
+  line-height: var(--resume-line-height, 1.5) !important;
+}
+
 /* ── TOAST ── */
 .toast-container{position:fixed;top:80px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
 .toast{background:#1a1a1a;color:#fff;font-size:13px;font-weight:500;padding:12px 18px;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.25);display:flex;align-items:center;gap:10px;animation:toastIn .3s ease;min-width:220px}
@@ -606,6 +664,47 @@ footer a{color:#5c4fc7}
       </div>
     </div>
 
+    <!-- 7. FORMATTING & SPACING -->
+    <div class="acc-section" id="sec-formatting">
+      <div class="acc-header" onclick="toggleSection('formatting')">
+        <div class="acc-icon" style="background:#ccfbf1">⚙️</div>
+        <span class="acc-title">Formatting & Spacing</span>
+        <span class="acc-status" id="formatting-status">Adjust Layout</span>
+        <span class="acc-arrow">▾</span>
+      </div>
+      <div class="acc-body">
+        <div style="margin-bottom: 14px;">
+          <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; font-weight: 600; color: #444;">
+            <span>Font Size</span>
+            <span id="val-font-size">9.5px</span>
+          </div>
+          <input type="range" id="input-font-size" min="8" max="13" step="0.5" value="9.5" oninput="changeFormatting('font-size', this.value)" style="width: 100%; cursor: pointer; accent-color: #5c4fc7;"/>
+        </div>
+        <div style="margin-bottom: 14px;">
+          <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; font-weight: 600; color: #444;">
+            <span>Line Spacing</span>
+            <span id="val-line-height">1.5</span>
+          </div>
+          <input type="range" id="input-line-height" min="1.2" max="2.0" step="0.1" value="1.5" oninput="changeFormatting('line-height', this.value)" style="width: 100%; cursor: pointer; accent-color: #5c4fc7;"/>
+        </div>
+        <div style="margin-bottom: 14px;">
+          <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; font-weight: 600; color: #444;">
+            <span>Section Spacing</span>
+            <span id="val-section-spacing">16px</span>
+          </div>
+          <input type="range" id="input-section-spacing" min="8" max="32" step="2" value="16" oninput="changeFormatting('section-spacing', this.value)" style="width: 100%; cursor: pointer; accent-color: #5c4fc7;"/>
+        </div>
+        <div style="margin-bottom: 14px;">
+          <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; font-weight: 600; color: #444;">
+            <span>Page Margin</span>
+            <span id="val-padding">20px</span>
+          </div>
+          <input type="range" id="input-padding" min="12" max="36" step="2" value="20" oninput="changeFormatting('padding', this.value)" style="width: 100%; cursor: pointer; accent-color: #5c4fc7;"/>
+        </div>
+        <button class="ai-btn secondary" onclick="resetFormatting()" style="margin-top: 4px; width: 100%; font-size: 11px; padding: 6px 12px;">Reset to Defaults</button>
+      </div>
+    </div>
+
     <!-- BOTTOM ACTIONS -->
     <div class="form-bottom">
       <div class="dl-counter" id="dlCounter">
@@ -782,6 +881,7 @@ let eduEntries = [];
 
 window.addEventListener('DOMContentLoaded', () => {
   addExp(); addEdu();
+  initFormatting();
   updatePreview(); updateDlUI(); updateProgress();
   setTimeout(updateDlUI, 500); // Wait for auth to populate
 
@@ -1044,7 +1144,7 @@ function updatePreview() {
   </div>`).join('');
 
   const skillsHtml = d.skills.map(s => `<span class="skill-pill">${esc(s)}</span>`).join('');
-  const summaryHtml = d.summary ? `<div class="sec-title">Summary</div><p style="font-size:8.5px;color:#444;line-height:1.7">${esc(d.summary)}</p>` : '';
+  const summaryHtml = d.summary ? `<div class="sec-title">Summary</div><p style="font-size:var(--resume-font-size, 9.5px);color:#444;line-height:var(--resume-line-height, 1.5)">${esc(d.summary)}</p>` : '';
 
   if (tpl === 'modern' || tpl === 'emerald' || tpl === 'creative') {
     const cls = tpl === 'modern' ? 'tpl-modern' : tpl === 'emerald' ? 'tpl-emerald' : 'tpl-creative';
@@ -1095,7 +1195,7 @@ function updatePreview() {
         <div class="contact-row">${contact.join(' | ')}</div>
       </div>
       <div class="resume-body">
-        ${d.summary?`<div class="sec-title">Profile</div><p style="font-size:8.5px;color:#444;line-height:1.7;margin-bottom:8px">${esc(d.summary)}</p>`:''}
+        ${d.summary?`<div class="sec-title">Profile</div><p style="font-size:var(--resume-font-size, 9.5px);color:#444;line-height:var(--resume-line-height, 1.5);margin-bottom:8px">${esc(d.summary)}</p>`:''}
         ${d.exps.length?`<div class="sec-title">Experience</div>${expHtml}`:''}
         ${d.edus.length?`<div class="sec-title">Education</div>${eduHtml}`:''}
         ${d.skills.length?`<div class="sec-title">Skills</div><div style="padding-bottom:8px">${skillsHtml}</div>`:''}
@@ -1189,7 +1289,14 @@ function downloadResumePDF() {
   const {jsPDF} = window.jspdf;
   const doc = new jsPDF({unit:'mm', format:'a4'});
   const d = getFormData();
-  const margin = 15, pw = 210 - margin * 2, lh = 6;
+  
+  // Scale PDF dimensions and spacing based on user's formatting controls
+  const fontScale = (resumeFormat['font-size'] || 9.5) / 9.5;
+  const secSpacing = (resumeFormat['section-spacing'] || 16) / 16;
+  const margin = (resumeFormat['padding'] || 20) * 0.75; // e.g. 20px margin -> 15mm
+  const pw = 210 - margin * 2;
+  const lh = 6 * fontScale * ((resumeFormat['line-height'] || 1.5) / 1.5);
+  
   let y = 15;
   const colors = {modern:[92,79,199], classic:[26,58,92], minimal:[26,26,26], emerald:[6,95,70], bold:[220,38,38], executive:[30,41,59], creative:[124,58,237], corporate:[15,23,42], elegant:[41,37,36], tech:[24,24,27], slate:[71,85,105]};
   const [r,g,b] = colors[currentTemplate] || [92,79,199];
@@ -1198,36 +1305,36 @@ function downloadResumePDF() {
     doc.setFillColor(r,g,b); doc.rect(0,0,210,38,'F'); doc.setTextColor(255,255,255);
   } else { doc.setTextColor(r,g,b); }
 
-  doc.setFontSize(20); doc.setFont('helvetica','bold'); doc.text(d.name, margin, y+6); y+=9;
-  doc.setFontSize(12); doc.setFont('helvetica','normal'); doc.text(d.title, margin, y); y+=7;
+  doc.setFontSize(20 * fontScale); doc.setFont('helvetica','bold'); doc.text(d.name, margin, y+6); y+=9;
+  doc.setFontSize(12 * fontScale); doc.setFont('helvetica','normal'); doc.text(d.title, margin, y); y+=7;
   const contact = [d.email, d.phone, d.location].filter(Boolean).join(' · ');
-  doc.setFontSize(9); doc.text(contact, margin, y); y += 14;
+  doc.setFontSize(9 * fontScale); doc.text(contact, margin, y); y += 14;
   doc.setTextColor(30,30,30);
 
   const section = (title) => {
     if (y > 275) { doc.addPage(); y = 15; }
-    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(r,g,b);
+    doc.setFontSize(9 * fontScale); doc.setFont('helvetica','bold'); doc.setTextColor(r,g,b);
     doc.text(title.toUpperCase(), margin, y); y += 1;
-    doc.setDrawColor(r,g,b); doc.line(margin, y, 210-margin, y); y += 5;
+    doc.setDrawColor(r,g,b); doc.line(margin, y, 210-margin, y); y += (5 * secSpacing);
     doc.setTextColor(30,30,30); doc.setFont('helvetica','normal');
   };
   const addText = (text, size=9, bold=false) => {
     if (!text) return;
-    doc.setFontSize(size); doc.setFont('helvetica', bold?'bold':'normal');
+    doc.setFontSize(size * fontScale); doc.setFont('helvetica', bold?'bold':'normal');
     doc.splitTextToSize(text, pw).forEach(line => {
       if (y > 278) { doc.addPage(); y = 15; }
       doc.text(line, margin, y); y += lh;
     });
   };
 
-  if (d.summary) { section('Summary'); addText(d.summary); y += 3; }
+  if (d.summary) { section('Summary'); addText(d.summary); y += (3 * secSpacing); }
   if (d.exps.length) {
     section('Experience');
     d.exps.forEach(e => {
       addText(`${e.title} — ${e.company}`, 10, true);
       addText(`${e.start}${e.end?' – '+e.end:''}`, 8);
       if (e.desc) addText(e.desc, 9);
-      y += 3;
+      y += (3 * secSpacing);
     });
   }
   if (d.edus.length) {
@@ -1235,16 +1342,70 @@ function downloadResumePDF() {
     d.edus.forEach(e => {
       addText(`${e.degree} — ${e.inst}`, 10, true);
       addText(`${e.year}${e.grade?' · '+e.grade:''}`, 8);
-      y += 2;
+      y += (2 * secSpacing);
     });
   }
   if (d.skills.length) { section('Skills'); addText(d.skills.join(' · '), 9); }
 
-  doc.setFontSize(8); doc.setTextColor(180,180,180);
+  doc.setFontSize(8 * fontScale); doc.setTextColor(180,180,180);
   doc.text('Created with CoverAI — coveraii.com', margin, 290);
 
   const name = document.getElementById('rName').value || 'resume';
   doc.save(`${name.replace(/\s+/g,'-')}-resume.pdf`);
+}
+
+/* ── FORMATTING CONTROLS ── */
+let resumeFormat = {
+  'font-size': 9.5,
+  'line-height': 1.5,
+  'section-spacing': 16,
+  'padding': 20
+};
+
+function changeFormatting(prop, val) {
+  resumeFormat[prop] = parseFloat(val);
+  const suffix = (prop === 'line-height') ? '' : 'px';
+  document.getElementById(`val-${prop}`).innerText = val + suffix;
+  const preview = document.getElementById('resumePreview');
+  if (preview) {
+    preview.style.setProperty(`--resume-${prop}`, val + suffix);
+  }
+  localStorage.setItem('resume_format', JSON.stringify(resumeFormat));
+  updatePreview();
+}
+
+function resetFormatting() {
+  const defaults = {
+    'font-size': 9.5,
+    'line-height': 1.5,
+    'section-spacing': 16,
+    'padding': 20
+  };
+  for (const [prop, val] of Object.entries(defaults)) {
+    const input = document.getElementById(`input-${prop}`);
+    if (input) input.value = val;
+    changeFormatting(prop, val);
+  }
+}
+
+function initFormatting() {
+  const saved = localStorage.getItem('resume_format');
+  if (saved) {
+    try {
+      resumeFormat = JSON.parse(saved);
+    } catch(e) {}
+  }
+  const preview = document.getElementById('resumePreview');
+  for (const [prop, val] of Object.entries(resumeFormat)) {
+    const suffix = (prop === 'line-height') ? '' : 'px';
+    const input = document.getElementById(`input-${prop}`);
+    if (input) input.value = val;
+    const label = document.getElementById(`val-${prop}`);
+    if (label) label.innerText = val + suffix;
+    if (preview) {
+      preview.style.setProperty(`--resume-${prop}`, val + suffix);
+    }
+  }
 }
 </script>
 <script src="mobile.js"></script>
