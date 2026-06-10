@@ -18,6 +18,7 @@
 <meta name="twitter:title" content="CoverAI — AI Cover Letter Generator"/>
 <meta name="twitter:description" content="Write a winning cover letter in 15 seconds with AI. Free, no sign-up needed."/>
 <meta name="twitter:image" content="https://www.coveraii.com/og-image.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="mobile.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
@@ -276,6 +277,28 @@
         <button class="action-btn" onclick="regenerate()">Regenerate</button>
       </div>
     </div>
+    <!-- Cover Letter Formatting Toolbar -->
+    <div class="formatting-toolbar" style="display: flex; gap: 12px; align-items: center; padding: 10px 16px; background: #fafafa; border-bottom: 1px solid #f0f0f0; flex-wrap: wrap;">
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span style="font-size: 11px; font-weight: 600; color: #666; font-family: 'Inter', sans-serif;">Font Size:</span>
+        <select id="clFontSizeSelect" onchange="changeCoverLetterFont()" style="padding: 4px 8px; font-size: 11px; border: 1px solid #ddd; border-radius: 4px; background: #fff; cursor: pointer; color: #444; font-family: 'Inter', sans-serif;">
+          <option value="12px">12px (Small)</option>
+          <option value="14px">14px (Normal)</option>
+          <option value="15px" selected>15px (Default)</option>
+          <option value="17px">17px (Large)</option>
+          <option value="19px">19px (X-Large)</option>
+        </select>
+      </div>
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span style="font-size: 11px; font-weight: 600; color: #666; font-family: 'Inter', sans-serif;">Font Style:</span>
+        <select id="clFontFamilySelect" onchange="changeCoverLetterFont()" style="padding: 4px 8px; font-size: 11px; border: 1px solid #ddd; border-radius: 4px; background: #fff; cursor: pointer; color: #444; font-family: 'Inter', sans-serif;">
+          <option value="Georgia, serif" selected>Georgia (Serif)</option>
+          <option value="'Inter', sans-serif">Inter (Sans-serif)</option>
+          <option value="'Outfit', sans-serif">Outfit (Sans-serif)</option>
+          <option value="'Courier New', monospace">Courier (Monospace)</option>
+        </select>
+      </div>
+    </div>
     <div class="output-text" id="outputText"></div>
     <div class="pro-banner">
       <div class="pro-text"><strong>Want unlimited letters & LinkedIn message generator?</strong><br/>Upgrade to Pro for just ₹199/month.</div>
@@ -489,6 +512,7 @@
       if (!res.ok) throw new Error(data.error || 'Something went wrong');
       if (!data.letter) throw new Error('No letter returned. Please try again.');
       document.getElementById('outputText').textContent = data.letter;
+      changeCoverLetterFont();
       document.getElementById('outputCard').style.display = 'block';
       document.getElementById('outputCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
       if (typeof data.remaining !== 'undefined') updateUsageUI(data.remaining);
@@ -499,6 +523,16 @@
     }
   }
 
+  function changeCoverLetterFont() {
+    const size = document.getElementById('clFontSizeSelect').value;
+    const family = document.getElementById('clFontFamilySelect').value;
+    const outputText = document.getElementById('outputText');
+    if (outputText) {
+      outputText.style.fontSize = size;
+      outputText.style.fontFamily = family;
+    }
+  }
+
   function downloadPDF() {
     const text = document.getElementById('outputText').textContent;
     if (!text) { showError('Please generate a cover letter first!'); return; }
@@ -506,13 +540,34 @@
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
     const margin = 20, pageWidth = doc.internal.pageSize.getWidth(), maxWidth = pageWidth - margin * 2;
     let y = margin;
+    
+    // Scale font size and line height based on formatting choices
+    const sizeMap = {
+      '12px': { font: 10, lh: 5.5 },
+      '14px': { font: 11, lh: 6.5 },
+      '15px': { font: 12, lh: 7 },
+      '17px': { font: 13, lh: 7.5 },
+      '19px': { font: 14, lh: 8.5 }
+    };
+    const sizeVal = document.getElementById('clFontSizeSelect')?.value || '15px';
+    const pdfFontInfo = sizeMap[sizeVal] || { font: 12, lh: 7 };
+    
+    const familyVal = document.getElementById('clFontFamilySelect')?.value || 'Georgia, serif';
+    let pdfFontFamily = 'times';
+    if (familyVal.includes('sans-serif')) {
+      pdfFontFamily = 'helvetica';
+    } else if (familyVal.includes('monospace')) {
+      pdfFontFamily = 'courier';
+    }
+
     doc.setFontSize(18); doc.setFont('helvetica','bold'); doc.setTextColor(92,79,199);
     doc.text('CoverAI', margin, y); y += 6;
     doc.setDrawColor(220,220,220); doc.line(margin, y, pageWidth-margin, y); y += 10;
-    doc.setFontSize(12); doc.setFont('times','normal'); doc.setTextColor(30,30,30);
+    
+    doc.setFontSize(pdfFontInfo.font); doc.setFont(pdfFontFamily,'normal'); doc.setTextColor(30,30,30);
     doc.splitTextToSize(text, maxWidth).forEach(line => {
       if (y > 270) { doc.addPage(); y = margin; }
-      doc.text(line, margin, y); y += 7;
+      doc.text(line, margin, y); y += pdfFontInfo.lh;
     });
     const name = document.getElementById('name').value.trim() || 'cover-letter';
     doc.save(`${name.replace(/\s+/g,'-')}-cover-letter.pdf`);
