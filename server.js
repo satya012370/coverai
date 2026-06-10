@@ -158,6 +158,80 @@ Resume: ${extractedText.slice(0, 4000)}`;
   }
 });
 
+// ─── FULL RESUME PARSE ─────────────────────────────────────────
+app.post("/api/parse-full-resume", upload.single("resume"), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+
+    const originalName = req.file.originalname.toLowerCase();
+    let extractedText = "";
+
+    if (req.file.mimetype === "application/pdf" || originalName.endsWith(".pdf")) {
+      try {
+        const pdfData = await pdfParse(req.file.buffer);
+        extractedText = pdfData.text;
+      } catch(e) {
+        return res.status(400).json({ error: "Could not read this PDF." });
+      }
+    } else if (originalName.endsWith(".docx")) {
+      const result = await mammoth.extractRawText({ buffer: req.file.buffer });
+      extractedText = result.value;
+    } else {
+      return res.status(400).json({ error: "Please upload a PDF or Word (.docx) file." });
+    }
+
+    if (!extractedText || extractedText.trim().length < 50) {
+      return res.status(400).json({ error: "Could not extract text from this file." });
+    }
+
+    const prompt = `Extract ALL details from this resume and return ONLY a valid JSON object containing:
+{
+  "name": "full name",
+  "title": "professional title or current job title",
+  "email": "email address",
+  "phone": "phone number",
+  "location": "city and country",
+  "linkedin": "LinkedIn profile link",
+  "website": "portfolio or GitHub website link",
+  "summary": "professional summary paragraph",
+  "skills": ["Skill 1", "Skill 2", "Skill 3", "Skill 4", "Skill 5", "Skill 6", "Skill 7", "Skill 8", "Skill 9", "Skill 10"],
+  "experience": [
+    {
+      "company": "Company Name",
+      "title": "Job Title",
+      "start": "Start Date",
+      "end": "End Date",
+      "desc": "Responsibility summary or bullet points"
+    }
+  ],
+  "education": [
+    {
+      "school": "University or School Name",
+      "degree": "Degree and Major",
+      "year": "Year of study or graduation year",
+      "grade": "GPA or Grade"
+    }
+  ]
+}
+Return ONLY valid JSON. No markdown backticks or formatting.
+Resume text: ${extractedText.slice(0, 4500)}`;
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) }
+    );
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error?.message || "API error");
+    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+    const parsed = parseSafeJSON(raw);
+    res.json({ success: true, data: parsed });
+
+  } catch (err) {
+    res.status(500).json({ error: "Failed to parse resume: " + err.message });
+  }
+});
+
 // ─── GENERATE COVER LETTER ────────────────────────────────────
 app.post("/api/generate", async (req, res) => {
   try {
