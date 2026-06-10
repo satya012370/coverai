@@ -539,17 +539,53 @@ function verifyRazorpaySignature(orderId, paymentId, signature) {
 app.post("/api/razorpay/payment-success", async (req, res) => {
   try {
     const { paymentId, orderId, signature, email, uid } = req.body;
-    if (!paymentId || !orderId || !signature || !email || !uid) {
-      return res.status(400).json({ error: "paymentId, orderId, signature, email, and uid are required" });
+    if (!paymentId || !email || !uid) {
+      return res.status(400).json({ error: "paymentId, email, and uid are required" });
     }
 
-    // Verify signature
-    const isValid = verifyRazorpaySignature(orderId, paymentId, signature);
-    if (!isValid) {
-      console.error("❌ INVALID RAZORPAY SIGNATURE for payment:", paymentId);
-      return res.status(400).json({ error: "Payment verification failed — invalid signature" });
+    let isPaymentValid = false;
+
+    // 1. Verify directly with Razorpay API (highly secure, works with or without orderId)
+    if (RAZORPAY_KEY_ID && RAZORPAY_KEY_SECRET) {
+      try {
+        const credentials = Buffer.from(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`).toString("base64");
+        const rzpRes = await fetch(`https://api.razorpay.com/v1/payments/${paymentId}`, {
+          headers: { "Authorization": `Basic ${credentials}` }
+        });
+        if (rzpRes.ok) {
+          const paymentData = await rzpRes.json();
+          // Verify status is captured/authorized and amount is ₹1 (100) or ₹199 (19900)
+          if ((paymentData.status === "captured" || paymentData.status === "authorized") &&
+              (paymentData.amount === 100 || paymentData.amount === 19900)) {
+            isPaymentValid = true;
+            console.log(`✅ Verified payment ${paymentId} directly with Razorpay API. Status: ${paymentData.status}, Amount: ${paymentData.amount}`);
+          } else {
+            console.warn(`⚠️ Razorpay payment status or amount mismatch: Status=${paymentData.status}, Amount=${paymentData.amount}`);
+          }
+        } else {
+          console.warn("⚠️ Razorpay API returned non-OK response:", rzpRes.status);
+        }
+      } catch (err) {
+        console.warn("⚠️ Direct Razorpay API verification failed:", err.message);
+      }
     }
-    console.log("✅ Razorpay signature verified for payment:", paymentId);
+
+    // 2. Fallback: Verify signature if orderId and signature are present
+    if (!isPaymentValid) {
+      if (orderId && signature) {
+        const isValid = verifyRazorpaySignature(orderId, paymentId, signature);
+        if (isValid) {
+          isPaymentValid = true;
+          console.log("✅ Verified payment via signature verification.");
+        }
+      }
+    }
+
+    // 3. Fail if neither method could verify the payment
+    if (!isPaymentValid) {
+      console.error("❌ Payment verification failed for payment ID:", paymentId);
+      return res.status(400).json({ error: "Payment verification failed — invalid payment or signature" });
+    }
 
     const record = {
       paymentId, orderId, signature,
@@ -568,7 +604,7 @@ app.post("/api/razorpay/payment-success", async (req, res) => {
         pro: true,
         proActivatedAt: new Date().toISOString(),
         razorpayPaymentId: paymentId,
-        razorpayOrderId: orderId,
+        razorpayOrderId: orderId || null,
         plan: "pro-monthly",
         email: email
       }, { merge: true });
@@ -581,7 +617,7 @@ app.post("/api/razorpay/payment-success", async (req, res) => {
         currency: 'INR',
         plan: 'pro-monthly',
         razorpayPaymentId: paymentId,
-        razorpayOrderId: orderId,
+        razorpayOrderId: orderId || null,
         verified: true,
         timestamp: new Date().toISOString()
       });
@@ -605,7 +641,7 @@ app.post("/api/razorpay/payment-success", async (req, res) => {
               pro: { booleanValue: true },
               proActivatedAt: { stringValue: new Date().toISOString() },
               razorpayPaymentId: { stringValue: paymentId },
-              razorpayOrderId: { stringValue: orderId },
+              razorpayOrderId: { stringValue: orderId || "" },
               plan: { stringValue: "pro-monthly" },
               email: { stringValue: email }
             }
@@ -634,7 +670,7 @@ app.post("/api/razorpay/payment-success", async (req, res) => {
               currency: { stringValue: "INR" },
               plan: { stringValue: "pro-monthly" },
               razorpayPaymentId: { stringValue: paymentId },
-              razorpayOrderId: { stringValue: orderId },
+              razorpayOrderId: { stringValue: orderId || "" },
               verified: { booleanValue: true },
               timestamp: { stringValue: new Date().toISOString() }
             }
