@@ -495,38 +495,15 @@ window.startRazorpayPayment = async function() {
 // ── Handle successful payment ────────────────────────────────
 async function handlePaymentSuccess(response, user) {
   try {
-    // 1. Write to Firestore — activate Pro
-    const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const token = await user.getIdToken();
 
-    const userRef = doc(window.db, 'users', user.uid);
-    await setDoc(userRef, {
-      pro: true,
-      proActivatedAt: new Date().toISOString(),
-      razorpayPaymentId: response.razorpay_payment_id,
-      razorpayOrderId: response.razorpay_order_id || null,
-      plan: 'pro-monthly',
-      email: user.email
-    }, { merge: true });
-
-    // 2. Log payment in separate collection
-    const payRef = doc(window.db, 'payments', response.razorpay_payment_id);
-    await setDoc(payRef, {
-      userId: user.uid,
-      email: user.email,
-      amount: 199,
-      currency: 'INR',
-      plan: 'pro-monthly',
-      razorpayPaymentId: response.razorpay_payment_id,
-      razorpayOrderId: response.razorpay_order_id || null,
-      razorpaySignature: response.razorpay_signature || null,
-      paidAt: new Date().toISOString(),
-      status: 'captured'
-    });
-
-    // 3. Notify backend (non-blocking)
-    fetch('/api/razorpay/payment-success', {
+    // Call backend to verify signature and upgrade the user securely
+    const verifyRes = await fetch('/api/razorpay/payment-success', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       body: JSON.stringify({
         paymentId: response.razorpay_payment_id,
         orderId: response.razorpay_order_id,
@@ -534,22 +511,26 @@ async function handlePaymentSuccess(response, user) {
         email: user.email,
         uid: user.uid
       })
-    }).catch(e => console.warn('Backend notify failed:', e));
+    });
 
-    // 4. Refresh the nav PRO badge immediately (no page reload needed)
+    const data = await verifyRes.json();
+    if (!verifyRes.ok) throw new Error(data.error || "Payment verification failed");
+
+    // Refresh the nav PRO badge immediately
     if (window.refreshProStatus) {
       await window.refreshProStatus();
     }
 
-    // 5. Show success screen
+    // Show success screen
     document.getElementById('confirmedEmail').textContent = user.email;
     document.getElementById('paymentIdDisplay').textContent = 'Payment ID: ' + response.razorpay_payment_id;
     showSection('success');
 
   } catch(err) {
     alert(
-      'Payment received ✅ but Pro activation had an issue.\n' +
-      'Please email coveraii@gmail.com with:\n' +
+      'Payment verification failed ❌\n' +
+      err.message + '\n\n' +
+      'If you were charged, please email coveraii@gmail.com with:\n' +
       'Payment ID: ' + response.razorpay_payment_id
     );
   }

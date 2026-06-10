@@ -5,6 +5,27 @@ const cors = require("cors");
 const multer = require("multer");
 const pdfParse = require("pdf-parse");
 const mammoth = require("mammoth");
+const admin = require("firebase-admin");
+
+let isFirebaseAdminInitialized = false;
+
+// Initialize Firebase Admin SDK if service account is provided in env
+if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  try {
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
+    });
+    isFirebaseAdminInitialized = true;
+    console.log("✅ Firebase Admin SDK initialized successfully.");
+  } catch (err) {
+    console.error("❌ Failed to initialize Firebase Admin SDK:", err.message);
+  }
+} else {
+  console.warn("⚠️ FIREBASE_SERVICE_ACCOUNT not set in .env — payment upgrades will fall back to using client Bearer tokens.");
+}
+
+const dbAdmin = isFirebaseAdminInitialized ? admin.firestore() : null;
 
 const app = express();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -61,6 +82,38 @@ function getRemainingCount(ip) {
   const today = getToday();
   if (!usageMap[ip] || usageMap[ip].date !== today) return FREE_LIMIT;
   return FREE_LIMIT - usageMap[ip].count;
+}
+
+// Rate limit maps for other endpoints
+const linkedinUsage = {};
+const interviewUsage = {};
+const atsUsage = {};
+
+const LIMITS = {
+  coverLetter: 5,
+  linkedin: 5,
+  interview: 2,
+  ats: 5
+};
+
+function checkEndpointLimit(ip, map, limit) {
+  const today = getToday();
+  if (!map[ip] || map[ip].date !== today) {
+    map[ip] = { count: 0, date: today };
+  }
+  return map[ip].count < limit;
+}
+
+function incrementEndpointUsage(ip, map) {
+  if (map[ip]) {
+    map[ip].count++;
+  }
+}
+
+function getEndpointRemaining(ip, map, limit) {
+  const today = getToday();
+  if (!map[ip] || map[ip].date !== today) return limit;
+  return limit - map[ip].count;
 }
 
 // ─── FIREBASE AUTH/PRO VERIFICATION ───────────────────────────
@@ -340,6 +393,16 @@ Rules: Strong action verbs, specific impact, under 2 sentences each. ONLY JSON, 
 // ─── ATS SCORE CHECKER ────────────────────────────────────────
 app.post("/api/ats-check", async (req, res) => {
   try {
+    const ip = req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress;
+    const isPro = await checkProStatus(req);
+
+    if (!isPro && !checkEndpointLimit(ip, atsUsage, LIMITS.ats)) {
+      return res.status(429).json({
+        error: "LIMIT_REACHED",
+        message: "You have used your 5 free ATS checks for today. Come back tomorrow or upgrade to Pro for unlimited access."
+      });
+    }
+
     const { resumeText, jobDesc } = req.body;
     if (!resumeText || !jobDesc) return res.status(400).json({ error: "Resume and job description are required." });
 
@@ -387,7 +450,12 @@ Rules:
     if (!response.ok) throw new Error(data.error?.message || "API error");
     const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
     const result = parseSafeJSON(raw);
-    res.json(result);
+
+    if (!isPro) {
+      incrementEndpointUsage(ip, atsUsage);
+    }
+
+    res.json({ ...result, remaining: isPro ? "unlimited" : getEndpointRemaining(ip, atsUsage, LIMITS.ats) });
   } catch (err) {
     res.status(500).json({ error: "ATS check failed: " + err.message });
   }
@@ -471,37 +539,123 @@ function verifyRazorpaySignature(orderId, paymentId, signature) {
 app.post("/api/razorpay/payment-success", async (req, res) => {
   try {
     const { paymentId, orderId, signature, email, uid } = req.body;
-    if (!paymentId || !email) return res.status(400).json({ error: "paymentId and email required" });
-
-    // Verify signature for live payments (order-based)
-    if (orderId && signature) {
-      const isValid = verifyRazorpaySignature(orderId, paymentId, signature);
-      if (!isValid) {
-        console.error("❌ INVALID RAZORPAY SIGNATURE for payment:", paymentId);
-        return res.status(400).json({ error: "Payment verification failed — invalid signature" });
-      }
-      console.log("✅ Razorpay signature verified for payment:", paymentId);
+    if (!paymentId || !orderId || !signature || !email || !uid) {
+      return res.status(400).json({ error: "paymentId, orderId, signature, email, and uid are required" });
     }
+
+    // Verify signature
+    const isValid = verifyRazorpaySignature(orderId, paymentId, signature);
+    if (!isValid) {
+      console.error("❌ INVALID RAZORPAY SIGNATURE for payment:", paymentId);
+      return res.status(400).json({ error: "Payment verification failed — invalid signature" });
+    }
+    console.log("✅ Razorpay signature verified for payment:", paymentId);
 
     const record = {
       paymentId, orderId, signature,
       email, uid,
       amount: 199,
       plan: "pro-monthly",
-      verified: !!(orderId && signature),
+      verified: true,
       capturedAt: new Date().toISOString()
     };
     confirmedPayments.push(record);
 
+    // Securely write to Firestore
+    if (dbAdmin) {
+      // 1. Update user to Pro in Firestore securely
+      await dbAdmin.collection("users").doc(uid).set({
+        pro: true,
+        proActivatedAt: new Date().toISOString(),
+        razorpayPaymentId: paymentId,
+        razorpayOrderId: orderId,
+        plan: "pro-monthly",
+        email: email
+      }, { merge: true });
+
+      // 2. Log payment transaction
+      await dbAdmin.collection("payments").doc(paymentId).set({
+        userId: uid,
+        email,
+        amount: 199,
+        currency: 'INR',
+        plan: 'pro-monthly',
+        razorpayPaymentId: paymentId,
+        razorpayOrderId: orderId,
+        verified: true,
+        timestamp: new Date().toISOString()
+      });
+      console.log("✅ Firestore database updated securely via Firebase Admin SDK.");
+    } else {
+      // Fallback REST call using the client's Bearer token
+      const authHeader = req.headers.authorization;
+      const token = authHeader?.startsWith("Bearer ") ? authHeader.split(" ")[1] : null;
+      if (token) {
+        const projId = process.env.FIREBASE_PROJECT_ID || "coverai-a26bf";
+        const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${projId}/databases/(default)/documents/users/${uid}?updateMask.fieldPaths=pro&updateMask.fieldPaths=proActivatedAt&updateMask.fieldPaths=razorpayPaymentId&updateMask.fieldPaths=razorpayOrderId&updateMask.fieldPaths=plan&updateMask.fieldPaths=email`;
+        
+        const updateRes = await fetch(firestoreUrl, {
+          method: "PATCH",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            fields: {
+              pro: { booleanValue: true },
+              proActivatedAt: { stringValue: new Date().toISOString() },
+              razorpayPaymentId: { stringValue: paymentId },
+              razorpayOrderId: { stringValue: orderId },
+              plan: { stringValue: "pro-monthly" },
+              email: { stringValue: email }
+            }
+          })
+        });
+
+        if (!updateRes.ok) {
+          const errData = await updateRes.json();
+          console.error("❌ REST Fallback Firestore update failed:", errData);
+          throw new Error(errData.error?.message || "REST Fallback Firestore update failed");
+        }
+
+        // Also log payment record
+        const payUrl = `https://firestore.googleapis.com/v1/projects/${projId}/databases/(default)/documents/payments/${paymentId}`;
+        await fetch(payUrl, {
+          method: "PATCH",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            fields: {
+              userId: { stringValue: uid },
+              email: { stringValue: email },
+              amount: { integerValue: "199" },
+              currency: { stringValue: "INR" },
+              plan: { stringValue: "pro-monthly" },
+              razorpayPaymentId: { stringValue: paymentId },
+              razorpayOrderId: { stringValue: orderId },
+              verified: { booleanValue: true },
+              timestamp: { stringValue: new Date().toISOString() }
+            }
+          })
+        });
+
+        console.log("✅ Firestore database updated via client-token REST fallback.");
+      } else {
+        console.warn("⚠️ Firestore update skipped: No service account configured and no client Bearer token found.");
+      }
+    }
+
     console.log("\n✅ RAZORPAY PAYMENT CONFIRMED:");
     console.log("   Payment ID:", paymentId);
     console.log("   Order ID  :", orderId);
-    console.log("   Verified  :", record.verified ? "YES ✅" : "NO (no order)");
     console.log("   Email     :", email);
     console.log("   Time      :", record.capturedAt, "\n");
 
-    res.json({ success: true, message: "Payment verified and logged" });
+    res.json({ success: true, message: "Payment verified, logged, and user upgraded to Pro" });
   } catch (err) {
+    console.error("❌ Razorpay success callback failed:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
@@ -519,6 +673,16 @@ app.listen(PORT, () => { console.log(`\n🚀 Server running on http://localhost:
 // ─── LINKEDIN MESSAGE GENERATOR ───────────────────────────────
 app.post("/api/linkedin-message", async (req, res) => {
   try {
+    const ip = req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress;
+    const isPro = await checkProStatus(req);
+
+    if (!isPro && !checkEndpointLimit(ip, linkedinUsage, LIMITS.linkedin)) {
+      return res.status(429).json({
+        error: "LIMIT_REACHED",
+        message: "You have used your 5 free LinkedIn messages for today. Come back tomorrow or upgrade to Pro for unlimited access."
+      });
+    }
+
     const { name, profession, skills, recruiterName, company, jobtitle, reason, messageType } = req.body;
 
     const greeting = recruiterName ? `Hi ${recruiterName.split(' ')[0]}` : 'Hi there';
@@ -568,7 +732,11 @@ Rules:
     const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
     const messages = parseSafeJSON(raw);
 
-    res.json({ messages });
+    if (!isPro) {
+      incrementEndpointUsage(ip, linkedinUsage);
+    }
+
+    res.json({ messages, remaining: isPro ? "unlimited" : getEndpointRemaining(ip, linkedinUsage, LIMITS.linkedin) });
 
   } catch (err) {
     console.error("LinkedIn message error:", err);
@@ -579,6 +747,16 @@ Rules:
 // ─── INTERVIEW Q&A GENERATOR ───────────────────────────────────
 app.post("/api/interview-prep", async (req, res) => {
   try {
+    const ip = req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress;
+    const isPro = await checkProStatus(req);
+
+    if (!isPro && !checkEndpointLimit(ip, interviewUsage, LIMITS.interview)) {
+      return res.status(429).json({
+        error: "LIMIT_REACHED",
+        message: "You have used your 2 free interview prep sessions for today. Come back tomorrow or upgrade to Pro for unlimited access."
+      });
+    }
+
     const { jobTitle, company, jobDescription, experience, focusAreas } = req.body;
     if (!jobTitle) return res.status(400).json({ error: "Job title is required" });
 
@@ -621,7 +799,11 @@ Rules:
     const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
     const questions = parseSafeJSON(raw);
 
-    res.json({ questions });
+    if (!isPro) {
+      incrementEndpointUsage(ip, interviewUsage);
+    }
+
+    res.json({ questions, remaining: isPro ? "unlimited" : getEndpointRemaining(ip, interviewUsage, LIMITS.interview) });
 
   } catch (err) {
     console.error("Interview prep error:", err);
