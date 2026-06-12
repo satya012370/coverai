@@ -273,7 +273,7 @@ Resume: ${extractedText.slice(0, 50000)}`;
     } else {
       errMsg = errMsg.replace(/[\{\}\[\]"]/g, "").trim();
     }
-    res.status(500).json({ error: "Failed to process resume: " + errMsg });
+    res.status(500).json({ error: errMsg });
   }
 });
 
@@ -359,7 +359,7 @@ Resume text: ${extractedText.slice(0, 50000)}`;
     } else {
       errMsg = errMsg.replace(/[\{\}\[\]"]/g, "").trim();
     }
-    res.status(500).json({ error: "Failed to parse resume: " + errMsg });
+    res.status(500).json({ error: errMsg });
   }
 });
 

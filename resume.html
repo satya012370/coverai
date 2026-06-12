@@ -927,7 +927,7 @@ let projectEntries = [];
       showToast('Resume imported successfully!', 'success');
 
     } catch (err) {
-      showUploadError('Could not read resume: ' + err.message);
+      showUploadError(err.message);
     } finally {
       document.getElementById('parsingMsg').style.display = 'none';
     }
