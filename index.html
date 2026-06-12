@@ -191,7 +191,7 @@
         <span style="font-size:28px">📄</span>
         <div>
           <div style="font-size:14px;font-weight:700;color:#fff">NEW — AI Resume Builder</div>
-          <div style="font-size:12px;color:rgba(255,255,255,.85);margin-top:2px">5 templates · AI-enhanced · Free PDF download</div>
+          <div id="resume-banner-text" style="font-size:12px;color:rgba(255,255,255,.85);margin-top:2px">11 templates · AI-enhanced · Free PDF download</div>
         </div>
       </div>
       <div style="background:#fff;color:#5c4fc7;font-size:13px;font-weight:700;padding:8px 18px;border-radius:8px;white-space:nowrap">Build Resume →</div>
@@ -468,12 +468,19 @@
     // Update usage bar and pro banners
     const usageBar = document.querySelector('.usage-bar');
     const proBanner = document.querySelector('.pro-banner');
+    const resumeBannerText = document.getElementById('resume-banner-text');
     if (isPro) {
       if (usageBar) usageBar.style.display = 'none';
       if (proBanner) proBanner.style.display = 'none';
+      if (resumeBannerText) {
+        resumeBannerText.textContent = "11 premium templates · AI-enhanced · Unlimited Pro PDF downloads";
+      }
     } else {
       if (usageBar) usageBar.style.display = 'block';
       if (proBanner) proBanner.style.display = 'flex';
+      if (resumeBannerText) {
+        resumeBannerText.textContent = "11 templates · AI-enhanced · Free PDF download";
+      }
       // Load remaining count from backend
       fetch('/api/remaining')
         .then(res => res.json())
