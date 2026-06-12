@@ -1536,14 +1536,23 @@ function downloadResumePDF() {
   const originalWidth = element.style.width;
   const originalMinHeight = element.style.minHeight;
   const originalHeight = element.style.height;
+  const originalZoom = element.style.zoom;
   
-  // Save parent styles
+  // Save parent styles and scroll positions
   const originalParentAlignItems = parent ? parent.style.alignItems : '';
   const originalParentPadding = parent ? parent.style.padding : '';
+  const originalParentScrollTop = parent ? parent.scrollTop : 0;
+  const originalParentScrollLeft = parent ? parent.scrollLeft : 0;
+  
+  // Scroll parent container to top-left to avoid html2canvas offsets
+  if (parent) {
+    parent.scrollTop = 0;
+    parent.scrollLeft = 0;
+    parent.style.alignItems = 'flex-start';
+    parent.style.padding = '0';
+  }
   
   // Temporarily normalize formatting to 100% scale and clear UI borders for PDF capture
-  // We force the element width to exactly 210mm (A4 width) and min-height to 297mm (A4 height)
-  // to ensure layout is perfect even when downloading from mobile or narrow screens.
   element.style.transform = 'none';
   element.style.boxShadow = 'none';
   element.style.borderRadius = '0';
@@ -1553,14 +1562,10 @@ function downloadResumePDF() {
   element.style.setProperty('width', '210mm', 'important');
   element.style.setProperty('min-height', '273mm', 'important');
   element.style.setProperty('height', 'auto', 'important');
+  element.style.setProperty('zoom', '1', 'important');
   
   // Temporarily hide the page boundary guides during PDF generation
   element.style.setProperty('background-image', 'none', 'important');
-  
-  if (parent) {
-    parent.style.alignItems = 'flex-start';
-    parent.style.padding = '0';
-  }
   
   const opt = {
     margin:       [12, 0, 12, 0],
@@ -1597,12 +1602,17 @@ function downloadResumePDF() {
     if (originalHeight) element.style.setProperty('height', originalHeight);
     else element.style.removeProperty('height');
     
+    if (originalZoom) element.style.setProperty('zoom', originalZoom);
+    else element.style.removeProperty('zoom');
+    
     // Restore page guides on screen
     element.style.removeProperty('background-image');
     
     if (parent) {
       parent.style.alignItems = originalParentAlignItems;
       parent.style.padding = originalParentPadding;
+      parent.scrollTop = originalParentScrollTop;
+      parent.scrollLeft = originalParentScrollLeft;
     }
     
     // Restore scroll positions
