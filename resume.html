@@ -337,9 +337,15 @@ textarea{resize:vertical;line-height:1.6}
   --resume-font-family: inherit;
   
   width: 210mm !important;
-  height: 297mm !important;
+  min-height: 297mm !important;
   background-color: #fff !important;
-  overflow: hidden !important;
+  position: relative;
+  transform-origin: top center !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  
+  /* Draw thin page break guide lines every 297mm on screen */
+  background-image: linear-gradient(to bottom, transparent 296.8mm, #e0dbf7 296.8mm, #e0dbf7 297mm, transparent 297mm) !important;
+  background-size: 100% 297mm !important;
 }
 
 #resumePreview, #resumePreview * {
@@ -1546,6 +1552,7 @@ function downloadResumePDF() {
   element.style.margin = '0';
   element.style.setProperty('width', '210mm', 'important');
   element.style.setProperty('min-height', '297mm', 'important');
+  element.style.setProperty('height', 'auto', 'important');
   
   // Temporarily hide the page boundary guides during PDF generation
   element.style.setProperty('background-image', 'none', 'important');
