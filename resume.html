@@ -155,8 +155,8 @@ textarea{resize:vertical;line-height:1.6}
 .preview-zoom{display:flex;gap:6px}
 .zoom-btn{background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;color:#555;transition:all .15s}
 .zoom-btn:hover{background:#eeedfe;border-color:#afa9ec;color:#5c4fc7}
-.resume-page{width:210mm !important;height:297mm !important;background:#fff;box-shadow:0 8px 32px rgba(0,0,0,.18);border-radius:4px;overflow:hidden !important;font-size:10pt;line-height:1.4;transition:transform .3s ease;transform-origin:top center}
-@media(max-width:900px){.resume-page{width:210mm !important;height:297mm !important;zoom:0.45}}
+.resume-page{width:210mm !important;min-height:297mm !important;background:#fff;box-shadow:0 8px 32px rgba(0,0,0,.18);border-radius:4px;font-size:10pt;line-height:1.4;transition:transform .3s ease;transform-origin:top center}
+@media(max-width:900px){.resume-page{width:210mm !important;zoom:0.45}}
 
 /* ── TEMPLATES ── */
 .tpl-modern .resume-header{background:linear-gradient(135deg,#5c4fc7,#7c3aed);color:#fff;padding:28px 32px}
@@ -343,9 +343,9 @@ textarea{resize:vertical;line-height:1.6}
   transform-origin: top center !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   
-  /* Draw thin page break guide lines every 297mm on screen */
-  background-image: linear-gradient(to bottom, transparent 296.8mm, #e0dbf7 296.8mm, #e0dbf7 297mm, transparent 297mm) !important;
-  background-size: 100% 297mm !important;
+  /* Draw thin page break guide lines every 273mm on screen (A4 297mm minus 24mm top/bottom margins) */
+  background-image: linear-gradient(to bottom, transparent 272.8mm, #e0dbf7 272.8mm, #e0dbf7 273mm, transparent 273mm) !important;
+  background-size: 100% 273mm !important;
 }
 
 #resumePreview, #resumePreview * {
@@ -1551,7 +1551,7 @@ function downloadResumePDF() {
   element.style.transition = 'none';
   element.style.margin = '0';
   element.style.setProperty('width', '210mm', 'important');
-  element.style.setProperty('min-height', '297mm', 'important');
+  element.style.setProperty('min-height', '273mm', 'important');
   element.style.setProperty('height', 'auto', 'important');
   
   // Temporarily hide the page boundary guides during PDF generation
@@ -1563,7 +1563,7 @@ function downloadResumePDF() {
   }
   
   const opt = {
-    margin:       0,
+    margin:       [12, 0, 12, 0],
     filename:     `${name.replace(/\s+/g,'-')}-resume.pdf`,
     image:        { type: 'jpeg', quality: 0.98 },
     html2canvas:  { 
