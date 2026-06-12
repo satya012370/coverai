@@ -347,10 +347,26 @@ textarea{resize:vertical;line-height:1.6}
 }
 
 /* Page break behaviors to avoid cutting elements in half horizontally */
-#resumePreview .exp-item,
-#resumePreview .sec-title,
+#resumePreview .sec-title {
+  page-break-inside: avoid !important;
+  break-inside: avoid !important;
+  page-break-after: avoid !important;
+  break-after: avoid !important;
+}
+
+#resumePreview .exp-title,
+#resumePreview .exp-company,
+#resumePreview .exp-date {
+  page-break-inside: avoid !important;
+  break-inside: avoid !important;
+  page-break-after: avoid !important;
+  break-after: avoid !important;
+}
+
 #resumePreview .publications-list li,
-#resumePreview .certifications-list li {
+#resumePreview .certifications-list li,
+#resumePreview li,
+#resumePreview .desc-list li {
   page-break-inside: avoid !important;
   break-inside: avoid !important;
 }
@@ -1268,6 +1284,36 @@ function getFormData() {
 
 /* ── PREVIEW ── */
 function esc(s){ return s ? s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : ''; }
+
+function formatDesc(text) {
+  if (!text) return '';
+  const lines = text.split('\n').map(x => x.trim()).filter(Boolean);
+  let isList = false;
+  let html = '';
+
+  lines.forEach(line => {
+    const match = line.match(/^([•\-\*\+])\s*(.*)/);
+    if (match) {
+      if (!isList) {
+        html += '<ul class="desc-list" style="margin: 4px 0 0; padding-left: 15px; list-style-type: disc; font-size: var(--resume-font-size, 9.5px); color: #444; line-height: var(--resume-line-height, 1.6);">';
+        isList = true;
+      }
+      html += `<li style="page-break-inside: avoid; break-inside: avoid; margin-bottom: 3px;">${esc(match[2])}</li>`;
+    } else {
+      if (isList) {
+        html += '</ul>';
+        isList = false;
+      }
+      html += `<p style="margin: 4px 0 0; font-size: var(--resume-font-size, 9.5px); color: #444; line-height: var(--resume-line-height, 1.6);">${esc(line)}</p>`;
+    }
+  });
+
+  if (isList) {
+    html += '</ul>';
+  }
+  return html;
+}
+
 function updatePreview() {
   const d = getFormData();
   const tpl = currentTemplate;
@@ -1278,7 +1324,7 @@ function updatePreview() {
     <div class="exp-title">${esc(e.title)}</div>
     <div class="exp-company">${esc(e.company)}</div>
     <div class="exp-date">${esc(e.start)}${e.end?' – '+esc(e.end):''}</div>
-    <div class="exp-desc">${esc(e.desc).replace(/\n/g,'<br/>')}</div>
+    <div class="exp-desc">${formatDesc(e.desc)}</div>
   </div>`).join('');
 
   const eduHtml = d.edus.map(e => `<div class="exp-item">
@@ -1294,12 +1340,12 @@ function updatePreview() {
   const projectsHtml_sidebar = d.projects && d.projects.length ? `<div class="sec-title">Projects</div>${d.projects.map(p => `<div class="exp-item">
     <div class="exp-title">${esc(p.title)}</div>
     ${p.subtitle ? `<div class="exp-company">${esc(p.subtitle)}</div>` : ''}
-    <div class="exp-desc">${esc(p.desc).replace(/\n/g,'<br/>')}</div>
+    <div class="exp-desc">${formatDesc(p.desc)}</div>
   </div>`).join('')}` : '';
 
   const projectsHtml_classic = d.projects && d.projects.length ? `<div class="sec-title">Projects</div>${d.projects.map(p => `<div class="exp-item">
     <div class="exp-title">${esc(p.title)}${p.subtitle ? ` — <span class="exp-company">${esc(p.subtitle)}</span>` : ''}</div>
-    <div class="exp-desc">${esc(p.desc).replace(/\n/g,'<br/>')}</div>
+    <div class="exp-desc">${formatDesc(p.desc)}</div>
   </div>`).join('')}` : '';
 
   const publicationsHtml = d.publications && d.publications.length ? `<div class="sec-title">Publications</div><ul class="publications-list" style="margin: 0; padding-left: 15px; font-size: var(--resume-font-size, 9.5px); color: #444; line-height: var(--resume-line-height, 1.5);">${d.publications.map(p => `<li style="margin-bottom: 4px;">${esc(p)}</li>`).join('')}</ul>` : '';
@@ -1337,7 +1383,7 @@ function updatePreview() {
       </div>
       <div class="resume-body">
         ${summaryHtml}
-        ${d.exps.length?`<div class="sec-title">Experience</div>${d.exps.map(e=>`<div class="exp-item"><div class="exp-title">${esc(e.title)} — <span class="exp-company">${esc(e.company)}</span> <span class="exp-date">(${esc(e.start)}${e.end?' – '+esc(e.end):''})</span></div><div class="exp-desc">${esc(e.desc).replace(/\n/g,'<br/>')}</div></div>`).join('')}`:''}
+        ${d.exps.length?`<div class="sec-title">Experience</div>${d.exps.map(e=>`<div class="exp-item"><div class="exp-title">${esc(e.title)} — <span class="exp-company">${esc(e.company)}</span> <span class="exp-date">(${esc(e.start)}${e.end?' – '+esc(e.end):''})</span></div><div class="exp-desc">${formatDesc(e.desc)}</div></div>`).join('')}`:''}
         ${projectsHtml_classic}
         ${d.edus.length?`<div class="sec-title">Education</div>${d.edus.map(e=>`<div class="exp-item"><div class="exp-title">${esc(e.degree)} — <span class="exp-company">${esc(e.inst)}</span></div><div class="exp-desc">${esc(e.year)}${e.grade?' · '+esc(e.grade):''}</div></div>`).join('')}`:''}
         ${d.skills.length?`<div class="sec-title">Skills</div><div>${skillsHtml}</div>`:''}
@@ -1352,7 +1398,7 @@ function updatePreview() {
       </div>
       <div class="resume-body">
         ${summaryHtml}
-        ${d.exps.length?`<div class="sec-title">Experience</div>${d.exps.map(e=>`<div class="exp-item"><div class="exp-title">${esc(e.title)}</div><div class="exp-company">${esc(e.company)}</div><div class="exp-date">${esc(e.start)}${e.end?' – '+esc(e.end):''}</div><div class="exp-desc">${esc(e.desc).replace(/\n/g,'<br/>')}</div></div>`).join('')}`:''}
+        ${d.exps.length?`<div class="sec-title">Experience</div>${d.exps.map(e=>`<div class="exp-item"><div class="exp-title">${esc(e.title)}</div><div class="exp-company">${esc(e.company)}</div><div class="exp-date">${esc(e.start)}${e.end?' – '+esc(e.end):''}</div><div class="exp-desc">${formatDesc(e.desc)}</div></div>`).join('')}`:''}
         ${projectsHtml_sidebar}
         ${d.edus.length?`<div class="sec-title">Education</div>${d.edus.map(e=>`<div class="exp-item"><div class="exp-title">${esc(e.degree)}</div><div class="exp-company">${esc(e.inst)}</div><div class="exp-date">${esc(e.year)}${e.grade?' · '+esc(e.grade):''}</div></div>`).join('')}`:''}
         ${d.skills.length?`<div class="sec-title">Skills</div><div>${skillsHtml}</div>`:''}
@@ -1392,6 +1438,23 @@ function updatePreview() {
       </div></div>`;
   }
   document.getElementById('resumePreview').innerHTML = html;
+
+  // Adjust preview container height to be an exact multiple of A4 page height (297mm)
+  const preview = document.getElementById('resumePreview');
+  preview.style.height = 'auto'; // Reset first
+  
+  // Create a temporary element to measure 297mm in pixels on the user's screen
+  const tempDiv = document.createElement('div');
+  tempDiv.style.height = '297mm';
+  tempDiv.style.position = 'absolute';
+  tempDiv.style.visibility = 'hidden';
+  document.body.appendChild(tempDiv);
+  const a4PxHeight = tempDiv.offsetHeight;
+  document.body.removeChild(tempDiv);
+  
+  const contentHeight = preview.scrollHeight;
+  const pages = Math.max(1, Math.ceil(contentHeight / a4PxHeight));
+  preview.style.height = (pages * 297) + 'mm';
 }
 
 /* ── AI SUMMARY ── */
@@ -1483,6 +1546,7 @@ function downloadResumePDF() {
   const originalMargin = element.style.margin;
   const originalWidth = element.style.width;
   const originalMinHeight = element.style.minHeight;
+  const originalHeight = element.style.height;
   
   // Save parent styles
   const originalParentAlignItems = parent ? parent.style.alignItems : '';
@@ -1539,6 +1603,9 @@ function downloadResumePDF() {
     
     if (originalMinHeight) element.style.setProperty('min-height', originalMinHeight);
     else element.style.removeProperty('min-height');
+
+    if (originalHeight) element.style.setProperty('height', originalHeight);
+    else element.style.removeProperty('height');
     
     // Restore page guides on screen
     element.style.removeProperty('background-image');
