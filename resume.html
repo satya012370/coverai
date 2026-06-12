@@ -348,7 +348,9 @@ textarea{resize:vertical;line-height:1.6}
 
 /* Page break behaviors to avoid cutting elements in half horizontally */
 #resumePreview .exp-item,
-#resumePreview .sec-title {
+#resumePreview .sec-title,
+#resumePreview .publications-list li,
+#resumePreview .certifications-list li {
   page-break-inside: avoid !important;
   break-inside: avoid !important;
 }
@@ -683,6 +685,36 @@ footer a{color:#5c4fc7}
       </div>
     </div>
 
+    <!-- PROJECTS -->
+    <div class="acc-section" id="sec-projects">
+      <div class="acc-header" onclick="toggleSection('projects')">
+        <div class="acc-icon" style="background:#fef3c7">🛠️</div>
+        <span class="acc-title">Projects</span>
+        <span class="acc-status" id="projects-status"></span>
+        <span class="acc-arrow">▾</span>
+      </div>
+      <div class="acc-body">
+        <div id="projectEntries"></div>
+        <button class="add-entry-btn" onclick="addProject()">+ Add Project</button>
+      </div>
+    </div>
+
+    <!-- PUBLICATIONS & CERTIFICATIONS -->
+    <div class="acc-section" id="sec-additional">
+      <div class="acc-header" onclick="toggleSection('additional')">
+        <div class="acc-icon" style="background:#fce7f3">🏆</div>
+        <span class="acc-title">Publications & Certifications</span>
+        <span class="acc-status" id="additional-status"></span>
+        <span class="acc-arrow">▾</span>
+      </div>
+      <div class="acc-body">
+        <label>Publications (one per line or comma-separated)</label>
+        <textarea id="rPublications" rows="3" placeholder="e.g. Published 'Intelligent Sensing Systems' in IEEE Sensors Journal" oninput="updatePreview()"></textarea>
+        <label>Certifications (one per line or comma-separated)</label>
+        <textarea id="rCertifications" rows="3" placeholder="e.g. CSIR-NET JRF (AIR 155), GATE Physics" oninput="updatePreview()"></textarea>
+      </div>
+    </div>
+
     <!-- 7. FORMATTING & SPACING -->
     <div class="acc-section open" id="sec-formatting">
       <div class="acc-header" onclick="toggleSection('formatting')">
@@ -779,6 +811,7 @@ let currentTemplate = 'modern';
 let skills = [];
 let expEntries = [];
 let eduEntries = [];
+let projectEntries = [];
 
   async function handleResumeUpload(input) {
     const file = input.files[0];
@@ -845,6 +878,30 @@ let eduEntries = [];
         });
       }
 
+      // 6. Fill Projects
+      if (d.projects && Array.isArray(d.projects)) {
+        // Clear existing projects UI entries
+        document.getElementById('projectEntries').innerHTML = '';
+        projectEntries = [];
+        
+        // Add parsed projects
+        d.projects.forEach(p => {
+          addParsedProject(p.title, p.subtitle || p.link || '', p.desc);
+        });
+      }
+
+      // 7. Fill Publications & Certifications
+      if (d.publications) {
+        document.getElementById('rPublications').value = Array.isArray(d.publications) ? d.publications.join('\n') : d.publications;
+      } else {
+        document.getElementById('rPublications').value = '';
+      }
+      if (d.certifications) {
+        document.getElementById('rCertifications').value = Array.isArray(d.certifications) ? d.certifications.join('\n') : d.certifications;
+      } else {
+        document.getElementById('rCertifications').value = '';
+      }
+
       // Update UI preview, progress completeness, etc.
       updatePreview();
       updateProgress();
@@ -909,8 +966,49 @@ let eduEntries = [];
     document.getElementById(`ugrade_${id}`).value = grade || '';
   }
 
+  function addProject() {
+    const id = Date.now(); projectEntries.push(id);
+    const div = document.createElement('div');
+    div.className = 'entry'; div.id = 'project_' + id;
+    div.innerHTML = `<button class="entry-del" onclick="removeEntry('project',${id})" title="Remove">×</button>
+      <label>Project Name *</label><input type="text" id="ptitle_${id}" placeholder="e.g. Portfolio Website" oninput="updatePreview();updateProgress()"/>
+      <label>Subtitle / Link</label><input type="text" id="psubtitle_${id}" placeholder="e.g. Github link or organization" oninput="updatePreview()"/>
+      <label>Project Details</label>
+      <textarea id="pdesc_${id}" rows="3" placeholder="• Built using React and Node.js...&#10;• Deployed on AWS..." oninput="updatePreview()"></textarea>`;
+    document.getElementById('projectEntries').appendChild(div);
+    updateProgress();
+  }
+
+  function addParsedProject(title, subtitle, desc) {
+    const id = Date.now() + Math.floor(Math.random() * 1000) + 2000;
+    projectEntries.push(id);
+    const div = document.createElement('div');
+    div.className = 'entry'; div.id = 'project_' + id;
+    div.innerHTML = `<button class="entry-del" onclick="removeEntry('project',${id})" title="Remove">×</button>
+      <label>Project Name *</label><input type="text" id="ptitle_${id}" placeholder="e.g. Portfolio Website" oninput="updatePreview();updateProgress()"/>
+      <label>Subtitle / Link</label><input type="text" id="psubtitle_${id}" placeholder="e.g. Github link or organization" oninput="updatePreview()"/>
+      <label>Project Details</label>
+      <textarea id="pdesc_${id}" rows="3" placeholder="• Built using React and Node.js...&#10;• Deployed on AWS..." oninput="updatePreview()"></textarea>`;
+    document.getElementById('projectEntries').appendChild(div);
+
+    document.getElementById(`ptitle_${id}`).value = title || '';
+    document.getElementById(`psubtitle_${id}`).value = subtitle || '';
+    document.getElementById(`pdesc_${id}`).value = desc || '';
+  }
+
+  function splitList(val) {
+    if (!val) return [];
+    if (val.includes('\n')) {
+      return val.split('\n').map(x => x.trim()).filter(Boolean);
+    }
+    if (val.includes(',')) {
+      return val.split(',').map(x => x.trim()).filter(Boolean);
+    }
+    return [val.trim()].filter(Boolean);
+  }
+
 window.addEventListener('DOMContentLoaded', () => {
-  addExp(); addEdu();
+  addExp(); addEdu(); addProject();
   initFormatting();
   updatePreview(); updateDlUI(); updateProgress();
   setTimeout(updateDlUI, 500); // Wait for auth to populate
@@ -976,7 +1074,7 @@ function updateProgress() {
   const expBonus = expEntries.length > 0 ? 1 : 0;
   const total = filled + skillBonus + expBonus;
   const max = 6;
-  const pct = Math.round((total / max) * 100);
+  const pct = Math.min(100, Math.round((total / max) * 100));
   document.getElementById('progressFill').style.width = pct + '%';
   document.getElementById('progressPct').textContent = pct + '%';
 
@@ -988,6 +1086,10 @@ function updateProgress() {
   document.getElementById('skills-status').textContent = skills.length > 0 ? `${skills.length} added` : '';
   document.getElementById('exp-status').textContent = expEntries.length > 0 ? `${expEntries.length} added` : '';
   document.getElementById('edu-status').textContent = eduEntries.length > 0 ? `${eduEntries.length} added` : '';
+  document.getElementById('projects-status').textContent = projectEntries.length > 0 ? `${projectEntries.length} added` : '';
+  const pubs = splitList(document.getElementById('rPublications').value).length;
+  const certs = splitList(document.getElementById('rCertifications').value).length;
+  document.getElementById('additional-status').textContent = (pubs || certs) ? `${pubs + certs} added` : '';
 }
 
 /* ── DOWNLOADS ── */
@@ -1118,9 +1220,14 @@ function addEdu() {
 }
 
 function removeEntry(type, id) {
-  document.getElementById((type==='exp'?'exp_':'edu_') + id)?.remove();
-  if (type==='exp') expEntries = expEntries.filter(e => e !== id);
-  else eduEntries = eduEntries.filter(e => e !== id);
+  let prefix = 'exp_';
+  if (type === 'edu') prefix = 'edu_';
+  else if (type === 'project') prefix = 'project_';
+  document.getElementById(prefix + id)?.remove();
+
+  if (type === 'exp') expEntries = expEntries.filter(e => e !== id);
+  else if (type === 'edu') eduEntries = eduEntries.filter(e => e !== id);
+  else if (type === 'project') projectEntries = projectEntries.filter(e => e !== id);
   updatePreview(); updateProgress();
 }
 
@@ -1148,7 +1255,14 @@ function getFormData() {
       inst: document.getElementById('uinst_'+id)?.value||'',
       year: document.getElementById('uyear_'+id)?.value||'',
       grade: document.getElementById('ugrade_'+id)?.value||''
-    })).filter(e => e.degree || e.inst)
+    })).filter(e => e.degree || e.inst),
+    projects: projectEntries.map(id => ({
+      title: document.getElementById('ptitle_'+id)?.value||'',
+      subtitle: document.getElementById('psubtitle_'+id)?.value||'',
+      desc: document.getElementById('pdesc_'+id)?.value||''
+    })).filter(p => p.title),
+    publications: splitList(document.getElementById('rPublications').value),
+    certifications: splitList(document.getElementById('rCertifications').value)
   };
 }
 
@@ -1176,6 +1290,24 @@ function updatePreview() {
   const skillsHtml = d.skills.map(s => `<span class="skill-pill">${esc(s)}</span>`).join('');
   const summaryHtml = d.summary ? `<div class="sec-title">Summary</div><p style="font-size:var(--resume-font-size, 9.5px);color:#444;line-height:var(--resume-line-height, 1.5)">${esc(d.summary)}</p>` : '';
 
+  // New section HTML builders
+  const projectsHtml_sidebar = d.projects && d.projects.length ? `<div class="sec-title">Projects</div>${d.projects.map(p => `<div class="exp-item">
+    <div class="exp-title">${esc(p.title)}</div>
+    ${p.subtitle ? `<div class="exp-company">${esc(p.subtitle)}</div>` : ''}
+    <div class="exp-desc">${esc(p.desc).replace(/\n/g,'<br/>')}</div>
+  </div>`).join('')}` : '';
+
+  const projectsHtml_classic = d.projects && d.projects.length ? `<div class="sec-title">Projects</div>${d.projects.map(p => `<div class="exp-item">
+    <div class="exp-title">${esc(p.title)}${p.subtitle ? ` — <span class="exp-company">${esc(p.subtitle)}</span>` : ''}</div>
+    <div class="exp-desc">${esc(p.desc).replace(/\n/g,'<br/>')}</div>
+  </div>`).join('')}` : '';
+
+  const publicationsHtml = d.publications && d.publications.length ? `<div class="sec-title">Publications</div><ul class="publications-list" style="margin: 0; padding-left: 15px; font-size: var(--resume-font-size, 9.5px); color: #444; line-height: var(--resume-line-height, 1.5);">${d.publications.map(p => `<li style="margin-bottom: 4px;">${esc(p)}</li>`).join('')}</ul>` : '';
+
+  const certsSidebarHtml = d.certifications && d.certifications.length ? `<div class="sec-title">Certifications</div><div style="font-size: var(--resume-font-size, 9.5px); color: #444; line-height: var(--resume-line-height, 1.5);">${d.certifications.map(c => `<div style="margin-bottom: 4px;">• ${esc(c)}</div>`).join('')}</div>` : '';
+
+  const certsBodyHtml = d.certifications && d.certifications.length ? `<div class="sec-title">Certifications</div><ul class="certifications-list" style="margin: 0; padding-left: 15px; font-size: var(--resume-font-size, 9.5px); color: #444; line-height: var(--resume-line-height, 1.5);">${d.certifications.map(c => `<li style="margin-bottom: 4px;">${esc(c)}</li>`).join('')}</ul>` : '';
+
   if (tpl === 'modern' || tpl === 'emerald' || tpl === 'creative') {
     const cls = tpl === 'modern' ? 'tpl-modern' : tpl === 'emerald' ? 'tpl-emerald' : 'tpl-creative';
     html = `<div class="${cls}">
@@ -1187,10 +1319,13 @@ function updatePreview() {
         <div class="resume-sidebar">
           ${d.skills.length?`<div class="sec-title">Skills</div><div>${skillsHtml}</div>`:''}
           ${d.edus.length?`<div class="sec-title">Education</div>${eduHtml}`:''}
+          ${certsSidebarHtml}
         </div>
         <div class="resume-main">
           ${summaryHtml}
           ${d.exps.length?`<div class="sec-title">Experience</div>${expHtml}`:''}
+          ${projectsHtml_sidebar}
+          ${publicationsHtml}
         </div>
       </div></div>`;
   } else if (tpl === 'classic' || tpl === 'corporate') {
@@ -1203,8 +1338,11 @@ function updatePreview() {
       <div class="resume-body">
         ${summaryHtml}
         ${d.exps.length?`<div class="sec-title">Experience</div>${d.exps.map(e=>`<div class="exp-item"><div class="exp-title">${esc(e.title)} — <span class="exp-company">${esc(e.company)}</span> <span class="exp-date">(${esc(e.start)}${e.end?' – '+esc(e.end):''})</span></div><div class="exp-desc">${esc(e.desc).replace(/\n/g,'<br/>')}</div></div>`).join('')}`:''}
+        ${projectsHtml_classic}
         ${d.edus.length?`<div class="sec-title">Education</div>${d.edus.map(e=>`<div class="exp-item"><div class="exp-title">${esc(e.degree)} — <span class="exp-company">${esc(e.inst)}</span></div><div class="exp-desc">${esc(e.year)}${e.grade?' · '+esc(e.grade):''}</div></div>`).join('')}`:''}
         ${d.skills.length?`<div class="sec-title">Skills</div><div>${skillsHtml}</div>`:''}
+        ${publicationsHtml}
+        ${certsBodyHtml}
       </div></div>`;
   } else if (tpl === 'minimal') {
     html = `<div class="tpl-minimal">
@@ -1215,8 +1353,11 @@ function updatePreview() {
       <div class="resume-body">
         ${summaryHtml}
         ${d.exps.length?`<div class="sec-title">Experience</div>${d.exps.map(e=>`<div class="exp-item"><div class="exp-title">${esc(e.title)}</div><div class="exp-company">${esc(e.company)}</div><div class="exp-date">${esc(e.start)}${e.end?' – '+esc(e.end):''}</div><div class="exp-desc">${esc(e.desc).replace(/\n/g,'<br/>')}</div></div>`).join('')}`:''}
+        ${projectsHtml_sidebar}
         ${d.edus.length?`<div class="sec-title">Education</div>${d.edus.map(e=>`<div class="exp-item"><div class="exp-title">${esc(e.degree)}</div><div class="exp-company">${esc(e.inst)}</div><div class="exp-date">${esc(e.year)}${e.grade?' · '+esc(e.grade):''}</div></div>`).join('')}`:''}
         ${d.skills.length?`<div class="sec-title">Skills</div><div>${skillsHtml}</div>`:''}
+        ${publicationsHtml}
+        ${certsBodyHtml}
       </div></div>`;
   } else if (tpl === 'bold') {
     html = `<div class="tpl-bold">
@@ -1227,8 +1368,11 @@ function updatePreview() {
       <div class="resume-body">
         ${d.summary?`<div class="sec-title">Profile</div><p style="font-size:var(--resume-font-size, 9.5px);color:#444;line-height:var(--resume-line-height, 1.5);margin-bottom:8px">${esc(d.summary)}</p>`:''}
         ${d.exps.length?`<div class="sec-title">Experience</div>${expHtml}`:''}
+        ${projectsHtml_sidebar}
         ${d.edus.length?`<div class="sec-title">Education</div>${eduHtml}`:''}
         ${d.skills.length?`<div class="sec-title">Skills</div><div style="padding-bottom:8px">${skillsHtml}</div>`:''}
+        ${publicationsHtml}
+        ${certsBodyHtml}
       </div></div>`;
   } else if (tpl === 'executive' || tpl === 'elegant' || tpl === 'tech' || tpl === 'slate') {
     const cls = 'tpl-' + tpl;
@@ -1240,8 +1384,11 @@ function updatePreview() {
       <div class="resume-body">
         ${summaryHtml}
         ${d.exps.length?`<div class="sec-title">Experience</div>${expHtml}`:''}
+        ${projectsHtml_sidebar}
         ${d.edus.length?`<div class="sec-title">Education</div>${eduHtml}`:''}
         ${d.skills.length?`<div class="sec-title">Skills</div><div>${skillsHtml}</div>`:''}
+        ${publicationsHtml}
+        ${certsBodyHtml}
       </div></div>`;
   }
   document.getElementById('resumePreview').innerHTML = html;

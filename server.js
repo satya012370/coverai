@@ -256,7 +256,7 @@ app.post("/api/parse-resume", upload.single("resume"), async (req, res) => {
   "achievement": "single most impressive achievement in one sentence"
 }
 Return ONLY JSON, no markdown, no backticks.
-Resume: ${extractedText.slice(0, 4000)}`;
+Resume: ${extractedText.slice(0, 50000)}`;
 
     const response = await ai.models.generateContent({
       model: GEMINI_MODEL,
@@ -264,7 +264,7 @@ Resume: ${extractedText.slice(0, 4000)}`;
     });
     const raw = response.text || "{}";
     const parsed = parseSafeJSON(raw);
-    res.json({ success: true, data: { ...parsed, rawText: extractedText.slice(0, 3000) } });
+    res.json({ success: true, data: { ...parsed, rawText: extractedText.slice(0, 50000) } });
 
   } catch (err) {
     res.status(500).json({ error: "Failed to process resume: " + err.message });
@@ -324,10 +324,19 @@ app.post("/api/parse-full-resume", upload.single("resume"), async (req, res) => 
       "year": "Year of study or graduation year",
       "grade": "GPA or Grade"
     }
-  ]
+  ],
+  "projects": [
+    {
+      "title": "Project Name",
+      "subtitle": "Project subtitle, association or link",
+      "desc": "Key details or bullet points describing the project"
+    }
+  ],
+  "publications": ["Publication 1", "Publication 2"],
+  "certifications": ["Certification 1", "Certification 2"]
 }
 Return ONLY valid JSON. No markdown backticks or formatting.
-Resume text: ${extractedText.slice(0, 4500)}`;
+Resume text: ${extractedText.slice(0, 50000)}`;
 
     const response = await ai.models.generateContent({
       model: GEMINI_MODEL,
@@ -341,6 +350,7 @@ Resume text: ${extractedText.slice(0, 4500)}`;
     res.status(500).json({ error: "Failed to parse resume: " + err.message });
   }
 });
+
 
 // ─── GENERATE COVER LETTER ────────────────────────────────────
 app.post("/api/generate", async (req, res) => {
