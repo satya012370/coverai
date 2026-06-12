@@ -40,6 +40,68 @@ app.use(express.static(__dirname));
 const GEMINI_MODEL = "gemini-2.5-flash";
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+async function generateContentWithFallbackAndRetry(options) {
+  const modelsToTry = [GEMINI_MODEL, "gemini-1.5-flash"];
+  let lastError = null;
+
+  for (const model of modelsToTry) {
+    let delay = 1000;
+    const maxRetries = 2; // Try up to 3 times total per model
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`🤖 Requesting GenAI (${model}), attempt ${attempt + 1}/${maxRetries + 1}...`);
+        const response = await ai.models.generateContent({
+          ...options,
+          model: model
+        });
+        return response;
+      } catch (err) {
+        lastError = err;
+        const errMsg = err.message || "";
+        const errStatus = err.status || (err.error && err.error.code) || null;
+
+        const isTransient = 
+          errStatus === 429 || 
+          errStatus === 503 || 
+          errMsg.includes("429") || 
+          errMsg.includes("503") || 
+          errMsg.includes("RESOURCE_EXHAUSTED") || 
+          errMsg.includes("UNAVAILABLE") ||
+          errMsg.includes("high demand") ||
+          errMsg.includes("overloaded") ||
+          errMsg.includes("quota");
+
+        if (isTransient && attempt < maxRetries) {
+          console.warn(`⚠️ Transient error calling GenAI: ${errMsg}. Retrying in ${delay}ms...`);
+          await sleep(delay);
+          delay *= 2; // exponential backoff
+        } else {
+          console.error(`❌ Non-transient error or retries exhausted for model ${model}: ${errMsg}`);
+          break; // Try fallback model or throw
+        }
+      }
+    }
+  }
+  throw lastError;
+}
+
+function formatAIError(err) {
+  const errMsg = err.message || "";
+  const errStatus = err.status || (err.error && err.error.code) || null;
+
+  if (errStatus === 429 || errMsg.includes("429") || errMsg.includes("RESOURCE_EXHAUSTED") || errMsg.includes("quota")) {
+    return "The AI service is currently experiencing high volume. Please wait a moment and try again, or fill in the form manually.";
+  }
+  if (errStatus === 503 || errMsg.includes("503") || errMsg.includes("UNAVAILABLE") || errMsg.includes("high demand") || errMsg.includes("overloaded")) {
+    return "The AI model is temporarily busy due to high demand. Please try again in a few seconds, or fill in the form manually.";
+  }
+
+  // Clean raw symbols from general errors to keep them clean
+  return errMsg.replace(/[\{\}\[\]"]/g, "").trim() || "An unexpected error occurred. Please try again.";
+}
+
 function parseSafeJSON(text) {
   if (!text) return {};
   try {
@@ -258,8 +320,7 @@ app.post("/api/parse-resume", upload.single("resume"), async (req, res) => {
 Return ONLY JSON, no markdown, no backticks.
 Resume: ${extractedText.slice(0, 50000)}`;
 
-    const response = await ai.models.generateContent({
-      model: GEMINI_MODEL,
+    const response = await generateContentWithFallbackAndRetry({
       contents: prompt
     });
     const raw = response.text || "{}";
@@ -267,13 +328,7 @@ Resume: ${extractedText.slice(0, 50000)}`;
     res.json({ success: true, data: { ...parsed, rawText: extractedText.slice(0, 50000) } });
 
   } catch (err) {
-    let errMsg = err.message || "Unknown error";
-    if (err.status === 429 || errMsg.includes("429") || errMsg.includes("RESOURCE_EXHAUSTED") || errMsg.includes("quota")) {
-      errMsg = "The AI parsing limit has been exceeded. Please wait a minute before retrying, or input your details manually.";
-    } else {
-      errMsg = errMsg.replace(/[\{\}\[\]"]/g, "").trim();
-    }
-    res.status(500).json({ error: errMsg });
+    res.status(500).json({ error: formatAIError(err) });
   }
 });
 
@@ -344,8 +399,7 @@ app.post("/api/parse-full-resume", upload.single("resume"), async (req, res) => 
 Return ONLY valid JSON. No markdown backticks or formatting.
 Resume text: ${extractedText.slice(0, 50000)}`;
 
-    const response = await ai.models.generateContent({
-      model: GEMINI_MODEL,
+    const response = await generateContentWithFallbackAndRetry({
       contents: prompt
     });
     const raw = response.text || "{}";
@@ -353,13 +407,7 @@ Resume text: ${extractedText.slice(0, 50000)}`;
     res.json({ success: true, data: parsed });
 
   } catch (err) {
-    let errMsg = err.message || "Unknown error";
-    if (err.status === 429 || errMsg.includes("429") || errMsg.includes("RESOURCE_EXHAUSTED") || errMsg.includes("quota")) {
-      errMsg = "The AI parsing limit has been exceeded. Please wait a minute before retrying, or input your details manually.";
-    } else {
-      errMsg = errMsg.replace(/[\{\}\[\]"]/g, "").trim();
-    }
-    res.status(500).json({ error: errMsg });
+    res.status(500).json({ error: formatAIError(err) });
   }
 });
 
@@ -404,8 +452,7 @@ STRICT RULES:
 7. 220 to 280 words only.
 8. Output the letter ONLY.`;
 
-    const response = await ai.models.generateContent({
-      model: GEMINI_MODEL,
+    const response = await generateContentWithFallbackAndRetry({
       contents: prompt
     });
     const letter = response.text;
@@ -417,7 +464,7 @@ STRICT RULES:
     res.json({ letter, remaining: isPro ? "unlimited" : await getRemainingCount(ip, "coverLetter") });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: formatAIError(error) });
   }
 });
 
@@ -430,14 +477,13 @@ app.post("/api/generate-summary", async (req, res) => {
 Name: ${name}, Title: ${title}, Skills: ${skills}, Experience: ${expText}
 Rules: 2-3 sentences, first person, confident, no clichés. Output summary text ONLY.`;
 
-    const response = await ai.models.generateContent({
-      model: GEMINI_MODEL,
+    const response = await generateContentWithFallbackAndRetry({
       contents: prompt
     });
     const summary = response.text || "";
     res.json({ summary: summary.trim() });
   } catch(err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: formatAIError(err) });
   }
 });
 
@@ -451,14 +497,13 @@ Name: ${name}, Title: ${title}, Skills: ${Array.isArray(skills)?skills.join(", "
 Experience: ${JSON.stringify(exps)}, Current summary: ${summary||"none"}
 Rules: Strong action verbs, specific impact, under 2 sentences each. ONLY JSON, no markdown.`;
 
-    const response = await ai.models.generateContent({
-      model: GEMINI_MODEL,
+    const response = await generateContentWithFallbackAndRetry({
       contents: prompt
     });
     const raw = response.text || "{}";
     res.json(parseSafeJSON(raw));
   } catch(err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: formatAIError(err) });
   }
 });
 
@@ -513,8 +558,7 @@ Rules:
 - Be strict and honest with scoring — a score of 80+ means genuinely strong match
 - Return ONLY the JSON object`;
 
-    const response = await ai.models.generateContent({
-      model: GEMINI_MODEL,
+    const response = await generateContentWithFallbackAndRetry({
       contents: prompt
     });
     const raw = response.text || "{}";
@@ -526,7 +570,7 @@ Rules:
 
     res.json({ ...result, remaining: isPro ? "unlimited" : await getRemainingCount(ip, "ats") });
   } catch (err) {
-    res.status(500).json({ error: "ATS check failed: " + err.message });
+    res.status(500).json({ error: "ATS check failed: " + formatAIError(err) });
   }
 });
 
@@ -544,12 +588,11 @@ app.get("/api/remaining", async (req, res) => {
 
 app.get("/test", async (req, res) => {
   try {
-    const response = await ai.models.generateContent({
-      model: GEMINI_MODEL,
+    const response = await generateContentWithFallbackAndRetry({
       contents: "Say hello in one sentence."
     });
     res.send(response.text || "Hello!");
-  } catch(error) { res.status(500).send(error.message); }
+  } catch(error) { res.status(500).send(formatAIError(error)); }
 });
 
 
@@ -846,8 +889,7 @@ Rules:
 - Version 2 = warmer and conversational
 - Return ONLY the JSON array, no markdown, no explanation`;
 
-    const response = await ai.models.generateContent({
-      model: GEMINI_MODEL,
+    const response = await generateContentWithFallbackAndRetry({
       contents: prompt
     });
     const raw = response.text || "[]";
@@ -861,7 +903,7 @@ Rules:
 
   } catch (err) {
     console.error("LinkedIn message error:", err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: formatAIError(err) });
   }
 });
 
@@ -908,8 +950,7 @@ Rules:
 - Tips should be practical (e.g. "pause for 2 seconds before answering", "mention a specific metric")
 - Return ONLY the JSON array, no markdown, no extra text`;
 
-    const response = await ai.models.generateContent({
-      model: GEMINI_MODEL,
+    const response = await generateContentWithFallbackAndRetry({
       contents: prompt
     });
     const raw = response.text || "[]";
@@ -923,7 +964,7 @@ Rules:
 
   } catch (err) {
     console.error("Interview prep error:", err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: formatAIError(err) });
   }
 });
 
