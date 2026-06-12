@@ -155,8 +155,8 @@ textarea{resize:vertical;line-height:1.6}
 .preview-zoom{display:flex;gap:6px}
 .zoom-btn{background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;color:#555;transition:all .15s}
 .zoom-btn:hover{background:#eeedfe;border-color:#afa9ec;color:#5c4fc7}
-.resume-page{width:210mm;min-height:297mm;background:#fff;box-shadow:0 8px 32px rgba(0,0,0,.18);border-radius:4px;overflow:hidden;font-size:10pt;line-height:1.4;transition:transform .3s ease;transform-origin:top center}
-@media(max-width:900px){.resume-page{width:100%;min-height:auto}}
+.resume-page{width:210mm !important;height:297mm !important;background:#fff;box-shadow:0 8px 32px rgba(0,0,0,.18);border-radius:4px;overflow:hidden !important;font-size:10pt;line-height:1.4;transition:transform .3s ease;transform-origin:top center}
+@media(max-width:900px){.resume-page{width:210mm !important;height:297mm !important;zoom:0.45}}
 
 /* ── TEMPLATES ── */
 .tpl-modern .resume-header{background:linear-gradient(135deg,#5c4fc7,#7c3aed);color:#fff;padding:28px 32px}
@@ -336,10 +336,10 @@ textarea{resize:vertical;line-height:1.6}
   --resume-section-spacing: 16px;
   --resume-font-family: inherit;
   
-  /* Page boundary guide lines at exactly 297mm (A4 height) intervals */
+  width: 210mm !important;
+  height: 297mm !important;
   background-color: #fff !important;
-  background-image: linear-gradient(to bottom, transparent calc(297mm - 1px), #cbd5e1 calc(297mm - 1px), #cbd5e1 calc(297mm + 1px), transparent calc(297mm + 1px)) !important;
-  background-size: 100% 297mm !important;
+  overflow: hidden !important;
 }
 
 #resumePreview, #resumePreview * {
@@ -1438,23 +1438,6 @@ function updatePreview() {
       </div></div>`;
   }
   document.getElementById('resumePreview').innerHTML = html;
-
-  // Adjust preview container height to be an exact multiple of A4 page height (297mm)
-  const preview = document.getElementById('resumePreview');
-  preview.style.height = 'auto'; // Reset first
-  
-  // Create a temporary element to measure 297mm in pixels on the user's screen
-  const tempDiv = document.createElement('div');
-  tempDiv.style.height = '297mm';
-  tempDiv.style.position = 'absolute';
-  tempDiv.style.visibility = 'hidden';
-  document.body.appendChild(tempDiv);
-  const a4PxHeight = tempDiv.offsetHeight;
-  document.body.removeChild(tempDiv);
-  
-  const contentHeight = preview.scrollHeight;
-  const pages = Math.max(1, Math.ceil(contentHeight / a4PxHeight));
-  preview.style.height = (pages * 297) + 'mm';
 }
 
 /* ── AI SUMMARY ── */
