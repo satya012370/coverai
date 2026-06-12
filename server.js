@@ -267,7 +267,13 @@ Resume: ${extractedText.slice(0, 50000)}`;
     res.json({ success: true, data: { ...parsed, rawText: extractedText.slice(0, 50000) } });
 
   } catch (err) {
-    res.status(500).json({ error: "Failed to process resume: " + err.message });
+    let errMsg = err.message || "Unknown error";
+    if (err.status === 429 || errMsg.includes("429") || errMsg.includes("RESOURCE_EXHAUSTED") || errMsg.includes("quota")) {
+      errMsg = "The AI parsing limit has been exceeded. Please wait a minute before retrying, or input your details manually.";
+    } else {
+      errMsg = errMsg.replace(/[\{\}\[\]"]/g, "").trim();
+    }
+    res.status(500).json({ error: "Failed to process resume: " + errMsg });
   }
 });
 
@@ -347,7 +353,13 @@ Resume text: ${extractedText.slice(0, 50000)}`;
     res.json({ success: true, data: parsed });
 
   } catch (err) {
-    res.status(500).json({ error: "Failed to parse resume: " + err.message });
+    let errMsg = err.message || "Unknown error";
+    if (err.status === 429 || errMsg.includes("429") || errMsg.includes("RESOURCE_EXHAUSTED") || errMsg.includes("quota")) {
+      errMsg = "The AI parsing limit has been exceeded. Please wait a minute before retrying, or input your details manually.";
+    } else {
+      errMsg = errMsg.replace(/[\{\}\[\]"]/g, "").trim();
+    }
+    res.status(500).json({ error: "Failed to parse resume: " + errMsg });
   }
 });
 
