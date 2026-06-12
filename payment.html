@@ -333,7 +333,21 @@ nav{background:#fff;border-bottom:1px solid #e8e8e8;padding:0 2rem;display:flex;
 <!-- ═══════════════════════════ SCRIPTS ═══════════════════════ -->
 <script type="module">
 // Razorpay Live Key (account activated)
-const RZP_KEY_ID = "rzp_live_SzV0Dg5rrF3L11";
+let RZP_KEY_ID = "rzp_live_SzV0Dg5rrF3L11";
+
+// Load public configuration dynamically from backend config endpoint
+window.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const configRes = await fetch("/api/config");
+    const configData = await configRes.json();
+    if (configData.razorpayKeyId) {
+      RZP_KEY_ID = configData.razorpayKeyId;
+    }
+  } catch (err) {
+    console.warn("⚠️ Failed to load dynamic config, falling back to default Razorpay Key:", err.message);
+  }
+});
+
 
 // ── UI helpers ──────────────────────────────────────────────
 function showSection(name) {

@@ -1,4 +1,6 @@
 require("dotenv").config();
+const fs = require("fs");
+const path = require("path");
 const crypto = require("crypto");
 const express = require("express");
 const cors = require("cors");
@@ -6,6 +8,7 @@ const multer = require("multer");
 const pdfParse = require("pdf-parse");
 const mammoth = require("mammoth");
 const admin = require("firebase-admin");
+const { GoogleGenAI } = require("@google/genai");
 
 let isFirebaseAdminInitialized = false;
 
@@ -35,6 +38,7 @@ app.use(express.json());
 app.use(express.static(__dirname));
 
 const GEMINI_MODEL = "gemini-2.5-flash";
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 function parseSafeJSON(text) {
   if (!text) return {};
@@ -66,28 +70,8 @@ console.log("=================================");
 console.log("API Key Loaded:", process.env.GEMINI_API_KEY ? "YES" : "NO");
 console.log("=================================");
 
-// ─── USAGE TRACKING ───────────────────────────────────────────
-const usageMap = {};
-const FREE_LIMIT = 5; // 5 cover letters per day
-
-function getToday() { return new Date().toISOString().split("T")[0]; }
-
-function checkLimit(ip) {
-  const today = getToday();
-  if (!usageMap[ip] || usageMap[ip].date !== today) usageMap[ip] = { count: 0, date: today };
-  return usageMap[ip].count < FREE_LIMIT;
-}
-function incrementUsage(ip) { usageMap[ip].count++; }
-function getRemainingCount(ip) {
-  const today = getToday();
-  if (!usageMap[ip] || usageMap[ip].date !== today) return FREE_LIMIT;
-  return FREE_LIMIT - usageMap[ip].count;
-}
-
-// Rate limit maps for other endpoints
-const linkedinUsage = {};
-const interviewUsage = {};
-const atsUsage = {};
+// ─── USAGE TRACKING (PERSISTENT) ──────────────────────────────
+const USAGE_FILE = path.join(__dirname, "usage.json");
 
 const LIMITS = {
   coverLetter: 5,
@@ -96,25 +80,103 @@ const LIMITS = {
   ats: 5
 };
 
-function checkEndpointLimit(ip, map, limit) {
-  const today = getToday();
-  if (!map[ip] || map[ip].date !== today) {
-    map[ip] = { count: 0, date: today };
+function getToday() { return new Date().toISOString().split("T")[0]; }
+
+function readLocalUsage() {
+  try {
+    if (fs.existsSync(USAGE_FILE)) {
+      return JSON.parse(fs.readFileSync(USAGE_FILE, "utf8"));
+    }
+  } catch (err) {
+    console.error("❌ Error reading local usage file:", err);
   }
-  return map[ip].count < limit;
+  return {};
 }
 
-function incrementEndpointUsage(ip, map) {
-  if (map[ip]) {
-    map[ip].count++;
+function writeLocalUsage(data) {
+  try {
+    fs.writeFileSync(USAGE_FILE, JSON.stringify(data, null, 2), "utf8");
+  } catch (err) {
+    console.error("❌ Error writing local usage file:", err);
   }
 }
 
-function getEndpointRemaining(ip, map, limit) {
+async function getUsageRecord(ip) {
   const today = getToday();
-  if (!map[ip] || map[ip].date !== today) return limit;
-  return limit - map[ip].count;
+  const safeIp = ip.replace(/[^a-zA-Z0-9]/g, "_");
+  const docId = `${safeIp}_${today}`;
+
+  if (dbAdmin) {
+    try {
+      const docRef = dbAdmin.collection("usage_logs").doc(docId);
+      const docSnap = await docRef.get();
+      if (docSnap.exists) {
+        return docSnap.data();
+      }
+    } catch (err) {
+      console.warn("⚠️ Firestore usage read failed, falling back to local file:", err.message);
+    }
+  }
+
+  const data = readLocalUsage();
+  return data[docId] || { coverLetter: 0, linkedin: 0, interview: 0, ats: 0 };
 }
+
+async function updateUsageRecord(ip, type) {
+  const today = getToday();
+  const safeIp = ip.replace(/[^a-zA-Z0-9]/g, "_");
+  const docId = `${safeIp}_${today}`;
+
+  const record = await getUsageRecord(ip);
+  record[type] = (record[type] || 0) + 1;
+  record.updatedAt = new Date().toISOString();
+
+  if (dbAdmin) {
+    try {
+      const docRef = dbAdmin.collection("usage_logs").doc(docId);
+      await docRef.set(record, { merge: true });
+      return;
+    } catch (err) {
+      console.warn("⚠️ Firestore usage write failed, writing to local file:", err.message);
+    }
+  }
+
+  const data = readLocalUsage();
+  data[docId] = record;
+
+  // Clean up old entries to keep the file small
+  const keys = Object.keys(data);
+  if (keys.length > 500) {
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
+    const cleaned = {};
+    for (const key of keys) {
+      if (key.endsWith(today) || key.endsWith(yesterday)) {
+        cleaned[key] = data[key];
+      }
+    }
+    writeLocalUsage(cleaned);
+  } else {
+    writeLocalUsage(data);
+  }
+}
+
+async function checkLimit(ip, type) {
+  const record = await getUsageRecord(ip);
+  const limit = LIMITS[type] || 5;
+  return (record[type] || 0) < limit;
+}
+
+async function incrementUsage(ip, type) {
+  await updateUsageRecord(ip, type);
+}
+
+async function getRemainingCount(ip, type) {
+  const record = await getUsageRecord(ip);
+  const limit = LIMITS[type] || 5;
+  const count = record[type] || 0;
+  return Math.max(0, limit - count);
+}
+
 
 // ─── FIREBASE AUTH/PRO VERIFICATION ───────────────────────────
 async function checkProStatus(req) {
@@ -196,13 +258,11 @@ app.post("/api/parse-resume", upload.single("resume"), async (req, res) => {
 Return ONLY JSON, no markdown, no backticks.
 Resume: ${extractedText.slice(0, 4000)}`;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) }
-    );
-    const data = await response.json();
-    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+    const response = await ai.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: prompt
+    });
+    const raw = response.text || "{}";
     const parsed = parseSafeJSON(raw);
     res.json({ success: true, data: { ...parsed, rawText: extractedText.slice(0, 3000) } });
 
@@ -269,14 +329,11 @@ app.post("/api/parse-full-resume", upload.single("resume"), async (req, res) => 
 Return ONLY valid JSON. No markdown backticks or formatting.
 Resume text: ${extractedText.slice(0, 4500)}`;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) }
-    );
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error?.message || "API error");
-    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+    const response = await ai.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: prompt
+    });
+    const raw = response.text || "{}";
     const parsed = parseSafeJSON(raw);
     res.json({ success: true, data: parsed });
 
@@ -292,7 +349,7 @@ app.post("/api/generate", async (req, res) => {
 
     const isPro = await checkProStatus(req);
 
-    if (!isPro && !checkLimit(ip)) {
+    if (!isPro && !(await checkLimit(ip, "coverLetter"))) {
       return res.status(429).json({
         error: "LIMIT_REACHED",
         message: "You have used your 5 free cover letters for today. Come back tomorrow or upgrade to Pro for unlimited access."
@@ -325,20 +382,17 @@ STRICT RULES:
 7. 220 to 280 words only.
 8. Output the letter ONLY.`;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) }
-    );
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error?.message || "API error");
-    const letter = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const response = await ai.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: prompt
+    });
+    const letter = response.text;
     if (!letter) throw new Error("No letter returned");
 
     if (!isPro) {
-      incrementUsage(ip);
+      await incrementUsage(ip, "coverLetter");
     }
-    res.json({ letter, remaining: isPro ? "unlimited" : getRemainingCount(ip) });
+    res.json({ letter, remaining: isPro ? "unlimited" : await getRemainingCount(ip, "coverLetter") });
 
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -354,13 +408,11 @@ app.post("/api/generate-summary", async (req, res) => {
 Name: ${name}, Title: ${title}, Skills: ${skills}, Experience: ${expText}
 Rules: 2-3 sentences, first person, confident, no clichés. Output summary text ONLY.`;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) }
-    );
-    const data = await response.json();
-    const summary = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    const response = await ai.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: prompt
+    });
+    const summary = response.text || "";
     res.json({ summary: summary.trim() });
   } catch(err) {
     res.status(500).json({ error: err.message });
@@ -377,13 +429,11 @@ Name: ${name}, Title: ${title}, Skills: ${Array.isArray(skills)?skills.join(", "
 Experience: ${JSON.stringify(exps)}, Current summary: ${summary||"none"}
 Rules: Strong action verbs, specific impact, under 2 sentences each. ONLY JSON, no markdown.`;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) }
-    );
-    const data = await response.json();
-    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+    const response = await ai.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: prompt
+    });
+    const raw = response.text || "{}";
     res.json(parseSafeJSON(raw));
   } catch(err) {
     res.status(500).json({ error: err.message });
@@ -396,7 +446,7 @@ app.post("/api/ats-check", async (req, res) => {
     const ip = req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress;
     const isPro = await checkProStatus(req);
 
-    if (!isPro && !checkEndpointLimit(ip, atsUsage, LIMITS.ats)) {
+    if (!isPro && !(await checkLimit(ip, "ats"))) {
       return res.status(429).json({
         error: "LIMIT_REACHED",
         message: "You have used your 5 free ATS checks for today. Come back tomorrow or upgrade to Pro for unlimited access."
@@ -441,42 +491,45 @@ Rules:
 - Be strict and honest with scoring — a score of 80+ means genuinely strong match
 - Return ONLY the JSON object`;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) }
-    );
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error?.message || "API error");
-    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+    const response = await ai.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: prompt
+    });
+    const raw = response.text || "{}";
     const result = parseSafeJSON(raw);
 
     if (!isPro) {
-      incrementEndpointUsage(ip, atsUsage);
+      await incrementUsage(ip, "ats");
     }
 
-    res.json({ ...result, remaining: isPro ? "unlimited" : getEndpointRemaining(ip, atsUsage, LIMITS.ats) });
+    res.json({ ...result, remaining: isPro ? "unlimited" : await getRemainingCount(ip, "ats") });
   } catch (err) {
     res.status(500).json({ error: "ATS check failed: " + err.message });
   }
 });
 
-app.get("/api/remaining", (req, res) => {
+// ─── CONFIG ENDPOINT ──────────────────────────────────────────
+app.get("/api/config", (req, res) => {
+  res.json({
+    razorpayKeyId: process.env.RAZORPAY_KEY_ID || "rzp_live_SzV0Dg5rrF3L11"
+  });
+});
+
+app.get("/api/remaining", async (req, res) => {
   const ip = req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress;
-  res.json({ remaining: getRemainingCount(ip) });
+  res.json({ remaining: await getRemainingCount(ip, "coverLetter") });
 });
 
 app.get("/test", async (req, res) => {
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      { method:"POST", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({ contents:[{ parts:[{ text:"Say hello in one sentence." }] }] }) }
-    );
-    const data = await response.json();
-    res.send(data?.candidates?.[0]?.content?.parts?.[0]?.text || JSON.stringify(data));
+    const response = await ai.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: "Say hello in one sentence."
+    });
+    res.send(response.text || "Hello!");
   } catch(error) { res.status(500).send(error.message); }
 });
+
 
 
 // ─── RAZORPAY PAYMENT (LIVE) ──────────────────────────────────
@@ -727,7 +780,7 @@ app.post("/api/linkedin-message", async (req, res) => {
     const ip = req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress;
     const isPro = await checkProStatus(req);
 
-    if (!isPro && !checkEndpointLimit(ip, linkedinUsage, LIMITS.linkedin)) {
+    if (!isPro && !(await checkLimit(ip, "linkedin"))) {
       return res.status(429).json({
         error: "LIMIT_REACHED",
         message: "You have used your 5 free LinkedIn messages for today. Come back tomorrow or upgrade to Pro for unlimited access."
@@ -771,23 +824,18 @@ Rules:
 - Version 2 = warmer and conversational
 - Return ONLY the JSON array, no markdown, no explanation`;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) }
-    );
-
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error?.message || "API error");
-
-    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
+    const response = await ai.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: prompt
+    });
+    const raw = response.text || "[]";
     const messages = parseSafeJSON(raw);
 
     if (!isPro) {
-      incrementEndpointUsage(ip, linkedinUsage);
+      await incrementUsage(ip, "linkedin");
     }
 
-    res.json({ messages, remaining: isPro ? "unlimited" : getEndpointRemaining(ip, linkedinUsage, LIMITS.linkedin) });
+    res.json({ messages, remaining: isPro ? "unlimited" : await getRemainingCount(ip, "linkedin") });
 
   } catch (err) {
     console.error("LinkedIn message error:", err);
@@ -801,7 +849,7 @@ app.post("/api/interview-prep", async (req, res) => {
     const ip = req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress;
     const isPro = await checkProStatus(req);
 
-    if (!isPro && !checkEndpointLimit(ip, interviewUsage, LIMITS.interview)) {
+    if (!isPro && !(await checkLimit(ip, "interview"))) {
       return res.status(429).json({
         error: "LIMIT_REACHED",
         message: "You have used your 2 free interview prep sessions for today. Come back tomorrow or upgrade to Pro for unlimited access."
@@ -838,27 +886,23 @@ Rules:
 - Tips should be practical (e.g. "pause for 2 seconds before answering", "mention a specific metric")
 - Return ONLY the JSON array, no markdown, no extra text`;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/${GEMINI_MODEL}:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) }
-    );
-
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error?.message || "Gemini API error");
-
-    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
+    const response = await ai.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: prompt
+    });
+    const raw = response.text || "[]";
     const questions = parseSafeJSON(raw);
 
     if (!isPro) {
-      incrementEndpointUsage(ip, interviewUsage);
+      await incrementUsage(ip, "interview");
     }
 
-    res.json({ questions, remaining: isPro ? "unlimited" : getEndpointRemaining(ip, interviewUsage, LIMITS.interview) });
+    res.json({ questions, remaining: isPro ? "unlimited" : await getRemainingCount(ip, "interview") });
 
   } catch (err) {
     console.error("Interview prep error:", err);
     res.status(500).json({ error: err.message });
   }
 });
+
 
