@@ -1577,49 +1577,49 @@ function downloadResumePDF() {
       letterRendering: true,
       logging: false,
       scrollX: 0,
-      scrollY: 0,
-      x: 0,
-      y: 0
+      scrollY: 0
     },
     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
     pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
   };
   
-  // Execute html2pdf conversion
-  html2pdf().from(element).set(opt).toPdf().get('pdf').then((pdf) => {
-    // Restore original screen styling after capture is complete
-    element.style.transform = originalTransform;
-    element.style.boxShadow = originalBoxShadow;
-    element.style.borderRadius = originalBorderRadius;
-    element.style.border = originalBorder;
-    element.style.transition = originalTransition;
-    element.style.margin = originalMargin;
-    
-    if (originalWidth) element.style.setProperty('width', originalWidth);
-    else element.style.removeProperty('width');
-    
-    if (originalMinHeight) element.style.setProperty('min-height', originalMinHeight);
-    else element.style.removeProperty('min-height');
+  // Give the browser a moment to reflow and repaint at 100% scale and left-aligned before capturing
+  setTimeout(() => {
+    html2pdf().from(element).set(opt).toPdf().get('pdf').then((pdf) => {
+      // Restore original screen styling after capture is complete
+      element.style.transform = originalTransform;
+      element.style.boxShadow = originalBoxShadow;
+      element.style.borderRadius = originalBorderRadius;
+      element.style.border = originalBorder;
+      element.style.transition = originalTransition;
+      element.style.margin = originalMargin;
+      
+      if (originalWidth) element.style.setProperty('width', originalWidth);
+      else element.style.removeProperty('width');
+      
+      if (originalMinHeight) element.style.setProperty('min-height', originalMinHeight);
+      else element.style.removeProperty('min-height');
 
-    if (originalHeight) element.style.setProperty('height', originalHeight);
-    else element.style.removeProperty('height');
-    
-    if (originalZoom) element.style.setProperty('zoom', originalZoom);
-    else element.style.removeProperty('zoom');
-    
-    // Restore page guides on screen
-    element.style.removeProperty('background-image');
-    
-    if (parent) {
-      parent.style.alignItems = originalParentAlignItems;
-      parent.style.padding = originalParentPadding;
-      parent.scrollTop = originalParentScrollTop;
-      parent.scrollLeft = originalParentScrollLeft;
-    }
-    
-    // Restore scroll positions
-    window.scrollTo(originalScrollX, originalScrollY);
-  }).save();
+      if (originalHeight) element.style.setProperty('height', originalHeight);
+      else element.style.removeProperty('height');
+      
+      if (originalZoom) element.style.setProperty('zoom', originalZoom);
+      else element.style.removeProperty('zoom');
+      
+      // Restore page guides on screen
+      element.style.removeProperty('background-image');
+      
+      if (parent) {
+        parent.style.alignItems = originalParentAlignItems;
+        parent.style.padding = originalParentPadding;
+        parent.scrollTop = originalParentScrollTop;
+        parent.scrollLeft = originalParentScrollLeft;
+      }
+      
+      // Restore scroll positions
+      window.scrollTo(originalScrollX, originalScrollY);
+    }).save();
+  }, 100);
 }
 
 /* ── FORMATTING CONTROLS ── */
