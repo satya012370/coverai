@@ -1481,19 +1481,24 @@ function downloadResumePDF() {
   const originalBorder = element.style.border;
   const originalTransition = element.style.transition;
   const originalMargin = element.style.margin;
+  const originalWidth = element.style.width;
+  const originalMinHeight = element.style.minHeight;
   
   // Save parent styles
   const originalParentAlignItems = parent ? parent.style.alignItems : '';
   const originalParentPadding = parent ? parent.style.padding : '';
   
   // Temporarily normalize formatting to 100% scale and clear UI borders for PDF capture
-  // We temporarily clear parent padding and centering so the element naturally aligns to (0,0) of parent flow
+  // We force the element width to exactly 210mm (A4 width) and min-height to 297mm (A4 height)
+  // to ensure layout is perfect even when downloading from mobile or narrow screens.
   element.style.transform = 'none';
   element.style.boxShadow = 'none';
   element.style.borderRadius = '0';
   element.style.border = 'none';
   element.style.transition = 'none';
   element.style.margin = '0';
+  element.style.setProperty('width', '210mm', 'important');
+  element.style.setProperty('min-height', '297mm', 'important');
   
   // Temporarily hide the page boundary guides during PDF generation
   element.style.setProperty('background-image', 'none', 'important');
@@ -1528,6 +1533,12 @@ function downloadResumePDF() {
     element.style.border = originalBorder;
     element.style.transition = originalTransition;
     element.style.margin = originalMargin;
+    
+    if (originalWidth) element.style.setProperty('width', originalWidth);
+    else element.style.removeProperty('width');
+    
+    if (originalMinHeight) element.style.setProperty('min-height', originalMinHeight);
+    else element.style.removeProperty('min-height');
     
     // Restore page guides on screen
     element.style.removeProperty('background-image');
