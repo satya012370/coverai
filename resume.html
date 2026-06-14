@@ -1904,13 +1904,13 @@ function initVoiceRecognition() {
   }
   
   voiceRecognition = new SpeechRecognition();
-  voiceRecognition.continuous = false;
+  voiceRecognition.continuous = true;
   voiceRecognition.interimResults = true;
   voiceRecognition.lang = voiceLang;
   
   voiceRecognition.onstart = () => {
     isRecording = true;
-    document.getElementById('voiceStatus').innerText = 'Listening... Speak now';
+    document.getElementById('voiceStatus').innerText = 'Listening... Click mic when done';
     document.getElementById('voiceWave').classList.add('active');
     document.getElementById('voiceMicBtn').classList.add('recording');
     document.getElementById('voiceCommandBtn').classList.add('listening');
@@ -1921,7 +1921,7 @@ function initVoiceRecognition() {
   
   voiceRecognition.onresult = (event) => {
     let transcript = '';
-    for (let i = event.resultIndex; i < event.results.length; ++i) {
+    for (let i = 0; i < event.results.length; ++i) {
       transcript += event.results[i][0].transcript;
     }
     document.getElementById('voiceTranscript').innerText = transcript;
