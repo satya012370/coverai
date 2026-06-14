@@ -1608,7 +1608,7 @@ function updatePreview() {
 
   const publicationsHtml = d.publications && d.publications.length ? `<div class="sec-title">Publications</div><ul class="publications-list" style="margin: 0; padding-left: 15px; font-size: var(--resume-font-size, 9.5px); color: #444; line-height: var(--resume-line-height, 1.5);">${d.publications.map(p => `<li style="margin-bottom: 4px;">${esc(p)}</li>`).join('')}</ul>` : '';
 
-  const certsSidebarHtml = d.certifications && d.certifications.length ? `<div class="sec-title">Certifications</div><div style="font-size: var(--resume-font-size, 9.5px); color: #444; line-height: var(--resume-line-height, 1.5);">${d.certifications.map(c => `<div style="margin-bottom: 4px;">• ${esc(c)}</div>`).join('')}</div>` : '';
+  const certsSidebarHtml = d.certifications && d.certifications.length ? `<div class="sec-title">Certifications</div><div style="font-size: var(--resume-font-size, 9.5px); color: #444; line-height: var(--resume-line-height, 1.5);">${d.certifications.map(c => `<div class="certs-sidebar-item" style="margin-bottom: 4px;">• ${esc(c)}</div>`).join('')}</div>` : '';
 
   const certsBodyHtml = d.certifications && d.certifications.length ? `<div class="sec-title">Certifications</div><ul class="certifications-list" style="margin: 0; padding-left: 15px; font-size: var(--resume-font-size, 9.5px); color: #444; line-height: var(--resume-line-height, 1.5);">${d.certifications.map(c => `<li style="margin-bottom: 4px;">${esc(c)}</li>`).join('')}</ul>` : '';
 
@@ -1867,7 +1867,7 @@ function downloadResumePDF() {
     const parentRect = el.getBoundingClientRect();
     const pxPerMm = el.offsetWidth / 210;
     
-    const selectors = ['.exp-item', '.sec-title', 'p', 'li', '.skill-pill', '.publications-list li', '.certifications-list li'];
+    const selectors = ['.exp-item', '.sec-title', 'p', 'li', '.skill-pill', '.publications-list li', '.certifications-list li', '.certs-sidebar-item'];
     const candidates = Array.from(el.querySelectorAll(selectors.join(', ')));
     
     // Sort candidates by their top position
