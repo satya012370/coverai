@@ -1336,7 +1336,7 @@ function updateDlUI() {
   const isPro = !!(window.currentUser && window.currentUser.isPro);
   document.querySelectorAll('.tpl-card').forEach(card => {
     const tpl = card.getAttribute('data-tpl');
-    const isProTpl = ['executive','creative','corporate','elegant','tech','slate'].includes(tpl);
+    const isProTpl = ['executive','creative','corporate','elegant','tech','slate','indigo','metro','vintage','minimalist-pro','quantum'].includes(tpl);
     if (isProTpl) {
       card.classList.toggle('pro-unlocked', isPro);
     }
