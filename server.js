@@ -507,6 +507,71 @@ Resume text: ${extractedText.slice(0, 50000)}`;
 });
 
 
+// ─── VOICE COMMAND INTERPRETER ────────────────────────────────
+app.post("/api/voice-command", async (req, res) => {
+  try {
+    const { command } = req.body;
+    if (!command || command.trim().length === 0) {
+      return res.status(400).json({ error: "No voice command provided" });
+    }
+
+    const systemPrompt = `You are a voice command parser for a resume builder application.
+Analyze the user's spoken command (which can be in English, Hindi, or Hinglish) and return a list of JSON state mutation actions to apply to the resume form.
+
+Supported field names for SET_FIELD:
+- "rName": Full name
+- "rTitle": Professional title
+- "rEmail": Email address
+- "rPhone": Phone number
+- "rLocation": Location (city, country)
+- "rLinkedin": LinkedIn link
+- "rWebsite": Website/portfolio link
+- "rSummary": Professional summary
+- "rPublications": Publications list
+- "rCertifications": Certifications list
+
+Supported template names for SET_TEMPLATE:
+"modern", "classic", "minimal", "emerald", "bold", "executive", "creative", "corporate", "elegant", "tech", "slate"
+
+Supported properties for SET_FORMATTING:
+"font-size" (number like 9, 10, 11), "line-height" (number like 1.4, 1.5, 1.6), "section-spacing" (number like 12, 16, 20), "padding" (number like 15, 20, 25), "font-family" (font name string)
+
+Actions format:
+Return ONLY a valid JSON array of mutation objects:
+[
+  { "type": "SET_FIELD", "field": "rName", "value": "..." },
+  { "type": "ADD_SKILL", "value": "..." },
+  { "type": "REMOVE_SKILL", "value": "..." },
+  { "type": "ADD_EXPERIENCE", "value": { "title": "...", "company": "...", "start": "...", "end": "...", "desc": "..." } },
+  { "type": "ADD_EDUCATION", "value": { "degree": "...", "school": "...", "year": "...", "grade": "..." } },
+  { "type": "ADD_PROJECT", "value": { "title": "...", "subtitle": "...", "desc": "..." } },
+  { "type": "SET_FORMATTING", "property": "...", "value": "..." },
+  { "type": "SET_TEMPLATE", "value": "..." }
+]
+
+Rules:
+1. Translate voice instructions in Hindi or Hinglish to the appropriate mutation action.
+   For example, "मेरा नाम अमित रख दो" should map to: { "type": "SET_FIELD", "field": "rName", "value": "अमित" } (or "Amit", but keep the proper name language spoken).
+   For example, "स्किल्स में जावास्क्रिप्ट डालो" should map to: { "type": "ADD_SKILL", "value": "JavaScript" }
+   For example, "फॉन्ट साइज ग्यारह कर do" should map to: { "type": "SET_FORMATTING", "property": "font-size", "value": "11" }
+2. If the user commands an experience, education, or project addition, structure the details into the value object fields.
+3. Be extremely precise. Return ONLY the JSON array, no markdown backticks, no explanatory text.
+User Command: "${command}"`;
+
+    const response = await generateContentWithFallbackAndRetry({
+      contents: systemPrompt
+    });
+
+    const raw = response.text || "[]";
+    const parsed = parseSafeJSON(raw);
+    res.json({ success: true, actions: Array.isArray(parsed) ? parsed : [] });
+
+  } catch (err) {
+    res.status(500).json({ error: formatAIError(err) });
+  }
+});
+
+
 // ─── GENERATE COVER LETTER ────────────────────────────────────
 app.post("/api/generate", async (req, res) => {
   try {
