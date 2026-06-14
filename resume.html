@@ -1873,8 +1873,6 @@ function initFormatting() {
 let voiceLang = 'hi-IN'; // Default to Hindi
 let isRecording = false;
 let voiceRecognition = null;
-let accumulatedTranscript = '';
-let currentSessionTranscript = '';
 
 function setVoiceLanguage(lang) {
   voiceLang = lang;
@@ -1892,7 +1890,6 @@ function toggleVoiceWidget() {
     initVoiceRecognition();
   } else {
     widget.style.display = 'none';
-    isRecording = false;
     stopListening();
   }
 }
@@ -1913,7 +1910,7 @@ function initVoiceRecognition() {
   
   voiceRecognition.onstart = () => {
     isRecording = true;
-    document.getElementById('voiceStatus').innerText = 'Listening... Click mic when done';
+    document.getElementById('voiceStatus').innerText = 'Listening... Speak your command';
     document.getElementById('voiceWave').classList.add('active');
     document.getElementById('voiceMicBtn').classList.add('recording');
     document.getElementById('voiceCommandBtn').classList.add('listening');
@@ -1922,21 +1919,11 @@ function initVoiceRecognition() {
   };
   
   voiceRecognition.onresult = (event) => {
-    let interimTranscript = '';
-    let finalTranscript = '';
-    for (let i = event.resultIndex; i < event.results.length; ++i) {
-      const text = event.results[i][0].transcript;
-      if (event.results[i].isFinal) {
-        finalTranscript += text + ' ';
-      } else {
-        interimTranscript += text;
-      }
+    let transcript = '';
+    for (let i = 0; i < event.results.length; ++i) {
+      transcript += event.results[i][0].transcript;
     }
-    if (finalTranscript) {
-      currentSessionTranscript += finalTranscript;
-    }
-    document.getElementById('voiceTranscript').innerText = 
-      (accumulatedTranscript + ' ' + currentSessionTranscript + ' ' + interimTranscript).trim().replace(/\s+/g, ' ');
+    document.getElementById('voiceTranscript').innerText = transcript;
   };
   
   voiceRecognition.onerror = (event) => {
@@ -1949,28 +1936,12 @@ function initVoiceRecognition() {
   };
   
   voiceRecognition.onend = () => {
-    if (currentSessionTranscript) {
-      accumulatedTranscript = (accumulatedTranscript + ' ' + currentSessionTranscript).trim().replace(/\s+/g, ' ');
-      currentSessionTranscript = '';
-    }
-
-    if (isRecording) {
-      console.log('Speech recognition ended automatically. Restarting...');
-      try {
-        voiceRecognition.start();
-      } catch(e) {
-        console.warn('Failed to restart speech recognition:', e);
-      }
+    stopListeningUI();
+    const transcript = document.getElementById('voiceTranscript').innerText.trim();
+    if (transcript && transcript !== '' && !transcript.startsWith('"')) {
+      processVoiceCommand(transcript);
     } else {
-      stopListeningUI();
-      const finalText = document.getElementById('voiceTranscript').innerText.trim();
-      if (finalText && finalText !== '' && !finalText.startsWith('"')) {
-        processVoiceCommand(finalText);
-      } else {
-        document.getElementById('voiceStatus').innerText = 'Ready';
-      }
-      accumulatedTranscript = '';
-      currentSessionTranscript = '';
+      document.getElementById('voiceStatus').innerText = 'Ready';
     }
   };
 }
@@ -1978,12 +1949,9 @@ function initVoiceRecognition() {
 function toggleSpeechListening() {
   if (!voiceRecognition) initVoiceRecognition();
   if (isRecording) {
-    isRecording = false;
     voiceRecognition.stop();
   } else {
     try {
-      accumulatedTranscript = '';
-      currentSessionTranscript = '';
       document.getElementById('voiceTranscript').innerText = '';
       voiceRecognition.start();
     } catch(e) {
@@ -1994,7 +1962,6 @@ function toggleSpeechListening() {
 
 function stopListening() {
   if (voiceRecognition && isRecording) {
-    isRecording = false;
     voiceRecognition.stop();
   }
 }
@@ -2009,11 +1976,15 @@ function stopListeningUI() {
 async function processVoiceCommand(transcript) {
   document.getElementById('voiceStatus').innerText = 'Processing command...';
   
+  // Find currently open/active accordion section title to pass as context
+  const activeSectionEl = document.querySelector('.acc-section.open');
+  const activeSection = activeSectionEl ? activeSectionEl.querySelector('.acc-title')?.innerText || '' : '';
+  
   try {
     const res = await fetch('/api/voice-command', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ command: transcript })
+      body: JSON.stringify({ command: transcript, activeSection: activeSection })
     });
     
     const data = await res.json();

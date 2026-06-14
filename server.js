@@ -510,7 +510,7 @@ Resume text: ${extractedText.slice(0, 50000)}`;
 // ─── VOICE COMMAND INTERPRETER ────────────────────────────────
 app.post("/api/voice-command", async (req, res) => {
   try {
-    const { command } = req.body;
+    const { command, activeSection } = req.body;
     if (!command || command.trim().length === 0) {
       return res.status(400).json({ error: "No voice command provided" });
     }
@@ -518,23 +518,20 @@ app.post("/api/voice-command", async (req, res) => {
     const systemPrompt = `You are a voice command parser for a resume builder application.
 Analyze the user's spoken command (which can be in English, Hindi, or Hinglish) and return a list of JSON state mutation actions to apply to the resume form.
 
+The user is currently focusing on/editing the resume section: "${activeSection || "General"}".
+If the voice command is ambiguous or simply contains content/details without specifying a field name, prefer mapping it to the active section if appropriate.
+
 Supported field names for SET_FIELD:
-- "rName": Full name
-- "rTitle": Professional title
-- "rEmail": Email address
-- "rPhone": Phone number
-- "rLocation": Location (city, country)
-- "rLinkedin": LinkedIn link
-- "rWebsite": Website/portfolio link
-- "rSummary": Professional summary
-- "rPublications": Publications list
-- "rCertifications": Certifications list
-
-Supported template names for SET_TEMPLATE:
-"modern", "classic", "minimal", "emerald", "bold", "executive", "creative", "corporate", "elegant", "tech", "slate"
-
-Supported properties for SET_FORMATTING:
-"font-size" (number like 9, 10, 11), "line-height" (number like 1.4, 1.5, 1.6), "section-spacing" (number like 12, 16, 20), "padding" (number like 15, 20, 25), "font-family" (font name string)
+- "rName": Full name (Personal Info section)
+- "rTitle": Professional title / Job Title (Personal Info section)
+- "rEmail": Email address (Personal Info section)
+- "rPhone": Phone number (Personal Info section)
+- "rLocation": Location (city, country) (Personal Info section)
+- "rLinkedin": LinkedIn link (Personal Info section)
+- "rWebsite": Website/portfolio link (Personal Info section)
+- "rSummary": Professional summary paragraph (Summary section)
+- "rPublications": Publications list (Additional Info section)
+- "rCertifications": Certifications list (Additional Info section)
 
 Actions format:
 Return ONLY a valid JSON array of mutation objects:
@@ -544,18 +541,16 @@ Return ONLY a valid JSON array of mutation objects:
   { "type": "REMOVE_SKILL", "value": "..." },
   { "type": "ADD_EXPERIENCE", "value": { "title": "...", "company": "...", "start": "...", "end": "...", "desc": "..." } },
   { "type": "ADD_EDUCATION", "value": { "degree": "...", "school": "...", "year": "...", "grade": "..." } },
-  { "type": "ADD_PROJECT", "value": { "title": "...", "subtitle": "...", "desc": "..." } },
-  { "type": "SET_FORMATTING", "property": "...", "value": "..." },
-  { "type": "SET_TEMPLATE", "value": "..." }
+  { "type": "ADD_PROJECT", "value": { "title": "...", "subtitle": "...", "desc": "..." } }
 ]
 
 Rules:
 1. Translate voice instructions in Hindi or Hinglish to the appropriate mutation action.
-   For example, "मेरा नाम अमित रख दो" should map to: { "type": "SET_FIELD", "field": "rName", "value": "अमित" } (or "Amit", but keep the proper name language spoken).
+   For example, "मेरा नाम अमित रख दो" should map to: { "type": "SET_FIELD", "field": "rName", "value": "अमित" } (or "Amit", keeping proper names).
    For example, "स्किल्स में जावास्क्रिप्ट डालो" should map to: { "type": "ADD_SKILL", "value": "JavaScript" }
-   For example, "फॉन्ट साइज ग्यारह कर do" should map to: { "type": "SET_FORMATTING", "property": "font-size", "value": "11" }
 2. If the user commands an experience, education, or project addition, structure the details into the value object fields.
-3. Be extremely precise. Return ONLY the JSON array, no markdown backticks, no explanatory text.
+3. If the user dictates a summary paragraph and the active section is "Professional Summary" (or similar), map it to: { "type": "SET_FIELD", "field": "rSummary", "value": "..." }.
+4. Be extremely precise. Return ONLY the JSON array, no markdown backticks, no explanatory text.
 User Command: "${command}"`;
 
     const response = await generateContentWithFallbackAndRetry({
