@@ -1837,9 +1837,78 @@ function downloadResumePDF() {
     pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
   };
   
+  // Helper to dynamically calculate and insert page-break spacers
+  function applyPageBreakSpacers(el) {
+    // Clear any existing spacers first
+    const existingSpacers = el.querySelectorAll('.pdf-page-spacer');
+    existingSpacers.forEach(s => s.remove());
+
+    const parentRect = el.getBoundingClientRect();
+    const pxPerMm = el.offsetWidth / 210;
+    
+    const selectors = ['.exp-item', '.sec-title', 'p', 'li', '.skill-pill', '.publications-list li', '.certifications-list li'];
+    const candidates = Array.from(el.querySelectorAll(selectors.join(', ')));
+    
+    // Sort candidates by their top position
+    candidates.sort((a, b) => {
+      return a.getBoundingClientRect().top - b.getBoundingClientRect().top;
+    });
+    
+    for (let i = 0; i < candidates.length; i++) {
+      const target = candidates[i];
+      if (!target.isConnected || target.classList.contains('pdf-page-spacer')) continue;
+      
+      const rect = target.getBoundingClientRect();
+      const elTop = rect.top - parentRect.top;
+      const elBottom = rect.bottom - parentRect.top;
+      
+      // Determine page index and content boundaries
+      let k = 1;
+      let endBoundary = 285 * pxPerMm;
+      
+      while (elTop > endBoundary) {
+        k++;
+        endBoundary = (285 + (k - 1) * 297) * pxPerMm;
+      }
+      
+      // Safety guard: if element is taller than the page content area, don't attempt to push it
+      const maxH = (k === 1 ? 285 : 273) * pxPerMm;
+      if (rect.height > maxH) continue;
+      
+      if (elBottom > endBoundary) {
+        const startBoundaryNext = (309 + (k - 1) * 297) * pxPerMm;
+        const neededSpacerHeight = startBoundaryNext - elTop;
+        
+        if (neededSpacerHeight > 0) {
+          const spacer = document.createElement('div');
+          spacer.className = 'pdf-page-spacer';
+          spacer.style.height = `${neededSpacerHeight}px`;
+          spacer.style.width = '100%';
+          spacer.style.clear = 'both';
+          spacer.style.margin = '0';
+          spacer.style.padding = '0';
+          spacer.style.border = 'none';
+          
+          target.parentNode.insertBefore(spacer, target);
+          
+          // Recurse to re-measure positions with updated layout
+          applyPageBreakSpacers(el);
+          return;
+        }
+      }
+    }
+  }
+
   // Give the browser a moment to reflow and repaint at 100% scale and left-aligned before capturing
   setTimeout(() => {
+    // Apply spacers under active print styles
+    applyPageBreakSpacers(element);
+
     html2pdf().from(element).set(opt).toCanvas().get('canvas').then((canvas) => {
+      // Remove the spacers immediately so they don't affect screen preview
+      const spacersToRemove = element.querySelectorAll('.pdf-page-spacer');
+      spacersToRemove.forEach(s => s.remove());
+
       // Restore original screen styling after capture is complete
       element.style.transform = originalTransform;
       element.style.boxShadow = originalBoxShadow;
