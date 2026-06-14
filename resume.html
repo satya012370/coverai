@@ -1904,10 +1904,6 @@ function downloadResumePDF() {
           spacer.style.border = 'none';
           
           target.parentNode.insertBefore(spacer, target);
-          
-          // Recurse to re-measure positions with updated layout
-          applyPageBreakSpacers(el);
-          return;
         }
       }
     }
