@@ -289,27 +289,57 @@ app.post("/api/parse-resume", upload.single("resume"), async (req, res) => {
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
     const originalName = req.file.originalname.toLowerCase();
-    let extractedText = "";
+    const isPdf = req.file.mimetype === "application/pdf" || originalName.endsWith(".pdf");
 
-    if (req.file.mimetype === "application/pdf" || originalName.endsWith(".pdf")) {
-      try {
-        const pdfData = await pdfParse(req.file.buffer);
-        extractedText = pdfData.text;
-      } catch(e) {
-        return res.status(400).json({ error: "Could not read this PDF. Please save your resume from Word or Google Docs as PDF and try again." });
+    if (isPdf) {
+      const prompt = `Extract information from this resume and return ONLY a valid JSON object:
+{
+  "name": "full name",
+  "profession": "current job title or profession",
+  "exp": "experience like '3-5 years' or 'fresher'",
+  "skills": "top 5 skills comma separated",
+  "achievement": "single most impressive achievement in one sentence",
+  "rawText": "full raw text content extracted from the resume"
+}
+Return ONLY JSON, no markdown, no backticks.`;
+
+      const response = await generateContentWithFallbackAndRetry({
+        contents: [
+          {
+            role: "user",
+            parts: [
+              {
+                inlineData: {
+                  data: req.file.buffer.toString("base64"),
+                  mimeType: "application/pdf"
+                }
+              },
+              {
+                text: prompt
+              }
+            ]
+          }
+        ]
+      });
+
+      const raw = response.text || "{}";
+      const parsed = parseSafeJSON(raw);
+      
+      if (!parsed.name && !parsed.skills && (!parsed.rawText || parsed.rawText.trim().length < 50)) {
+        return res.status(400).json({ error: "Could not read this PDF. Make sure it is not empty." });
       }
+
+      res.json({ success: true, data: { ...parsed, rawText: parsed.rawText || "" } });
+
     } else if (originalName.endsWith(".docx")) {
       const result = await mammoth.extractRawText({ buffer: req.file.buffer });
-      extractedText = result.value;
-    } else {
-      return res.status(400).json({ error: "Please upload a PDF or Word (.docx) file." });
-    }
+      const extractedText = result.value;
 
-    if (!extractedText || extractedText.trim().length < 50) {
-      return res.status(400).json({ error: "Could not extract text. Make sure it's not a scanned image PDF." });
-    }
+      if (!extractedText || extractedText.trim().length < 50) {
+        return res.status(400).json({ error: "Could not extract text. Make sure the Word file is not empty." });
+      }
 
-    const prompt = `Extract information from this resume and return ONLY a valid JSON object:
+      const prompt = `Extract information from this resume and return ONLY a valid JSON object:
 {
   "name": "full name",
   "profession": "current job title or profession",
@@ -320,12 +350,15 @@ app.post("/api/parse-resume", upload.single("resume"), async (req, res) => {
 Return ONLY JSON, no markdown, no backticks.
 Resume: ${extractedText.slice(0, 50000)}`;
 
-    const response = await generateContentWithFallbackAndRetry({
-      contents: prompt
-    });
-    const raw = response.text || "{}";
-    const parsed = parseSafeJSON(raw);
-    res.json({ success: true, data: { ...parsed, rawText: extractedText.slice(0, 50000) } });
+      const response = await generateContentWithFallbackAndRetry({
+        contents: prompt
+      });
+      const raw = response.text || "{}";
+      const parsed = parseSafeJSON(raw);
+      res.json({ success: true, data: { ...parsed, rawText: extractedText.slice(0, 50000) } });
+    } else {
+      return res.status(400).json({ error: "Please upload a PDF or Word (.docx) file." });
+    }
 
   } catch (err) {
     res.status(500).json({ error: formatAIError(err) });
@@ -338,27 +371,86 @@ app.post("/api/parse-full-resume", upload.single("resume"), async (req, res) => 
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
     const originalName = req.file.originalname.toLowerCase();
-    let extractedText = "";
+    const isPdf = req.file.mimetype === "application/pdf" || originalName.endsWith(".pdf");
 
-    if (req.file.mimetype === "application/pdf" || originalName.endsWith(".pdf")) {
-      try {
-        const pdfData = await pdfParse(req.file.buffer);
-        extractedText = pdfData.text;
-      } catch(e) {
-        return res.status(400).json({ error: "Could not read this PDF." });
+    if (isPdf) {
+      const prompt = `Extract ALL details from this resume and return ONLY a valid JSON object containing:
+{
+  "name": "full name",
+  "title": "professional title or current job title",
+  "email": "email address",
+  "phone": "phone number",
+  "location": "city and country",
+  "linkedin": "LinkedIn profile link",
+  "website": "portfolio or GitHub website link",
+  "summary": "professional summary paragraph",
+  "skills": ["Skill 1", "Skill 2", "Skill 3", "Skill 4", "Skill 5", "Skill 6", "Skill 7", "Skill 8", "Skill 9", "Skill 10"],
+  "experience": [
+    {
+      "company": "Company Name",
+      "title": "Job Title",
+      "start": "Start Date",
+      "end": "End Date",
+      "desc": "Responsibility summary or bullet points"
+    }
+  ],
+  "education": [
+    {
+      "school": "University or School Name",
+      "degree": "Degree and Major",
+      "year": "Year of study or graduation year",
+      "grade": "GPA or Grade"
+    }
+  ],
+  "projects": [
+    {
+      "title": "Project Name",
+      "subtitle": "Project subtitle, association or link",
+      "desc": "Key details or bullet points describing the project"
+    }
+  ],
+  "publications": ["Publication 1", "Publication 2"],
+  "certifications": ["Certification 1", "Certification 2"]
+}
+Return ONLY valid JSON. No markdown backticks or formatting.`;
+
+      const response = await generateContentWithFallbackAndRetry({
+        contents: [
+          {
+            role: "user",
+            parts: [
+              {
+                inlineData: {
+                  data: req.file.buffer.toString("base64"),
+                  mimeType: "application/pdf"
+                }
+              },
+              {
+                text: prompt
+              }
+            ]
+          }
+        ]
+      });
+
+      const raw = response.text || "{}";
+      const parsed = parseSafeJSON(raw);
+      
+      if (!parsed.name && !parsed.skills) {
+        return res.status(400).json({ error: "Could not read this PDF. Make sure it is not empty." });
       }
+
+      res.json({ success: true, data: parsed });
+
     } else if (originalName.endsWith(".docx")) {
       const result = await mammoth.extractRawText({ buffer: req.file.buffer });
-      extractedText = result.value;
-    } else {
-      return res.status(400).json({ error: "Please upload a PDF or Word (.docx) file." });
-    }
+      const extractedText = result.value;
 
-    if (!extractedText || extractedText.trim().length < 50) {
-      return res.status(400).json({ error: "Could not extract text from this file." });
-    }
+      if (!extractedText || extractedText.trim().length < 50) {
+        return res.status(400).json({ error: "Could not extract text. Make sure the Word file is not empty." });
+      }
 
-    const prompt = `Extract ALL details from this resume and return ONLY a valid JSON object containing:
+      const prompt = `Extract ALL details from this resume and return ONLY a valid JSON object containing:
 {
   "name": "full name",
   "title": "professional title or current job title",
@@ -399,12 +491,15 @@ app.post("/api/parse-full-resume", upload.single("resume"), async (req, res) => 
 Return ONLY valid JSON. No markdown backticks or formatting.
 Resume text: ${extractedText.slice(0, 50000)}`;
 
-    const response = await generateContentWithFallbackAndRetry({
-      contents: prompt
-    });
-    const raw = response.text || "{}";
-    const parsed = parseSafeJSON(raw);
-    res.json({ success: true, data: parsed });
+      const response = await generateContentWithFallbackAndRetry({
+        contents: prompt
+      });
+      const raw = response.text || "{}";
+      const parsed = parseSafeJSON(raw);
+      res.json({ success: true, data: parsed });
+    } else {
+      return res.status(400).json({ error: "Please upload a PDF or Word (.docx) file." });
+    }
 
   } catch (err) {
     res.status(500).json({ error: formatAIError(err) });

@@ -343,9 +343,17 @@ textarea{resize:vertical;line-height:1.6}
   transform-origin: top center !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   
-  /* Draw thin page break guide lines every 273mm on screen (A4 297mm minus 24mm top/bottom margins) */
-  background-image: linear-gradient(to bottom, transparent 272.8mm, #e0dbf7 272.8mm, #e0dbf7 273mm, transparent 273mm) !important;
-  background-size: 100% 273mm !important;
+  /* Draw repeating A4 sheets (273mm white space) separated by a 24mm gray margin gap with a cut line in the middle (at 285mm) */
+  background-image: linear-gradient(to bottom, 
+    transparent 273mm, 
+    #e2e2e8 273mm, 
+    #e2e2e8 284.8mm, 
+    #b0b0bb 284.8mm, 
+    #b0b0bb 285.2mm, 
+    #e2e2e8 285.2mm, 
+    #e2e2e8 297mm
+  ) !important;
+  background-size: 100% 297mm !important;
 }
 
 #resumePreview, #resumePreview * {
