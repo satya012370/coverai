@@ -1553,7 +1553,7 @@ function formatDesc(text) {
     const match = line.match(/^([•\-\*\+])\s*(.*)/);
     if (match) {
       if (!isList) {
-        html += '<ul class="desc-list" style="margin: 4px 0 0; padding-left: 15px; list-style-type: disc; font-size: var(--resume-font-size, 9.5px); color: #444; line-height: var(--resume-line-height, 1.6);">';
+        html += '<ul class="desc-list" style="margin: 4px 0 0; padding-left: 15px; list-style-type: disc; font-size: var(--resume-font-size, 9.5px); color: inherit; line-height: var(--resume-line-height, 1.6);">';
         isList = true;
       }
       html += `<li style="page-break-inside: avoid; break-inside: avoid; margin-bottom: 3px;">${esc(match[2])}</li>`;
@@ -1562,7 +1562,7 @@ function formatDesc(text) {
         html += '</ul>';
         isList = false;
       }
-      html += `<p style="margin: 4px 0 0; font-size: var(--resume-font-size, 9.5px); color: #444; line-height: var(--resume-line-height, 1.6);">${esc(line)}</p>`;
+      html += `<p style="margin: 4px 0 0; font-size: var(--resume-font-size, 9.5px); color: inherit; line-height: var(--resume-line-height, 1.6);">${esc(line)}</p>`;
     }
   });
 
