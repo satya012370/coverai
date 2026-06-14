@@ -1896,6 +1896,51 @@ function downloadResumePDF() {
       const maxH = (k === 1 ? 285 : 273) * pxPerMm;
       if (rect.height > maxH) continue;
       
+      // Keep-with-next: if target is a section title, push it to the next page if its first item crosses or starts on the next page
+      if (target.classList.contains('sec-title')) {
+        let firstContent = null;
+        let next = target.nextElementSibling;
+        if (next) {
+          if (next.classList.contains('exp-item') || next.tagName === 'P' || next.tagName === 'LI' || next.classList.contains('skill-pill') || next.classList.contains('certs-sidebar-item')) {
+            firstContent = next;
+          } else {
+            let child = next.firstElementChild;
+            while (child && child.classList.contains('pdf-page-spacer')) {
+              child = child.nextElementSibling;
+            }
+            if (child) {
+              firstContent = child;
+            }
+          }
+        }
+        
+        if (firstContent) {
+          const nextRect = firstContent.getBoundingClientRect();
+          const nextTop = nextRect.top - parentRect.top;
+          
+          let nextK = 1;
+          let nextEndBoundary = 285 * pxPerMm;
+          while (nextTop > nextEndBoundary) {
+            nextK++;
+            nextEndBoundary = (285 + (nextK - 1) * 297) * pxPerMm;
+          }
+          
+          const nextBottom = nextRect.bottom - parentRect.top;
+          if (nextBottom > nextEndBoundary || nextTop > nextEndBoundary) {
+            const startBoundaryNext = (309 + (nextK - 1) * 297) * pxPerMm;
+            const neededSpacerHeight = startBoundaryNext - elTop;
+            
+            if (neededSpacerHeight > 0) {
+              const originalMarginTop = target.style.marginTop || '';
+              target.setAttribute('data-pdf-original-margin-top', originalMarginTop);
+              const currentMarginTopPx = parseFloat(window.getComputedStyle(target).marginTop) || 0;
+              target.style.marginTop = `${currentMarginTopPx + neededSpacerHeight}px`;
+              continue;
+            }
+          }
+        }
+      }
+      
       if (elBottom > endBoundary) {
         const startBoundaryNext = (309 + (k - 1) * 297) * pxPerMm;
         const neededSpacerHeight = startBoundaryNext - elTop;
