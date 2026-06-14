@@ -43,7 +43,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function generateContentWithFallbackAndRetry(options) {
-  const modelsToTry = [GEMINI_MODEL, "gemini-1.5-flash"];
+  const modelsToTry = [GEMINI_MODEL, "gemini-2.5-flash-lite", "gemini-3.5-flash", "gemini-3.1-flash-lite"];
   let lastError = null;
 
   for (const model of modelsToTry) {
