@@ -1873,6 +1873,8 @@ function initFormatting() {
 let voiceLang = 'hi-IN'; // Default to Hindi
 let isRecording = false;
 let voiceRecognition = null;
+let accumulatedTranscript = '';
+let currentSessionTranscript = '';
 
 function setVoiceLanguage(lang) {
   voiceLang = lang;
@@ -1890,6 +1892,7 @@ function toggleVoiceWidget() {
     initVoiceRecognition();
   } else {
     widget.style.display = 'none';
+    isRecording = false;
     stopListening();
   }
 }
@@ -1914,32 +1917,60 @@ function initVoiceRecognition() {
     document.getElementById('voiceWave').classList.add('active');
     document.getElementById('voiceMicBtn').classList.add('recording');
     document.getElementById('voiceCommandBtn').classList.add('listening');
-    document.getElementById('voiceTranscript').innerText = '';
     document.getElementById('voiceTranscript').style.fontStyle = 'normal';
     document.getElementById('voiceTranscript').style.color = '#1e293b';
   };
   
   voiceRecognition.onresult = (event) => {
-    let transcript = '';
-    for (let i = 0; i < event.results.length; ++i) {
-      transcript += event.results[i][0].transcript;
+    let interimTranscript = '';
+    let finalTranscript = '';
+    for (let i = event.resultIndex; i < event.results.length; ++i) {
+      const text = event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        finalTranscript += text + ' ';
+      } else {
+        interimTranscript += text;
+      }
     }
-    document.getElementById('voiceTranscript').innerText = transcript;
+    if (finalTranscript) {
+      currentSessionTranscript += finalTranscript;
+    }
+    document.getElementById('voiceTranscript').innerText = 
+      (accumulatedTranscript + ' ' + currentSessionTranscript + ' ' + interimTranscript).trim().replace(/\s+/g, ' ');
   };
   
   voiceRecognition.onerror = (event) => {
     console.error('Speech recognition error:', event.error);
-    document.getElementById('voiceStatus').innerText = 'Error: ' + event.error;
-    stopListeningUI();
+    if (event.error === 'not-allowed' || event.error === 'audio-capture' || event.error === 'service-not-allowed') {
+      isRecording = false;
+      document.getElementById('voiceStatus').innerText = 'Error: ' + event.error;
+      stopListeningUI();
+    }
   };
   
   voiceRecognition.onend = () => {
-    stopListeningUI();
-    const transcript = document.getElementById('voiceTranscript').innerText.trim();
-    if (transcript && transcript !== '' && !transcript.startsWith('"')) {
-      processVoiceCommand(transcript);
+    if (currentSessionTranscript) {
+      accumulatedTranscript = (accumulatedTranscript + ' ' + currentSessionTranscript).trim().replace(/\s+/g, ' ');
+      currentSessionTranscript = '';
+    }
+
+    if (isRecording) {
+      console.log('Speech recognition ended automatically. Restarting...');
+      try {
+        voiceRecognition.start();
+      } catch(e) {
+        console.warn('Failed to restart speech recognition:', e);
+      }
     } else {
-      document.getElementById('voiceStatus').innerText = 'Ready';
+      stopListeningUI();
+      const finalText = document.getElementById('voiceTranscript').innerText.trim();
+      if (finalText && finalText !== '' && !finalText.startsWith('"')) {
+        processVoiceCommand(finalText);
+      } else {
+        document.getElementById('voiceStatus').innerText = 'Ready';
+      }
+      accumulatedTranscript = '';
+      currentSessionTranscript = '';
     }
   };
 }
@@ -1947,9 +1978,13 @@ function initVoiceRecognition() {
 function toggleSpeechListening() {
   if (!voiceRecognition) initVoiceRecognition();
   if (isRecording) {
+    isRecording = false;
     voiceRecognition.stop();
   } else {
     try {
+      accumulatedTranscript = '';
+      currentSessionTranscript = '';
+      document.getElementById('voiceTranscript').innerText = '';
       voiceRecognition.start();
     } catch(e) {
       console.warn('Recognition already started:', e);
@@ -1959,6 +1994,7 @@ function toggleSpeechListening() {
 
 function stopListening() {
   if (voiceRecognition && isRecording) {
+    isRecording = false;
     voiceRecognition.stop();
   }
 }
