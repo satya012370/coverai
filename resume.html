@@ -483,17 +483,36 @@ textarea{resize:vertical;line-height:1.6}
   transform-origin: top center !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   
-  /* Draw repeating A4 sheets (273mm white space) separated by a 24mm gray margin gap with a cut line in the middle (at 285mm) */
+  /* Draw repeating A4 sheets (Page 1 has 0 top margin, Page 2+ has 12mm top/bottom margin) with page cut guides */
   background-image: linear-gradient(to bottom, 
-    transparent 273mm, 
-    #e2e2e8 273mm, 
-    #e2e2e8 284.8mm, 
-    #b0b0bb 284.8mm, 
-    #b0b0bb 285.2mm, 
-    #e2e2e8 285.2mm, 
-    #e2e2e8 297mm
+    transparent 285mm, 
+    #e2e2e8 285mm, #e2e2e8 296.8mm, 
+    #b0b0bb 296.8mm, #b0b0bb 297.2mm, 
+    #e2e2e8 297.2mm, #e2e2e8 309mm, 
+    transparent 309mm,
+    transparent 582mm, 
+    #e2e2e8 582mm, #e2e2e8 593.8mm, 
+    #b0b0bb 593.8mm, #b0b0bb 594.2mm, 
+    #e2e2e8 594.2mm, #e2e2e8 606mm, 
+    transparent 606mm,
+    transparent 879mm, 
+    #e2e2e8 879mm, #e2e2e8 890.8mm, 
+    #b0b0bb 890.8mm, #b0b0bb 891.2mm, 
+    #e2e2e8 891.2mm, #e2e2e8 903mm, 
+    transparent 903mm,
+    transparent 1176mm, 
+    #e2e2e8 1176mm, #e2e2e8 1187.8mm, 
+    #b0b0bb 1187.8mm, #b0b0bb 1188.2mm, 
+    #e2e2e8 1188.2mm, #e2e2e8 1200mm, 
+    transparent 1200mm,
+    transparent 1473mm, 
+    #e2e2e8 1473mm, #e2e2e8 1484.8mm, 
+    #b0b0bb 1484.8mm, #b0b0bb 1485.2mm, 
+    #e2e2e8 1485.2mm, #e2e2e8 1497mm, 
+    transparent 1497mm
   ) !important;
-  background-size: 100% 297mm !important;
+  background-size: 100% 100% !important;
+  background-repeat: no-repeat !important;
 }
 
 #resumePreview, #resumePreview * {
@@ -1795,7 +1814,7 @@ function downloadResumePDF() {
   element.style.transition = 'none';
   element.style.margin = '0';
   element.style.setProperty('width', '210mm', 'important');
-  element.style.setProperty('min-height', '273mm', 'important');
+  element.style.setProperty('min-height', '285mm', 'important');
   element.style.setProperty('height', 'auto', 'important');
   element.style.setProperty('zoom', '1', 'important');
   
@@ -1803,7 +1822,7 @@ function downloadResumePDF() {
   element.style.setProperty('background-image', 'none', 'important');
   
   const opt = {
-    margin:       [12, 0, 12, 0],
+    margin:       0,
     filename:     `${name.replace(/\s+/g,'-')}-resume.pdf`,
     image:        { type: 'jpeg', quality: 0.98 },
     html2canvas:  { 
@@ -1820,7 +1839,7 @@ function downloadResumePDF() {
   
   // Give the browser a moment to reflow and repaint at 100% scale and left-aligned before capturing
   setTimeout(() => {
-    html2pdf().from(element).set(opt).toPdf().get('pdf').then((pdf) => {
+    html2pdf().from(element).set(opt).toCanvas().get('canvas').then((canvas) => {
       // Restore original screen styling after capture is complete
       element.style.transform = originalTransform;
       element.style.boxShadow = originalBoxShadow;
@@ -1853,7 +1872,52 @@ function downloadResumePDF() {
       
       // Restore scroll positions
       window.scrollTo(originalScrollX, originalScrollY);
-    }).save();
+
+      // Slice the canvas and generate PDF manually
+      const jsPDFClass = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : window.jsPDF;
+      const pdf = new jsPDFClass('p', 'mm', 'a4');
+      
+      const pxPerMm = canvas.width / 210;
+      const usableHeight1_px = 285 * pxPerMm;
+      const usableHeightOthers_px = 273 * pxPerMm;
+      
+      let srcY = 0;
+      let pageIndex = 0;
+      
+      while (srcY < canvas.height) {
+        if (pageIndex > 0) {
+          pdf.addPage();
+        }
+        
+        const isFirstPage = (pageIndex === 0);
+        const srcH = isFirstPage ? usableHeight1_px : usableHeightOthers_px;
+        const actualSrcH = Math.min(srcH, canvas.height - srcY);
+        
+        // Create temporary canvas for cropping
+        const croppedCanvas = document.createElement('canvas');
+        croppedCanvas.width = canvas.width;
+        croppedCanvas.height = actualSrcH;
+        
+        const ctx = croppedCanvas.getContext('2d');
+        ctx.drawImage(
+          canvas,
+          0, srcY, canvas.width, actualSrcH,  // Source region
+          0, 0, canvas.width, actualSrcH      // Destination region
+        );
+        
+        const imgData = croppedCanvas.toDataURL('image/jpeg', 0.98);
+        
+        const destY = isFirstPage ? 0 : 12;
+        const destH = actualSrcH / pxPerMm;
+        
+        pdf.addImage(imgData, 'JPEG', 0, destY, 210, destH);
+        
+        srcY += actualSrcH;
+        pageIndex++;
+      }
+      
+      pdf.save(`${name.replace(/\s+/g,'-')}-resume.pdf`);
+    });
   }, 100);
 }
 
