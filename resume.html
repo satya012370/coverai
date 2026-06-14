@@ -1824,8 +1824,8 @@ function applyPageBreakSpacers(el) {
     if (!target.isConnected || target.classList.contains('pdf-page-spacer')) continue;
     
     const rect = target.getBoundingClientRect();
-    const elTop = (rect.top - parentRect.top) / scale;
-    const elBottom = (rect.bottom - parentRect.top) / scale;
+    let elTop = (rect.top - parentRect.top) / scale;
+    let elBottom = (rect.bottom - parentRect.top) / scale;
     const rectHeight = rect.height / scale;
     
     // Determine page index and content boundaries
@@ -1841,6 +1841,24 @@ function applyPageBreakSpacers(el) {
     // Safety guard: if element is taller than the page content area, don't attempt to push it
     const maxH = (k === 1 ? 285 : 273) * pxPerMm;
     if (rectHeight > maxH) continue;
+    
+    // Check if element starts in the gap of the current page k (for k > 1)
+    if (k > 1) {
+      const startBoundary = (309 + (k - 2) * 297) * pxPerMm;
+      if (elTop < startBoundary) {
+        const neededSpacerHeight = startBoundary - elTop;
+        if (neededSpacerHeight > 0) {
+          const originalMarginTop = target.style.marginTop || '';
+          target.setAttribute('data-pdf-original-margin-top', originalMarginTop);
+          const currentMarginTopPx = parseFloat(window.getComputedStyle(target).marginTop) || 0;
+          target.style.marginTop = `${currentMarginTopPx + neededSpacerHeight}px`;
+          
+          // Re-calculate shifted positions
+          elTop = startBoundary;
+          elBottom = startBoundary + rectHeight;
+        }
+      }
+    }
     
     // Keep-with-next: if target is a section title, push it to the next page if its first item crosses or starts on the next page
     if (target.classList.contains('sec-title')) {
@@ -1863,6 +1881,7 @@ function applyPageBreakSpacers(el) {
       if (firstContent) {
         const nextRect = firstContent.getBoundingClientRect();
         const nextTop = (nextRect.top - parentRect.top) / scale;
+        const nextBottom = (nextRect.bottom - parentRect.top) / scale;
         
         let nextK = 1;
         let nextEndBoundary = 285 * pxPerMm;
@@ -1871,9 +1890,10 @@ function applyPageBreakSpacers(el) {
           nextEndBoundary = (285 + (nextK - 1) * 297) * pxPerMm;
         }
         
-        const nextBottom = (nextRect.bottom - parentRect.top) / scale;
-        if (nextBottom > nextEndBoundary || nextTop > nextEndBoundary) {
-          const startBoundaryNext = (309 + (nextK - 1) * 297) * pxPerMm;
+        const targetPage = (nextBottom > nextEndBoundary) ? nextK + 1 : nextK;
+        
+        if (targetPage > k) {
+          const startBoundaryNext = (309 + (targetPage - 2) * 297) * pxPerMm;
           const neededSpacerHeight = startBoundaryNext - elTop;
           
           if (neededSpacerHeight > 0) {
@@ -1881,7 +1901,12 @@ function applyPageBreakSpacers(el) {
             target.setAttribute('data-pdf-original-margin-top', originalMarginTop);
             const currentMarginTopPx = parseFloat(window.getComputedStyle(target).marginTop) || 0;
             target.style.marginTop = `${currentMarginTopPx + neededSpacerHeight}px`;
-            maxPage = Math.max(maxPage, nextK + 1);
+            
+            // Update shifted positions
+            elTop = startBoundaryNext;
+            elBottom = startBoundaryNext + rectHeight;
+            k = targetPage;
+            maxPage = Math.max(maxPage, k);
             continue;
           }
         }
