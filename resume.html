@@ -1762,10 +1762,24 @@ function handleDownload() {
     document.getElementById('limitBanner').style.display = 'block';
     return;
   }
-  downloadResumePDF();
-  incrementDownloads();
-  updateDlUI();
-  showToast('PDF downloaded! 🎉', 'success');
+  
+  const btn = document.getElementById('dlBtn');
+  const originalText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Generating PDF...';
+  
+  downloadResumePDF().then(() => {
+    incrementDownloads();
+    updateDlUI();
+    showToast('PDF downloaded! 🎉', 'success');
+  }).catch((err) => {
+    console.error('PDF Generation failed:', err);
+    showToast('PDF generation failed. Please try again.', 'error');
+  }).finally(() => {
+    btn.disabled = false;
+    btn.innerHTML = originalText;
+    updateDlUI();
+  });
 }
 
 function downloadResumePDF() {
@@ -1899,95 +1913,125 @@ function downloadResumePDF() {
     }
   }
 
-  // Give the browser a moment to reflow and repaint at 100% scale and left-aligned before capturing
-  setTimeout(() => {
-    // Apply spacers under active print styles
-    applyPageBreakSpacers(element);
+  return new Promise((resolve, reject) => {
+    // Give the browser a moment to reflow and repaint at 100% scale and left-aligned before capturing
+    setTimeout(() => {
+      try {
+        // Apply spacers under active print styles
+        applyPageBreakSpacers(element);
 
-    html2pdf().from(element).set(opt).toCanvas().get('canvas').then((canvas) => {
-      // Remove the spacers immediately so they don't affect screen preview
-      const spacersToRemove = element.querySelectorAll('.pdf-page-spacer');
-      spacersToRemove.forEach(s => s.remove());
+        html2pdf().from(element).set(opt).toCanvas().get('canvas').then((canvas) => {
+          try {
+            // Remove the spacers immediately so they don't affect screen preview
+            const spacersToRemove = element.querySelectorAll('.pdf-page-spacer');
+            spacersToRemove.forEach(s => s.remove());
 
-      // Restore original screen styling after capture is complete
-      element.style.transform = originalTransform;
-      element.style.boxShadow = originalBoxShadow;
-      element.style.borderRadius = originalBorderRadius;
-      element.style.border = originalBorder;
-      element.style.transition = originalTransition;
-      element.style.margin = originalMargin;
-      
-      if (originalWidth) element.style.setProperty('width', originalWidth);
-      else element.style.removeProperty('width');
-      
-      if (originalMinHeight) element.style.setProperty('min-height', originalMinHeight);
-      else element.style.removeProperty('min-height');
+            // Restore original screen styling after capture is complete
+            element.style.transform = originalTransform;
+            element.style.boxShadow = originalBoxShadow;
+            element.style.borderRadius = originalBorderRadius;
+            element.style.border = originalBorder;
+            element.style.transition = originalTransition;
+            element.style.margin = originalMargin;
+            
+            if (originalWidth) element.style.setProperty('width', originalWidth);
+            else element.style.removeProperty('width');
+            
+            if (originalMinHeight) element.style.setProperty('min-height', originalMinHeight);
+            else element.style.removeProperty('min-height');
 
-      if (originalHeight) element.style.setProperty('height', originalHeight);
-      else element.style.removeProperty('height');
-      
-      if (originalZoom) element.style.setProperty('zoom', originalZoom);
-      else element.style.removeProperty('zoom');
-      
-      // Restore page guides on screen
-      element.style.removeProperty('background-image');
-      
-      if (parent) {
-        parent.style.alignItems = originalParentAlignItems;
-        parent.style.padding = originalParentPadding;
-        parent.scrollTop = originalParentScrollTop;
-        parent.scrollLeft = originalParentScrollLeft;
+            if (originalHeight) element.style.setProperty('height', originalHeight);
+            else element.style.removeProperty('height');
+            
+            if (originalZoom) element.style.setProperty('zoom', originalZoom);
+            else element.style.removeProperty('zoom');
+            
+            // Restore page guides on screen
+            element.style.removeProperty('background-image');
+            
+            if (parent) {
+              parent.style.alignItems = originalParentAlignItems;
+              parent.style.padding = originalParentPadding;
+              parent.scrollTop = originalParentScrollTop;
+              parent.scrollLeft = originalParentScrollLeft;
+            }
+            
+            // Restore scroll positions
+            window.scrollTo(originalScrollX, originalScrollY);
+
+            // Slice the canvas and generate PDF manually
+            const jsPDFClass = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : window.jsPDF;
+            const pdf = new jsPDFClass('p', 'mm', 'a4');
+            
+            const pxPerMm = canvas.width / 210;
+            const usableHeight1_px = 285 * pxPerMm;
+            const usableHeightOthers_px = 273 * pxPerMm;
+            
+            let srcY = 0;
+            let pageIndex = 0;
+            
+            while (srcY < canvas.height) {
+              if (pageIndex > 0) {
+                pdf.addPage();
+              }
+              
+              const isFirstPage = (pageIndex === 0);
+              const srcH = isFirstPage ? usableHeight1_px : usableHeightOthers_px;
+              const actualSrcH = Math.min(srcH, canvas.height - srcY);
+              
+              // Create temporary canvas for cropping
+              const croppedCanvas = document.createElement('canvas');
+              croppedCanvas.width = canvas.width;
+              croppedCanvas.height = actualSrcH;
+              
+              const ctx = croppedCanvas.getContext('2d');
+              ctx.drawImage(
+                canvas,
+                0, srcY, canvas.width, actualSrcH,  // Source region
+                0, 0, canvas.width, actualSrcH      // Destination region
+              );
+              
+              const imgData = croppedCanvas.toDataURL('image/jpeg', 0.98);
+              
+              const destY = isFirstPage ? 0 : 12;
+              const destH = actualSrcH / pxPerMm;
+              
+              pdf.addImage(imgData, 'JPEG', 0, destY, 210, destH);
+              
+              srcY += actualSrcH;
+              pageIndex++;
+            }
+            
+            pdf.save(`${name.replace(/\s+/g,'-')}-resume.pdf`);
+            resolve();
+          } catch (err) {
+            reject(err);
+          }
+        }).catch(err => {
+          // Clean up styling on failure
+          element.style.transform = originalTransform;
+          element.style.boxShadow = originalBoxShadow;
+          element.style.borderRadius = originalBorderRadius;
+          element.style.border = originalBorder;
+          element.style.transition = originalTransition;
+          element.style.margin = originalMargin;
+          if (originalWidth) element.style.setProperty('width', originalWidth);
+          if (originalMinHeight) element.style.setProperty('min-height', originalMinHeight);
+          if (originalHeight) element.style.setProperty('height', originalHeight);
+          if (originalZoom) element.style.setProperty('zoom', originalZoom);
+          element.style.removeProperty('background-image');
+          if (parent) {
+            parent.style.alignItems = originalParentAlignItems;
+            parent.style.padding = originalParentPadding;
+          }
+          window.scrollTo(originalScrollX, originalScrollY);
+          reject(err);
+        });
+      } catch (err) {
+        reject(err);
       }
-      
-      // Restore scroll positions
-      window.scrollTo(originalScrollX, originalScrollY);
-
-      // Slice the canvas and generate PDF manually
-      const jsPDFClass = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : window.jsPDF;
-      const pdf = new jsPDFClass('p', 'mm', 'a4');
-      
-      const pxPerMm = canvas.width / 210;
-      const usableHeight1_px = 285 * pxPerMm;
-      const usableHeightOthers_px = 273 * pxPerMm;
-      
-      let srcY = 0;
-      let pageIndex = 0;
-      
-      while (srcY < canvas.height) {
-        if (pageIndex > 0) {
-          pdf.addPage();
-        }
-        
-        const isFirstPage = (pageIndex === 0);
-        const srcH = isFirstPage ? usableHeight1_px : usableHeightOthers_px;
-        const actualSrcH = Math.min(srcH, canvas.height - srcY);
-        
-        // Create temporary canvas for cropping
-        const croppedCanvas = document.createElement('canvas');
-        croppedCanvas.width = canvas.width;
-        croppedCanvas.height = actualSrcH;
-        
-        const ctx = croppedCanvas.getContext('2d');
-        ctx.drawImage(
-          canvas,
-          0, srcY, canvas.width, actualSrcH,  // Source region
-          0, 0, canvas.width, actualSrcH      // Destination region
-        );
-        
-        const imgData = croppedCanvas.toDataURL('image/jpeg', 0.98);
-        
-        const destY = isFirstPage ? 0 : 12;
-        const destH = actualSrcH / pxPerMm;
-        
-        pdf.addImage(imgData, 'JPEG', 0, destY, 210, destH);
-        
-        srcY += actualSrcH;
-        pageIndex++;
-      }
-      
-      pdf.save(`${name.replace(/\s+/g,'-')}-resume.pdf`);
-    });
-  }, 100);
+    }, 100);
+  });
 }
 
 /* ── FORMATTING CONTROLS ── */
