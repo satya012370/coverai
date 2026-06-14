@@ -1851,9 +1851,16 @@ function downloadResumePDF() {
     pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
   };
   
-  // Helper to dynamically calculate and insert page-break spacers
+  // Helper to dynamically calculate and apply page-break spacers using margin-top
   function applyPageBreakSpacers(el) {
-    // Clear any existing spacers first
+    // Clear any existing spacer margins first
+    const shiftedElements = el.querySelectorAll('[data-pdf-original-margin-top]');
+    shiftedElements.forEach(item => {
+      item.style.marginTop = item.getAttribute('data-pdf-original-margin-top');
+      item.removeAttribute('data-pdf-original-margin-top');
+    });
+
+    // Clear any existing physical spacers first (for safety)
     const existingSpacers = el.querySelectorAll('.pdf-page-spacer');
     existingSpacers.forEach(s => s.remove());
 
@@ -1894,16 +1901,13 @@ function downloadResumePDF() {
         const neededSpacerHeight = startBoundaryNext - elTop;
         
         if (neededSpacerHeight > 0) {
-          const spacer = document.createElement('div');
-          spacer.className = 'pdf-page-spacer';
-          spacer.style.height = `${neededSpacerHeight}px`;
-          spacer.style.width = '100%';
-          spacer.style.clear = 'both';
-          spacer.style.margin = '0';
-          spacer.style.padding = '0';
-          spacer.style.border = 'none';
+          // Save original margin-top (even if empty string)
+          const originalMarginTop = target.style.marginTop || '';
+          target.setAttribute('data-pdf-original-margin-top', originalMarginTop);
           
-          target.parentNode.insertBefore(spacer, target);
+          // Get the current computed margin-top in pixels
+          const currentMarginTopPx = parseFloat(window.getComputedStyle(target).marginTop) || 0;
+          target.style.marginTop = `${currentMarginTopPx + neededSpacerHeight}px`;
         }
       }
     }
@@ -1918,6 +1922,13 @@ function downloadResumePDF() {
 
         html2pdf().from(element).set(opt).toCanvas().get('canvas').then((canvas) => {
           try {
+            // Restore original margins of shifted elements
+            const shiftedElements = element.querySelectorAll('[data-pdf-original-margin-top]');
+            shiftedElements.forEach(item => {
+              item.style.marginTop = item.getAttribute('data-pdf-original-margin-top');
+              item.removeAttribute('data-pdf-original-margin-top');
+            });
+
             // Remove the spacers immediately so they don't affect screen preview
             const spacersToRemove = element.querySelectorAll('.pdf-page-spacer');
             spacersToRemove.forEach(s => s.remove());
@@ -2005,6 +2016,14 @@ function downloadResumePDF() {
           }
         }).catch(err => {
           // Clean up styling on failure
+          const shiftedElements = element.querySelectorAll('[data-pdf-original-margin-top]');
+          shiftedElements.forEach(item => {
+            item.style.marginTop = item.getAttribute('data-pdf-original-margin-top');
+            item.removeAttribute('data-pdf-original-margin-top');
+          });
+          const spacersToRemove = element.querySelectorAll('.pdf-page-spacer');
+          spacersToRemove.forEach(s => s.remove());
+
           element.style.transform = originalTransform;
           element.style.boxShadow = originalBoxShadow;
           element.style.borderRadius = originalBorderRadius;
