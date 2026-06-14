@@ -478,41 +478,39 @@ textarea{resize:vertical;line-height:1.6}
   
   width: 210mm !important;
   min-height: 297mm !important;
-  background-color: #fff !important;
+  background-color: transparent !important;
   position: relative;
   transform-origin: top center !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  
-  /* Draw repeating A4 sheets (Page 1 has 0 top margin, Page 2+ has 12mm top/bottom margin) with page cut guides */
-  background-image: linear-gradient(to bottom, 
-    transparent 285mm, 
-    #e2e2e8 285mm, #e2e2e8 296.8mm, 
-    #b0b0bb 296.8mm, #b0b0bb 297.2mm, 
-    #e2e2e8 297.2mm, #e2e2e8 309mm, 
-    transparent 309mm,
-    transparent 582mm, 
-    #e2e2e8 582mm, #e2e2e8 593.8mm, 
-    #b0b0bb 593.8mm, #b0b0bb 594.2mm, 
-    #e2e2e8 594.2mm, #e2e2e8 606mm, 
-    transparent 606mm,
-    transparent 879mm, 
-    #e2e2e8 879mm, #e2e2e8 890.8mm, 
-    #b0b0bb 890.8mm, #b0b0bb 891.2mm, 
-    #e2e2e8 891.2mm, #e2e2e8 903mm, 
-    transparent 903mm,
-    transparent 1176mm, 
-    #e2e2e8 1176mm, #e2e2e8 1187.8mm, 
-    #b0b0bb 1187.8mm, #b0b0bb 1188.2mm, 
-    #e2e2e8 1188.2mm, #e2e2e8 1200mm, 
-    transparent 1200mm,
-    transparent 1473mm, 
-    #e2e2e8 1473mm, #e2e2e8 1484.8mm, 
-    #b0b0bb 1484.8mm, #b0b0bb 1485.2mm, 
-    #e2e2e8 1485.2mm, #e2e2e8 1497mm, 
-    transparent 1497mm
-  ) !important;
-  background-size: 100% 100% !important;
-  background-repeat: no-repeat !important;
+  box-shadow: none !important;
+}
+
+.preview-page-bg {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.preview-page-gap-overlay {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background-color: #e2e2e8;
+  z-index: 8;
+  pointer-events: none;
+  box-shadow: inset 0 5px 5px -5px rgba(0,0,0,0.35), inset 0 -5px 5px -5px rgba(0,0,0,0.35);
+}
+
+#resumePreview.pdf-capturing {
+  background-color: #fff !important;
+}
+
+#resumePreview.pdf-capturing .preview-page-bg,
+#resumePreview.pdf-capturing .preview-page-gap-overlay {
+  display: none !important;
 }
 
 #resumePreview, #resumePreview * {
@@ -1697,7 +1695,9 @@ function updatePreview() {
         ${certsBodyHtml}
       </div></div>`;
   }
-  document.getElementById('resumePreview').innerHTML = html;
+  const previewEl = document.getElementById('resumePreview');
+  previewEl.innerHTML = html;
+  applyPageBreakSpacers(previewEl);
 }
 
 /* ── AI SUMMARY ── */
@@ -1782,6 +1782,163 @@ function handleDownload() {
   });
 }
 
+// Helper to dynamically calculate and apply page-break spacers using margin-top
+function applyPageBreakSpacers(el) {
+  // Clear any existing preview background and gap elements first
+  const existingBgs = el.querySelectorAll('.preview-page-bg');
+  existingBgs.forEach(bg => bg.remove());
+  const existingGaps = el.querySelectorAll('.preview-page-gap-overlay');
+  existingGaps.forEach(gap => gap.remove());
+
+  // Clear any existing spacer margins first
+  const shiftedElements = el.querySelectorAll('[data-pdf-original-margin-top]');
+  shiftedElements.forEach(item => {
+    item.style.marginTop = item.getAttribute('data-pdf-original-margin-top');
+    item.removeAttribute('data-pdf-original-margin-top');
+  });
+
+  // Clear any existing physical spacers first (for safety)
+  const existingSpacers = el.querySelectorAll('.pdf-page-spacer');
+  existingSpacers.forEach(s => s.remove());
+
+  const parentRect = el.getBoundingClientRect();
+  const pxPerMm = el.offsetWidth / 210;
+  
+  // Detect transform scale factor to normalize coordinates in live preview
+  const transformStyle = el.style.transform || '';
+  const scaleMatch = transformStyle.match(/scale\(([^)]+)\)/);
+  const scale = scaleMatch ? parseFloat(scaleMatch[1]) : 1;
+  
+  const selectors = ['.exp-item', '.sec-title', 'p', 'li', '.skill-pill', '.publications-list li', '.certifications-list li', '.certs-sidebar-item'];
+  const candidates = Array.from(el.querySelectorAll(selectors.join(', ')));
+  
+  // Sort candidates by their top position
+  candidates.sort((a, b) => {
+    return a.getBoundingClientRect().top - b.getBoundingClientRect().top;
+  });
+  
+  let maxPage = 1;
+  
+  for (let i = 0; i < candidates.length; i++) {
+    const target = candidates[i];
+    if (!target.isConnected || target.classList.contains('pdf-page-spacer')) continue;
+    
+    const rect = target.getBoundingClientRect();
+    const elTop = (rect.top - parentRect.top) / scale;
+    const elBottom = (rect.bottom - parentRect.top) / scale;
+    const rectHeight = rect.height / scale;
+    
+    // Determine page index and content boundaries
+    let k = 1;
+    let endBoundary = 285 * pxPerMm;
+    
+    while (elTop > endBoundary) {
+      k++;
+      endBoundary = (285 + (k - 1) * 297) * pxPerMm;
+    }
+    maxPage = Math.max(maxPage, k);
+    
+    // Safety guard: if element is taller than the page content area, don't attempt to push it
+    const maxH = (k === 1 ? 285 : 273) * pxPerMm;
+    if (rectHeight > maxH) continue;
+    
+    // Keep-with-next: if target is a section title, push it to the next page if its first item crosses or starts on the next page
+    if (target.classList.contains('sec-title')) {
+      let firstContent = null;
+      let next = target.nextElementSibling;
+      if (next) {
+        if (next.classList.contains('exp-item') || next.tagName === 'P' || next.tagName === 'LI' || next.classList.contains('skill-pill') || next.classList.contains('certs-sidebar-item')) {
+          firstContent = next;
+        } else {
+          let child = next.firstElementChild;
+          while (child && child.classList.contains('pdf-page-spacer')) {
+            child = child.nextElementSibling;
+          }
+          if (child) {
+            firstContent = child;
+          }
+        }
+      }
+      
+      if (firstContent) {
+        const nextRect = firstContent.getBoundingClientRect();
+        const nextTop = (nextRect.top - parentRect.top) / scale;
+        
+        let nextK = 1;
+        let nextEndBoundary = 285 * pxPerMm;
+        while (nextTop > nextEndBoundary) {
+          nextK++;
+          nextEndBoundary = (285 + (nextK - 1) * 297) * pxPerMm;
+        }
+        
+        const nextBottom = (nextRect.bottom - parentRect.top) / scale;
+        if (nextBottom > nextEndBoundary || nextTop > nextEndBoundary) {
+          const startBoundaryNext = (309 + (nextK - 1) * 297) * pxPerMm;
+          const neededSpacerHeight = startBoundaryNext - elTop;
+          
+          if (neededSpacerHeight > 0) {
+            const originalMarginTop = target.style.marginTop || '';
+            target.setAttribute('data-pdf-original-margin-top', originalMarginTop);
+            const currentMarginTopPx = parseFloat(window.getComputedStyle(target).marginTop) || 0;
+            target.style.marginTop = `${currentMarginTopPx + neededSpacerHeight}px`;
+            maxPage = Math.max(maxPage, nextK + 1);
+            continue;
+          }
+        }
+      }
+    }
+    
+    if (elBottom > endBoundary) {
+      const startBoundaryNext = (309 + (k - 1) * 297) * pxPerMm;
+      const neededSpacerHeight = startBoundaryNext - elTop;
+      
+      if (neededSpacerHeight > 0) {
+        // Save original margin-top (even if empty string)
+        const originalMarginTop = target.style.marginTop || '';
+        target.setAttribute('data-pdf-original-margin-top', originalMarginTop);
+        
+        // Get the current computed margin-top in pixels
+        const currentMarginTopPx = parseFloat(window.getComputedStyle(target).marginTop) || 0;
+        target.style.marginTop = `${currentMarginTopPx + neededSpacerHeight}px`;
+        maxPage = Math.max(maxPage, k + 1);
+      }
+    }
+  }
+
+  // If not capturing for PDF, create page backgrounds and gap overlays
+  if (!el.classList.contains('pdf-capturing')) {
+    const pageCountFromHeight = Math.ceil(el.scrollHeight / (297 * pxPerMm));
+    const numPages = Math.max(maxPage, pageCountFromHeight);
+    
+    for (let pageIdx = 1; pageIdx <= numPages; pageIdx++) {
+      const bg = document.createElement('div');
+      bg.className = 'preview-page-bg';
+      
+      let topMm, heightMm;
+      if (pageIdx === 1) {
+        topMm = 0;
+        heightMm = 291;
+      } else {
+        topMm = 303 + (pageIdx - 2) * 297;
+        heightMm = 285;
+      }
+      
+      bg.style.top = `${topMm * pxPerMm}px`;
+      bg.style.height = `${heightMm * pxPerMm}px`;
+      el.appendChild(bg);
+      
+      if (pageIdx < numPages) {
+        const gap = document.createElement('div');
+        gap.className = 'preview-page-gap-overlay';
+        const gapTopMm = 291 + (pageIdx - 1) * 297;
+        gap.style.top = `${gapTopMm * pxPerMm}px`;
+        gap.style.height = `${12 * pxPerMm}px`;
+        el.appendChild(gap);
+      }
+    }
+  }
+}
+
 function downloadResumePDF() {
   const element = document.getElementById('resumePreview');
   const name = document.getElementById('rName').value || 'resume';
@@ -1821,6 +1978,7 @@ function downloadResumePDF() {
   }
   
   // Temporarily normalize formatting to 100% scale and clear UI borders for PDF capture
+  element.classList.add('pdf-capturing');
   element.style.transform = 'none';
   element.style.boxShadow = 'none';
   element.style.borderRadius = '0';
@@ -1851,112 +2009,7 @@ function downloadResumePDF() {
     pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
   };
   
-  // Helper to dynamically calculate and apply page-break spacers using margin-top
-  function applyPageBreakSpacers(el) {
-    // Clear any existing spacer margins first
-    const shiftedElements = el.querySelectorAll('[data-pdf-original-margin-top]');
-    shiftedElements.forEach(item => {
-      item.style.marginTop = item.getAttribute('data-pdf-original-margin-top');
-      item.removeAttribute('data-pdf-original-margin-top');
-    });
 
-    // Clear any existing physical spacers first (for safety)
-    const existingSpacers = el.querySelectorAll('.pdf-page-spacer');
-    existingSpacers.forEach(s => s.remove());
-
-    const parentRect = el.getBoundingClientRect();
-    const pxPerMm = el.offsetWidth / 210;
-    
-    const selectors = ['.exp-item', '.sec-title', 'p', 'li', '.skill-pill', '.publications-list li', '.certifications-list li', '.certs-sidebar-item'];
-    const candidates = Array.from(el.querySelectorAll(selectors.join(', ')));
-    
-    // Sort candidates by their top position
-    candidates.sort((a, b) => {
-      return a.getBoundingClientRect().top - b.getBoundingClientRect().top;
-    });
-    
-    for (let i = 0; i < candidates.length; i++) {
-      const target = candidates[i];
-      if (!target.isConnected || target.classList.contains('pdf-page-spacer')) continue;
-      
-      const rect = target.getBoundingClientRect();
-      const elTop = rect.top - parentRect.top;
-      const elBottom = rect.bottom - parentRect.top;
-      
-      // Determine page index and content boundaries
-      let k = 1;
-      let endBoundary = 285 * pxPerMm;
-      
-      while (elTop > endBoundary) {
-        k++;
-        endBoundary = (285 + (k - 1) * 297) * pxPerMm;
-      }
-      
-      // Safety guard: if element is taller than the page content area, don't attempt to push it
-      const maxH = (k === 1 ? 285 : 273) * pxPerMm;
-      if (rect.height > maxH) continue;
-      
-      // Keep-with-next: if target is a section title, push it to the next page if its first item crosses or starts on the next page
-      if (target.classList.contains('sec-title')) {
-        let firstContent = null;
-        let next = target.nextElementSibling;
-        if (next) {
-          if (next.classList.contains('exp-item') || next.tagName === 'P' || next.tagName === 'LI' || next.classList.contains('skill-pill') || next.classList.contains('certs-sidebar-item')) {
-            firstContent = next;
-          } else {
-            let child = next.firstElementChild;
-            while (child && child.classList.contains('pdf-page-spacer')) {
-              child = child.nextElementSibling;
-            }
-            if (child) {
-              firstContent = child;
-            }
-          }
-        }
-        
-        if (firstContent) {
-          const nextRect = firstContent.getBoundingClientRect();
-          const nextTop = nextRect.top - parentRect.top;
-          
-          let nextK = 1;
-          let nextEndBoundary = 285 * pxPerMm;
-          while (nextTop > nextEndBoundary) {
-            nextK++;
-            nextEndBoundary = (285 + (nextK - 1) * 297) * pxPerMm;
-          }
-          
-          const nextBottom = nextRect.bottom - parentRect.top;
-          if (nextBottom > nextEndBoundary || nextTop > nextEndBoundary) {
-            const startBoundaryNext = (309 + (nextK - 1) * 297) * pxPerMm;
-            const neededSpacerHeight = startBoundaryNext - elTop;
-            
-            if (neededSpacerHeight > 0) {
-              const originalMarginTop = target.style.marginTop || '';
-              target.setAttribute('data-pdf-original-margin-top', originalMarginTop);
-              const currentMarginTopPx = parseFloat(window.getComputedStyle(target).marginTop) || 0;
-              target.style.marginTop = `${currentMarginTopPx + neededSpacerHeight}px`;
-              continue;
-            }
-          }
-        }
-      }
-      
-      if (elBottom > endBoundary) {
-        const startBoundaryNext = (309 + (k - 1) * 297) * pxPerMm;
-        const neededSpacerHeight = startBoundaryNext - elTop;
-        
-        if (neededSpacerHeight > 0) {
-          // Save original margin-top (even if empty string)
-          const originalMarginTop = target.style.marginTop || '';
-          target.setAttribute('data-pdf-original-margin-top', originalMarginTop);
-          
-          // Get the current computed margin-top in pixels
-          const currentMarginTopPx = parseFloat(window.getComputedStyle(target).marginTop) || 0;
-          target.style.marginTop = `${currentMarginTopPx + neededSpacerHeight}px`;
-        }
-      }
-    }
-  }
 
   return new Promise((resolve, reject) => {
     // Give the browser a moment to reflow and repaint at 100% scale and left-aligned before capturing
@@ -1967,18 +2020,8 @@ function downloadResumePDF() {
 
         html2pdf().from(element).set(opt).toCanvas().get('canvas').then((canvas) => {
           try {
-            // Restore original margins of shifted elements
-            const shiftedElements = element.querySelectorAll('[data-pdf-original-margin-top]');
-            shiftedElements.forEach(item => {
-              item.style.marginTop = item.getAttribute('data-pdf-original-margin-top');
-              item.removeAttribute('data-pdf-original-margin-top');
-            });
-
-            // Remove the spacers immediately so they don't affect screen preview
-            const spacersToRemove = element.querySelectorAll('.pdf-page-spacer');
-            spacersToRemove.forEach(s => s.remove());
-
-            // Restore original screen styling after capture is complete
+            // Remove the pdf-capturing class and restore original screen styling after capture is complete
+            element.classList.remove('pdf-capturing');
             element.style.transform = originalTransform;
             element.style.boxShadow = originalBoxShadow;
             element.style.borderRadius = originalBorderRadius;
@@ -2000,6 +2043,9 @@ function downloadResumePDF() {
             
             // Restore page guides on screen
             element.style.removeProperty('background-image');
+
+            // Re-apply spacers for the screen view
+            applyPageBreakSpacers(element);
             
             if (parent) {
               parent.style.alignItems = originalParentAlignItems;
@@ -2061,14 +2107,7 @@ function downloadResumePDF() {
           }
         }).catch(err => {
           // Clean up styling on failure
-          const shiftedElements = element.querySelectorAll('[data-pdf-original-margin-top]');
-          shiftedElements.forEach(item => {
-            item.style.marginTop = item.getAttribute('data-pdf-original-margin-top');
-            item.removeAttribute('data-pdf-original-margin-top');
-          });
-          const spacersToRemove = element.querySelectorAll('.pdf-page-spacer');
-          spacersToRemove.forEach(s => s.remove());
-
+          element.classList.remove('pdf-capturing');
           element.style.transform = originalTransform;
           element.style.boxShadow = originalBoxShadow;
           element.style.borderRadius = originalBorderRadius;
@@ -2080,6 +2119,9 @@ function downloadResumePDF() {
           if (originalHeight) element.style.setProperty('height', originalHeight);
           if (originalZoom) element.style.setProperty('zoom', originalZoom);
           element.style.removeProperty('background-image');
+
+          // Re-apply spacers for screen view
+          applyPageBreakSpacers(element);
           if (parent) {
             parent.style.alignItems = originalParentAlignItems;
             parent.style.padding = originalParentPadding;
